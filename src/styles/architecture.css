@@ -1,0 +1,290 @@
+.architecture-panel {
+  border: 1px solid #d5e1e9;
+  border-radius: 12px;
+  background: white;
+  overflow: hidden;
+}
+.architecture-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 28px;
+  border-bottom: 1px solid #e0e8ef;
+  gap: 16px;
+}
+.architecture-panel-head h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+.architecture-panel-head > a {
+  font-size: 12px;
+}
+.lesson-eyebrow {
+  font-size: 11px;
+  color: #087e8b;
+  letter-spacing: 1.2px;
+}
+.architecture-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1fr);
+}
+.architecture-map {
+  border-right: 1px solid #e0e8ef;
+  background: #f8fafc;
+  padding: 16px 24px 18px;
+  min-width: 0;
+}
+.architecture-map-label {
+  display: flex;
+  justify-content: space-between;
+  color: #6e8395;
+  font-size: 11px;
+}
+.architecture-map svg {
+  display: block;
+  width: 100%;
+  max-height: 630px;
+  margin: auto;
+}
+.architecture-wire {
+  fill: none;
+  stroke: #7c94a6;
+  stroke-width: 1.5;
+}
+.architecture-wire.residual {
+  stroke: #68967c;
+  stroke-width: 2;
+}
+.architecture-node {
+  cursor: pointer;
+  outline: none;
+}
+.architecture-node rect,
+.architecture-node circle {
+  fill: #fff;
+  stroke: #c3d0dc;
+  stroke-width: 1.3;
+}
+.architecture-node.attention-node rect {
+  fill: #e6f3f5;
+  stroke: #6daeb6;
+}
+.architecture-node.selected rect,
+.architecture-node.selected circle {
+  fill: #d7eff1;
+  stroke: #087e8b;
+  stroke-width: 2.5;
+}
+.architecture-node:hover rect,
+.architecture-node:hover circle {
+  stroke: #087e8b;
+}
+.architecture-node:focus-visible rect,
+.architecture-node:focus-visible circle {
+  stroke: #2c4db8;
+  stroke-width: 4;
+}
+.architecture-node text {
+  font:
+    13px 'Microsoft YaHei',
+    sans-serif;
+  fill: #29495f;
+  pointer-events: none;
+}
+.architecture-node .architecture-plus {
+  font-size: 23px;
+  fill: #537a65;
+}
+.architecture-node .architecture-you {
+  font-size: 13px;
+  fill: #087e8b;
+}
+.architecture-block-caption {
+  font:
+    12px Consolas,
+    monospace;
+  fill: #658671;
+}
+.architecture-residual-label {
+  font:
+    10px 'Microsoft YaHei',
+    sans-serif;
+  fill: #68967c;
+}
+.architecture-position-label {
+  font:
+    11px 'Microsoft YaHei',
+    sans-serif;
+  fill: #94713a;
+}
+.architecture-reading-label {
+  font:
+    14px 'Microsoft YaHei',
+    sans-serif;
+  fill: #5e788e;
+}
+.architecture-diagram-note {
+  color: #8696a6;
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.8;
+}
+.architecture-explanation {
+  padding: 28px 32px;
+  min-width: 0;
+}
+.architecture-location {
+  font-size: 12px;
+  color: #8795a4;
+}
+.architecture-location strong {
+  display: block;
+  font-family: Consolas, monospace;
+  font-size: 14px;
+  color: #087e8b;
+  font-weight: 500;
+  margin-top: 7px;
+}
+.architecture-explanation h3 {
+  font-size: 25px;
+  line-height: 1.5;
+  margin: 13px 0 24px;
+  font-weight: 500;
+}
+.architecture-explanation dl {
+  margin: 0;
+}
+.architecture-explanation dl > div {
+  margin: 18px 0;
+}
+.architecture-explanation dt {
+  font-size: 11px;
+  color: #7b91a1;
+  margin-bottom: 7px;
+}
+.architecture-explanation dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.9;
+  color: #415c72;
+}
+.architecture-hint {
+  padding: 14px 16px;
+  background: #f0f6f8;
+  border-left: 3px solid #7fb3bb;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #557383;
+  margin: 22px 0 13px;
+}
+.architecture-chapter {
+  font-size: 11px;
+  color: #8396a6;
+}
+.architecture-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 23px;
+  gap: 10px;
+}
+.architecture-navigation button {
+  padding: 7px 13px;
+  font-size: 12px;
+}
+.architecture-navigation span {
+  font:
+    11px Consolas,
+    monospace;
+  color: #8ca0af;
+}
+.architecture-explore {
+  border-top: 1px solid #e0e8ef;
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.architecture-explore > span {
+  font-size: 11px;
+  color: #087e8b;
+}
+.architecture-explore p {
+  font-size: 13px;
+  color: #5f7789;
+  line-height: 1.8;
+  margin: 8px 0 13px;
+}
+.architecture-explore .button {
+  font-size: 13px;
+}
+.architecture-difference {
+  margin-top: 20px;
+  color: #748b9e;
+  font-size: 12px;
+}
+.architecture-difference summary {
+  cursor: pointer;
+}
+.architecture-difference p {
+  margin: 12px 0;
+  line-height: 1.9;
+}
+.architecture-difference a {
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .architecture-explanation {
+    padding: 24px;
+  }
+  .architecture-layout {
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1fr);
+  }
+  .architecture-map {
+    padding: 16px 10px;
+  }
+  .architecture-explanation h3 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 700px) {
+  .architecture-panel-head {
+    padding: 18px;
+    display: block;
+  }
+  .architecture-panel-head h2 {
+    font-size: 21px;
+    margin-bottom: 7px;
+  }
+  .architecture-layout {
+    display: block;
+  }
+  .architecture-map {
+    border-right: 0;
+    border-bottom: 1px solid #e0e8ef;
+    padding: 15px 9px;
+  }
+  .architecture-map svg {
+    max-height: none;
+    max-width: 420px;
+  }
+  .architecture-map-label {
+    padding: 0 8px;
+    font-size: 10px;
+  }
+  .architecture-explanation {
+    padding: 23px 20px;
+  }
+  .architecture-explanation h3 {
+    font-size: 22px;
+  }
+  .architecture-explanation dd {
+    font-size: 14px;
+  }
+  .architecture-map .architecture-diagram-note {
+    font-size: 10px;
+    padding: 0 8px;
+  }
+  .architecture-panel-head > a {
+    font-size: 11px;
+  }
+}

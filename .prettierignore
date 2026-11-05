@@ -1,0 +1,8 @@
+node_modules
+dist
+.tools
+.cloudflare
+.wrangler
+package-lock.json
+test-results
+AGENTS.md

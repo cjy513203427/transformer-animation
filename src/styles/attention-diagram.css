@@ -1,0 +1,153 @@
+.diagram-panel {
+  min-width: 0;
+  padding: 20px 18px;
+  background: #f8fafc;
+  border-right: 1px solid #e0e8ef;
+}
+.diagram-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.diagram-caption strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: #526d82;
+}
+.diagram-caption span {
+  font-size: 10px;
+  color: #8298a8;
+}
+.diagram-panel svg {
+  display: block;
+  width: 100%;
+  max-height: 630px;
+}
+.diagram-wire {
+  fill: none;
+  stroke: #9aaebb;
+  stroke-width: 1.7;
+}
+.diagram-wire.q-wire {
+  stroke: #4267c7;
+}
+.diagram-wire.k-wire {
+  stroke: #a85a17;
+}
+.diagram-wire.v-wire {
+  stroke: #865dad;
+  stroke-width: 2;
+}
+.diagram-wire.main-wire {
+  stroke: #64a5ad;
+}
+.diagram-wire.lit {
+  stroke-width: 3;
+}
+.diagram-node {
+  cursor: pointer;
+  outline: none;
+  --node-color: #627c90;
+  --node-fill: #fff;
+}
+.diagram-query {
+  --node-color: #4267c7;
+  --node-fill: #edf2ff;
+}
+.diagram-key {
+  --node-color: #a85a17;
+  --node-fill: #fbf3e8;
+}
+.diagram-value {
+  --node-color: #865dad;
+  --node-fill: #f4eef9;
+}
+.diagram-probability {
+  --node-color: #087e8b;
+  --node-fill: #eaf7f7;
+}
+.diagram-node rect {
+  fill: var(--node-fill);
+  stroke: #cbd7e2;
+  stroke-width: 1.3;
+}
+.diagram-node.active rect {
+  stroke: var(--node-color);
+  stroke-width: 2.5;
+}
+.diagram-node text {
+  font:
+    15px 'Microsoft YaHei',
+    sans-serif;
+  fill: var(--node-color);
+  pointer-events: none;
+}
+.diagram-node .diagram-node-sub {
+  font-size: 11px;
+  fill: #7d8fa1;
+}
+.diagram-node:focus-visible rect {
+  stroke: #163bad;
+  stroke-width: 4;
+}
+.diagram-node:hover rect {
+  stroke: var(--node-color);
+}
+.diagram-bypass-label {
+  font:
+    13px 'Microsoft YaHei',
+    sans-serif;
+  fill: #865dad;
+}
+.diagram-bypass-note {
+  font:
+    11px 'Microsoft YaHei',
+    sans-serif;
+  fill: #9475ad;
+}
+.diagram-multihead {
+  padding: 14px 15px;
+  border: 1px dashed #c6d7e2;
+  border-radius: 7px;
+  background: white;
+}
+.diagram-multihead strong {
+  font-size: 11px;
+  font-weight: 500;
+  color: #657f93;
+}
+.diagram-multihead p {
+  font-size: 12px;
+  color: #718899;
+  line-height: 1.9;
+  margin: 7px 0;
+}
+.diagram-multihead em {
+  font-style: normal;
+  color: #087e8b;
+  background: #edf7f7;
+}
+.diagram-multihead small {
+  font-size: 10px;
+  color: #92a2af;
+}
+@media (max-width: 700px) {
+  .diagram-panel {
+    border-right: 0;
+    border-bottom: 1px solid #e0e8ef;
+    padding: 18px 8px;
+  }
+  .diagram-caption {
+    padding: 0 8px;
+  }
+  .diagram-panel svg {
+    max-height: none;
+  }
+  .diagram-multihead {
+    margin: 0 8px;
+  }
+  .diagram-caption strong {
+    font-size: 12px;
+  }
+}

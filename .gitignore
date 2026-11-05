@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.cloudflare/
+.wrangler/
+.env
+.env.*
+!.env.example
+.dev.vars*
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*.log
+.DS_Store
+.tools/
