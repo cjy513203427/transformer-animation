@@ -6,11 +6,13 @@ export function AttentionDiagram({
   onStep,
   causal = true,
   scaled = true,
+  onOpenHeads,
 }: {
   step: number;
   onStep: (step: number) => void;
   causal?: boolean;
   scaled?: boolean;
+  onOpenHeads?: () => void;
 }) {
   const id = useId().replace(/:/g, '') + '-attention';
   function node(
@@ -147,7 +149,12 @@ export function AttentionDiagram({
         <p>
           投影 → 拆成多个头 → <em>每头执行上图</em> → Concat 拼接 → W_O 输出投影 → 返回残差连接
         </p>
-        <small>拆头、拼接、W_O 为结构定位；本例仅数值演算一个头。</small>
+        <small>上图只演算一个头；拆头、拼接、Wo 的数值演算在“多头注意力”。</small>
+        {onOpenHeads && (
+          <button className="diagram-heads-link" onClick={onOpenHeads}>
+            看多头怎样切分与合并 →
+          </button>
+        )}
       </div>
     </div>
   );

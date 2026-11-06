@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   initialState,
+  moveHeadStep,
   moveStep,
   presetState,
   restoreState,
@@ -30,7 +31,13 @@ describe('分享状态与步骤', () => {
   });
   it('拒绝版本、维度、类型及范围错误', () => {
     const cases = [
-      { ...initialState(), version: 3 },
+      { ...initialState(), version: 4 },
+      { ...initialState(), heads: undefined },
+      { ...initialState(), heads: { ...initialState().heads, numHeads: 3 } },
+      { ...initialState(), heads: { ...initialState().heads, step: 6 } },
+      { ...initialState(), heads: { ...initialState().heads, query: 3 } },
+      { ...initialState(), heads: { ...initialState().heads, keyDelta: 4.5 } },
+      { ...initialState(), view: { ...initialState().view, lesson: 'multi' } },
       { ...initialState(), step: 5 },
       { ...initialState(), seed: 0.2 },
       { ...initialState(), config: { causal: 'true', scaled: true } },
@@ -71,7 +78,8 @@ describe('分享状态与步骤', () => {
     };
     const restored = restoreState('#lab=' + encodeURIComponent(JSON.stringify(old)));
     expect(restored.warning).toBeNull();
-    expect(restored.state.version).toBe(2);
+    expect(restored.state.version).toBe(3);
+    expect(restored.state.heads).toEqual(initialState().heads);
     expect(restored.state.view.lesson).toBe('numbers');
     expect(restored.state.view.query).toBe(2);
     expect(restored.state.config.causal).toBe(false);
@@ -83,5 +91,28 @@ describe('分享状态与步骤', () => {
     state.view.lesson = 'guide';
     state.step = 3;
     expect(restoreState(serializeState(state)).state).toEqual(state);
+  });
+  it('v2 链接迁移到 v3，多头课程从默认示例开始', () => {
+    const v2 = { ...initialState(), version: 2, heads: undefined };
+    v2.view = { ...v2.view, lesson: 'guide' };
+    v2.step = 2;
+    const restored = restoreState('#lab=' + encodeURIComponent(JSON.stringify(v2)));
+    expect(restored.warning).toBeNull();
+    expect(restored.state.view.lesson).toBe('guide');
+    expect(restored.state.step).toBe(2);
+    expect(restored.state.heads).toEqual(initialState().heads);
+  });
+  it('多头课程的步骤、头数、观察位置与已执行的干预可分享恢复', () => {
+    const state = initialState();
+    state.view.lesson = 'heads';
+    state.heads = { step: 5, numHeads: 4, query: 0, keyDelta: -2.5 };
+    expect(restoreState(serializeState(state))).toEqual({ state, warning: null });
+  });
+  it('多头步骤独立于单头步骤，且不越界', () => {
+    const state = initialState();
+    const forward = moveHeadStep(state, 10);
+    expect(forward.heads.step).toBe(5);
+    expect(forward.step).toBe(state.step);
+    expect(moveHeadStep(forward, -10).heads.step).toBe(0);
   });
 });

@@ -3,18 +3,25 @@ import ReactDOM from 'react-dom/client';
 import './styles/app.css';
 
 const AttentionLab = lazy(() => import('./features/attention/AttentionLab'));
-const knownRoute = ['/', '/attention', '/attention/'].includes(window.location.pathname);
+const PositionLab = lazy(() => import('./features/position/PositionLab'));
+const path = window.location.pathname.replace(/\/+$/, '') || '/';
+const page =
+  path === '/' || path === '/attention' ? (
+    <AttentionLab />
+  ) : path === '/position' ? (
+    <PositionLab />
+  ) : null;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {knownRoute ? (
-      <Suspense fallback={<div className="loading">正在准备 Attention 计算台…</div>}>
-        <AttentionLab />
-      </Suspense>
+    {page ? (
+      <Suspense fallback={<div className="loading">正在准备实验…</div>}>{page}</Suspense>
     ) : (
       <main className="not-found">
         <h1>这个实验还不存在</h1>
-        <a href="/attention">回到 Attention 计算台</a>
+        <p>
+          <a href="/attention">回到 Attention 计算台</a> · <a href="/position">位置编码</a>
+        </p>
       </main>
     )}
   </React.StrictMode>,

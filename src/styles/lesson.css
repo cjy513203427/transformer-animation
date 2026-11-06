@@ -1,6 +1,6 @@
 .lesson-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin: 20px 0 23px;
 }
@@ -593,6 +593,7 @@
 }
 @media (max-width: 700px) {
   .lesson-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
     margin-top: 16px;
   }

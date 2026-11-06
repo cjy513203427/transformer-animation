@@ -31,6 +31,7 @@ interface Props {
   playing: boolean;
   onTogglePlay: () => void;
   onOpenNumbers: () => void;
+  onOpenHeads: () => void;
   reducedMotion: boolean;
 }
 
@@ -42,6 +43,7 @@ export function AttentionLesson({
   playing,
   onTogglePlay,
   onOpenNumbers,
+  onOpenHeads,
   reducedMotion,
 }: Props) {
   const { query } = state.view;
@@ -90,6 +92,7 @@ export function AttentionLesson({
           onStep={onJump}
           causal={state.config.causal}
           scaled={state.config.scaled}
+          onOpenHeads={onOpenHeads}
         />
         <div className="lesson-reading">
           <div className="lesson-reading-top">
@@ -288,8 +291,8 @@ export function AttentionLesson({
                 <small>一个头的输出，不是词表概率</small>
               </div>
               <p>
-                完整 MHA 还要拼接各头输出，再乘 W_O，才能回到总图中的残差加法。图中的 O
-                对应书里单个头的 H_head。
+                完整 MHA 还要拼接各头输出，再乘 Wo，才能回到总图中的残差加法。这里的 O 对应书中第
+                11–12 章 A 的一个头（一片 [T, d_key]）。
               </p>
             </div>
           )}

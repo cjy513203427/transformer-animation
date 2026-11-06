@@ -1,10 +1,23 @@
 import type { Matrix } from '../math/attention';
+import { HEAD_OPTIONS, type HeadCount } from '../math/multihead';
 import { ARCHITECTURE_NODES, LESSON_MODES, type ArchitectureNode, type LessonMode } from './lesson';
 
 export const STEP_COUNT = 5;
+/** 投影 → 切分多头 → 矩阵变形 → 每头 Attention → Concatenate → Wo */
+export const HEAD_STEP_COUNT = 6;
 export type Preset = 'basic' | 'value' | 'causal' | 'uniform' | 'bidirectional';
+
+/** The multi-head lesson keeps its own timeline, so it never mixes with the single-head steps. */
+export interface HeadsState {
+  step: number;
+  numHeads: HeadCount;
+  query: number;
+  /** Executed activation intervention K[t0, d3] += keyDelta (the draft slider is not shared). */
+  keyDelta: number;
+}
+
 export interface ExperimentState {
-  version: 2;
+  version: 3;
   config: { causal: boolean; scaled: boolean };
   input: { x: Matrix; keyDelta: number; valueDelta: number };
   step: number;
@@ -17,11 +30,16 @@ export interface ExperimentState {
     lesson: LessonMode;
     architectureNode: ArchitectureNode;
   };
+  heads: HeadsState;
+}
+
+function initialHeads(): HeadsState {
+  return { step: 0, numHeads: 2, query: 2, keyDelta: 0 };
 }
 
 export function initialState(): ExperimentState {
   return {
-    version: 2,
+    version: 3,
     config: { causal: true, scaled: true },
     input: {
       x: [
@@ -42,6 +60,7 @@ export function initialState(): ExperimentState {
       lesson: 'overview',
       architectureNode: 'attention',
     },
+    heads: initialHeads(),
   };
 }
 
@@ -86,10 +105,23 @@ function bounded(value: unknown, min: number, max: number, integer = false): val
   );
 }
 
+function validateHeads(value: unknown): HeadsState | null {
+  if (!record(value)) return null;
+  const { step, numHeads, query, keyDelta } = value;
+  if (
+    !bounded(step, 0, HEAD_STEP_COUNT - 1, true) ||
+    !HEAD_OPTIONS.some((option) => option === numHeads) ||
+    !bounded(query, 0, 2, true) ||
+    !bounded(keyDelta, -4, 4)
+  )
+    return null;
+  return { step, numHeads: numHeads as HeadCount, query, keyDelta };
+}
+
 export function validateState(value: unknown): ExperimentState | null {
   if (
     !record(value) ||
-    (value.version !== 1 && value.version !== 2) ||
+    (value.version !== 1 && value.version !== 2 && value.version !== 3) ||
     !record(value.config) ||
     !record(value.input) ||
     !record(value.view)
@@ -103,6 +135,9 @@ export function validateState(value: unknown): ExperimentState | null {
     !ARCHITECTURE_NODES.some((node) => node === architectureNode)
   )
     return null;
+  // Links created before the multi-head lesson existed start it from its default example.
+  const heads = value.version === 3 ? validateHeads(value.heads) : initialHeads();
+  if (!heads) return null;
   if (typeof config.causal !== 'boolean' || typeof config.scaled !== 'boolean') return null;
   if (!bounded(input.keyDelta, -4, 4) || !bounded(input.valueDelta, -4, 4)) return null;
   if (
@@ -125,7 +160,7 @@ export function validateState(value: unknown): ExperimentState | null {
     return null;
   // Reconstruct a whitelist: unrelated/private fields are never serialized.
   return {
-    version: 2,
+    version: 3,
     config: { causal: config.causal, scaled: config.scaled },
     input: {
       x: input.x.map((row) => [...row]),
@@ -142,6 +177,7 @@ export function validateState(value: unknown): ExperimentState | null {
       lesson: lesson as LessonMode,
       architectureNode: architectureNode as ArchitectureNode,
     },
+    heads,
   };
 }
 
@@ -165,4 +201,9 @@ export function restoreState(hash: string): { state: ExperimentState; warning: s
 
 export function moveStep(state: ExperimentState, delta: number): ExperimentState {
   return { ...state, step: Math.max(0, Math.min(STEP_COUNT - 1, state.step + delta)) };
+}
+
+export function moveHeadStep(state: ExperimentState, delta: number): ExperimentState {
+  const step = Math.max(0, Math.min(HEAD_STEP_COUNT - 1, state.heads.step + delta));
+  return { ...state, heads: { ...state.heads, step } };
 }
