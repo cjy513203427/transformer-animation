@@ -33,6 +33,7 @@ import {
 } from './InferenceWidgets';
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
+import '../../styles/experiment.css';
 import '../../styles/inference.css';
 import '../../styles/instrument.css';
 
@@ -450,7 +451,7 @@ export default function InferenceLab() {
             上的耗时。 缓存本身占用显存：第 22 章用 Llama 2 7B 手算了每个 token
             的缓存字节数；字节公式与 MHA、GQA、MLA 的对照会在“KV 架构对照”实验中展开（尚未实现）。
           </p>
-          <strong className="inf-notes-title">常见误区</strong>
+          <strong className="exp-notes-title">常见误区</strong>
           <ul>
             {inferenceMyths.map((myth) => (
               <li key={myth}>

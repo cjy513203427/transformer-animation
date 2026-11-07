@@ -123,3 +123,34 @@ logits = H_L Eᵀ（输出头复用嵌入表），贪心解码取最大概率，
 与原书对照：第 16、22 章的相关说法与本实验一致（训练并行来自已知序列与因果 Mask；第 22 章明确不承诺固定加速倍数，并指出多轮对话复用缓存需要完全相同的 token 前缀）。第 22 章用 Llama 2 7B 手算缓存字节数（每 token 512 KiB）的内容留给“KV 架构对照”实验。
 
 依据：原书第 2、16、22 章（2026-11-07 在线读取）；[Attention Is All You Need §3.2.3](https://arxiv.org/abs/1706.03762)；[Efficiently Scaling Transformer Inference](https://arxiv.org/abs/2211.05102) 对 Prefill 与 Decode 两个阶段的划分。
+
+## KV 架构对照（原书第 22、23、30 章，DeepSeek-V2 论文）
+
+**缓存字节**（只统计 K、V，不含权重、激活与分配器开销）：
+
+```text
+bytes = B × L × T × H_KV × (d_k + d_v) × b
+MLA：  bytes = B × L × T × (d_c + d_h^R) × b      latent 与共享的 RoPE Key 都要缓存
+```
+
+已逐字节核对：原书第 23 章（32 层、d_h = 128、1024 token、2 字节）MHA 536,870,912 B = 512 MiB、GQA-8 128 MiB、MQA 16 MiB；第 22 章 Llama 2 7B 每 token 524,288 B = 512 KiB，4096 token 2 GiB。只有 W_K、W_V 随 KV 头数变化：H_Q = 32 时注意力投影参数 MHA 4D²、GQA-8 2.5D²、MQA 2.0625D²。页面用二进制单位（1 KiB = 1024 B）。
+
+**MHA / GQA / MQA**（玩具：T = 4、D = 4、H = 4 个 Query 头、d = 2，因果 Mask）：Query 头 h 读第 g(h) = ⌊h / (H/G)⌋ 组 K/V，G ∈ {4, 2, 1}。共享的 K/V 投影按 GQA 论文的转换方式由组内各头取平均得到；论文之后还会以约 5% 的原预训练算力继续训练，本页没有，所以 GQA/MQA 的输出不代表转换后的效果。按组查表与“把每组 K/V 显式复制给每个 Query 头”的参考计算（复用 `attention.ts` 的独立实现）比较，容差 1e-12；复制只用于核对，不是推荐的存储方式。打分次数 H × T(T+1)/2 = 40 与 G 无关，缓存每 token 每层 2Gd 个数。
+
+**MLA**（玩具：d_c = 3、d_h^R = 2，RoPE θ = 1）。论文用列向量 W h；本页转写为行向量：
+
+```text
+c_t = h_t W_DKV                     缓存
+k^C_{t,i} = c_t W_UK^(i)，v^C_{t,i} = c_t W_UV^(i)
+k^R_t = RoPE_t(h_t W_KR)            缓存，所有头共享
+q^C_{t,i} = h_t W_QC^(i)，q^R_{t,i} = RoPE_t(h_t W_QR^(i))
+score = (q^C·k^C + q^R·k^R) / √(d_h + d_h^R)，o_{t,i} = Σ_j p v^C_{j,i}，u_t = [o_1; …; o_H] W_O
+```
+
+省略了论文中的 Query 压缩（W^DQ，用于减少训练时的激活内存，不影响 KV 缓存），RoPE Query 因此直接由 h 投影（论文中由 c^Q 投影）。
+
+吸收路径：W̃_Q^(i) = W_QC^(i) W_UK^(i)ᵀ（[D, d_c]），W̃_O^(i) = W_UV^(i) W_O^(i)（[d_c, D]）；打分只读缓存的 c_j 与 k^R_j，加权和 Σ p c_j 停在 latent 空间。与展开路径的分数、权重、输出比较，容差 1e-12。反例：若 RoPE 直接加在 q^C 与还原出的 k^C 上，q 与 c_j 之间的矩阵为 R_t R_jᵀ W_UKᵀ，随 t − j 变化；同一个吸收矩阵 W_UKᵀ 只在 j = t 时正确，测试逐头、逐位置验证这一点。
+
+**真实规模对照**：DeepSeek-V2 取 60 层、128 头、d_h = 128、d_c = 512、d_h^R = 64（论文 §3.1.2 与表 1 说明 d_c = 4d_h、d_h^R = d_h/2）。MLA 每 token 每层 576 个数 = (9/2) d_h，相当于 2.25 组的 GQA；只算 latent 会少算 64 个（11.1%）。同头数同头维的 MHA、GQA-8、MQA 是套公式得到的假想配置，只用来对照缓存；页面不比较效果，也不给排行。原书第 30.4.3 节“KV Cache 减少 75%”是假设 latent 维度为 1/4 时的示意计算，不是 DeepSeek 的实测。
+
+依据：原书第 22、23、30 章；[MQA（Shazeer, 2019）](https://arxiv.org/abs/1911.02150)；[GQA（Ainslie et al., 2023）](https://arxiv.org/abs/2305.13245) §2.1–2.2；[DeepSeek-V2](https://arxiv.org/html/2405.04434v5) §2.1、表 1、§3.1.2。2026-11-07 在线读取。

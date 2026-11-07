@@ -1,4 +1,4 @@
-export type TopicId = 'attention' | 'position' | 'inference';
+export type TopicId = 'attention' | 'position' | 'inference' | 'kv';
 
 /** Implemented experiments. Everything else stays in ROADMAP until it has a working page. */
 export const TOPICS: {
@@ -29,8 +29,15 @@ export const TOPICS: {
     title: '训练、生成与缓存',
     subtitle: 'Prefill、Decode 与 KV 缓存',
   },
+  {
+    id: 'kv',
+    number: '04',
+    href: '/kv-architectures',
+    title: 'KV 架构对照',
+    subtitle: 'MHA、GQA、MQA 与 MLA 的缓存',
+  },
 ];
 
-export const ROADMAP = ['KV 架构对照', 'MoE 与专家并行', 'FlashAttention'];
+export const ROADMAP = ['MoE 与专家并行', 'FlashAttention'];
 
 export const BOOK_URL = 'https://waylandz.com/llm-transformer-book/';

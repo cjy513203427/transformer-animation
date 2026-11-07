@@ -1340,6 +1340,8 @@ footer {
     border-bottom: 1px solid var(--line);
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px 16px;
     align-items: center;
     justify-content: space-between;
   }
@@ -1354,7 +1356,9 @@ footer {
   }
   .sidebar nav {
     flex-direction: row;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 8px 6px;
+    min-width: 0;
   }
   .sidebar nav a {
     padding: 6px 9px;
@@ -1426,6 +1430,9 @@ footer {
   .sidebar nav a {
     padding: 6px 7px;
     font-size: 10px;
+    white-space: nowrap;
+  }
+  .brand {
     white-space: nowrap;
   }
   .sidebar nav .nav-number {

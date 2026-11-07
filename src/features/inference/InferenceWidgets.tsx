@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import {
+  Prediction as SharedPrediction,
+  PredictionResult as SharedResult,
+  Segment,
+} from '../../components/Controls';
 import { Tex } from '../../components/Tex';
 import { formatNumber as fmt } from '../../math/attention';
 import {
@@ -35,38 +40,13 @@ function Tokens({
   highlight?: number;
 }) {
   return (
-    <div className="inf-tokens" role="group" aria-label={label}>
-      <span className="inf-tokens-label">{label}</span>
+    <div className="exp-tokens" role="group" aria-label={label}>
+      <span className="exp-tokens-label">{label}</span>
       {ids.map((id, i) => (
-        <span key={i} className={`inf-chip ${highlight === from + i ? 'inf-chip-on' : ''}`}>
+        <span key={i} className={`exp-chip ${highlight === from + i ? 'exp-chip-on' : ''}`}>
           <small>{from + i}</small>
           {name(id)}
         </span>
-      ))}
-    </div>
-  );
-}
-
-function Segment<T extends string | number>({
-  label,
-  options,
-  value,
-  onSelect,
-  render = (option) => String(option),
-}: {
-  label: string;
-  options: readonly T[];
-  value: T;
-  onSelect: (value: T) => void;
-  render?: (option: T) => string;
-}) {
-  return (
-    <div className="inf-segment" role="group" aria-label={label}>
-      <span>{label}</span>
-      {options.map((option) => (
-        <button key={option} aria-pressed={option === value} onClick={() => onSelect(option)}>
-          {render(option)}
-        </button>
       ))}
     </div>
   );
@@ -87,6 +67,11 @@ function predictionHolds(choice: Spread, changed: boolean[], pos: number): boole
   );
 }
 
+const SPREAD_OPTIONS = (['only', 'after', 'all'] as const).map((value) => ({
+  value,
+  label: SPREAD_LABEL[value],
+}));
+
 function Prediction({
   question,
   choice,
@@ -97,35 +82,24 @@ function Prediction({
   onChoose: (choice: Spread) => void;
 }) {
   return (
-    <div className="inf-predict" role="group" aria-label={question}>
-      <strong>先预测：{question}</strong>
-      <div>
-        {(['only', 'after', 'all'] as const).map((option) => (
-          <button key={option} aria-pressed={choice === option} onClick={() => onChoose(option)}>
-            {SPREAD_LABEL[option]}
-          </button>
-        ))}
-      </div>
-    </div>
+    <SharedPrediction
+      question={question}
+      options={SPREAD_OPTIONS}
+      choice={choice}
+      onChoose={onChoose}
+    />
   );
 }
 
 function PredictionResult({ choice, holds }: { choice: Spread | null; holds: boolean }) {
-  if (!choice) return null;
-  return (
-    <>
-      {' '}
-      你的预测是“{SPREAD_LABEL[choice]}”，
-      {holds ? '与计算一致。' : '与计算不同，对照左图再想一想。'}
-    </>
-  );
+  return <SharedResult label={choice && SPREAD_LABEL[choice]} holds={holds} />;
 }
 
 // ---------------------------------------------------------------- shared controls
 
 function DecodeSlider({ state, onChange, label }: WidgetProps & { label: string }) {
   return (
-    <label className="inf-range">
+    <label className="exp-range">
       <span>{label}</span>
       <input
         type="range"
@@ -148,7 +122,7 @@ function GeneratedText({
   decodeSteps: number;
 }) {
   return (
-    <div className="inf-shift">
+    <div className="exp-stack">
       <Tokens ids={PROMPT} label="提示" />
       <Tokens
         ids={generation.tokens.slice(PROMPT.length, PROMPT.length + decodeSteps + 1)}
@@ -178,16 +152,16 @@ export function TrainingWidget({ state, onChange }: WidgetProps) {
   };
 
   return (
-    <div className="inf-widget">
-      <div className="inf-shift">
+    <div className="exp-widget">
+      <div className="exp-stack">
         <Tokens ids={TRAIN_SEQUENCE.slice(0, -1)} label="输入 x" />
         <Tokens ids={TRAIN_SEQUENCE.slice(1)} label="目标 y" />
-        <p className="inf-caption">
+        <p className="exp-caption">
           同一条已知序列错开一位：第 t 个输入的目标，就是第 t + 1 个 token。
         </p>
       </div>
-      <div className="inf-table-wrap">
-        <table className="inf-table" aria-label="每个位置的预测与 loss">
+      <div className="exp-table-wrap">
+        <table className="exp-table" aria-label="每个位置的预测与 loss">
           <thead>
             <tr>
               <th>行 t</th>
@@ -201,7 +175,7 @@ export function TrainingWidget({ state, onChange }: WidgetProps) {
           </thead>
           <tbody>
             {rows.map((row, t) => (
-              <tr key={t} className={changed[t] ? 'inf-changed' : undefined}>
+              <tr key={t} className={changed[t] ? 'exp-changed' : undefined}>
                 <th scope="row">{t}</th>
                 <td>{name(row.input)}</td>
                 <td>{row.visible.map((i) => name(rows[i].input)).join(' ')}</td>
@@ -214,12 +188,12 @@ export function TrainingWidget({ state, onChange }: WidgetProps) {
           </tbody>
         </table>
       </div>
-      <p className="inf-caption">
+      <p className="exp-caption">
         平均 loss = {fmt(mean)}
         。权重是固定教学数字，没有训练过，概率大小本身没有意义；要看的是每一行用到了哪些输入。
       </p>
 
-      <div className="inf-experiment">
+      <div className="exp-experiment">
         <strong>反事实：只改一个输入，目标不动</strong>
         <Segment
           label="改哪个输入"
@@ -240,7 +214,7 @@ export function TrainingWidget({ state, onChange }: WidgetProps) {
           choice={choice}
           onChoose={setChoice}
         />
-        <div className="inf-actions">
+        <div className="exp-actions">
           <button
             className="button primary"
             disabled={applied}
@@ -255,7 +229,7 @@ export function TrainingWidget({ state, onChange }: WidgetProps) {
           )}
         </div>
         {applied && (
-          <p className="inf-verdict ok" role="status">
+          <p className="exp-verdict ok" role="status">
             {noChange ? (
               `x${pos} 本来就是 ${name(token)}，没有任何改动。`
             ) : (
@@ -297,11 +271,11 @@ export function BaselineWidget({
   };
   const worst = Math.max(...passes.slice(1).map((_, i) => repeatDiff(i + 1)));
   return (
-    <div className="inf-widget">
+    <div className="exp-widget">
       <DecodeSlider state={state} onChange={onChange} label="生成步数" />
       <GeneratedText generation={generation} decodeSteps={state.decode.steps} />
-      <div className="inf-table-wrap">
-        <table className="inf-table" aria-label="不用缓存时每一步的工作">
+      <div className="exp-table-wrap">
+        <table className="exp-table" aria-label="不用缓存时每一步的工作">
           <thead>
             <tr>
               <th>步骤</th>
@@ -329,7 +303,7 @@ export function BaselineWidget({
           </tbody>
         </table>
       </div>
-      <p className="inf-verdict ok" role="status">
+      <p className="exp-verdict ok" role="status">
         每一步重算出的旧行，与上一步的结果相比，两层输出的最大差为 {diffText(worst)}
         。真正新的只有最后一行。
       </p>
@@ -342,14 +316,14 @@ export function BaselineWidget({
 export function PrefillWidget({ generation }: { generation: Generation }) {
   const last = generation.prefill.probs[PROMPT.length - 1];
   return (
-    <div className="inf-widget">
+    <div className="exp-widget">
       <Tokens ids={PROMPT} label="提示" />
-      <p className="inf-caption">
+      <p className="exp-caption">
         3 个位置在一次因果前向里并行计算；每一层都把各位置的 K、V 写进缓存。
       </p>
       {generation.prefill.layers.map((layer, l) => (
-        <div className="inf-table-wrap" key={l}>
-          <table className="inf-table" aria-label={`第 ${l + 1} 层写入缓存的 K、V`}>
+        <div className="exp-table-wrap" key={l}>
+          <table className="exp-table" aria-label={`第 ${l + 1} 层写入缓存的 K、V`}>
             <caption>
               第 {l + 1} 层写入缓存（这一层的输入是
               {l === 0 ? '词嵌入 + 位置编码' : '第 1 层的输出'}）
@@ -375,17 +349,17 @@ export function PrefillWidget({ generation }: { generation: Generation }) {
           </table>
         </div>
       ))}
-      <div className="inf-bars" role="group" aria-label="最后一个提示位置的输出分布">
+      <div className="exp-bars" role="group" aria-label="最后一个提示位置的输出分布">
         <strong>只用最后一个位置（pos {PROMPT.length - 1}）的分布选第一个新 token</strong>
         {last.map((p, id) => (
-          <div key={id} className={id === generation.first ? 'inf-bar inf-bar-on' : 'inf-bar'}>
+          <div key={id} className={id === generation.first ? 'exp-bar exp-bar-on' : 'exp-bar'}>
             <span>{name(id)}</span>
             <i style={{ width: `${Math.max(1, p * 100)}%` }} />
             <em>{pct(p)}</em>
           </div>
         ))}
       </div>
-      <p className="inf-verdict ok" role="status">
+      <p className="exp-verdict ok" role="status">
         贪心选概率最大的：第一个新 token 是 {name(generation.first)}
         。它还没有 K、V，要等下一次 Decode 把它喂进去才会算。
       </p>
@@ -403,15 +377,15 @@ export function DecodeWidget({
   const step = generation.steps[state.decode.steps - 1];
   const { decode } = step;
   return (
-    <div className="inf-widget">
+    <div className="exp-widget">
       <DecodeSlider state={state} onChange={onChange} label="看第几次 Decode" />
-      <p className="inf-caption">
+      <p className="exp-caption">
         这一步喂入 <strong>{name(step.input)}</strong>（位置 {decode.position}
         ）。缓存里已有 {decode.position} 个位置；每层只为新 token 算一组 <Tex tex="q,\ k,\ v" />。
       </p>
       {decode.layers.map((layer, l) => (
-        <div className="inf-table-wrap" key={l}>
-          <table className="inf-table" aria-label={`第 ${l + 1} 层：新 Query 读缓存`}>
+        <div className="exp-table-wrap" key={l}>
+          <table className="exp-table" aria-label={`第 ${l + 1} 层：新 Query 读缓存`}>
             <caption>
               第 {l + 1} 层新算：
               <Tex tex="q" /> = {vec(layer.q)}，<Tex tex="k" /> = {vec(layer.k)}，<Tex tex="v" /> ={' '}
@@ -430,7 +404,7 @@ export function DecodeWidget({
             </thead>
             <tbody>
               {layer.weights.map((w, p) => (
-                <tr key={p} className={p === decode.position ? 'inf-new-row' : undefined}>
+                <tr key={p} className={p === decode.position ? 'exp-new-row' : undefined}>
                   <th scope="row">{p}</th>
                   <td>{name(generation.tokens[p])}</td>
                   <td>{p === decode.position ? '本步新算' : '读缓存'}</td>
@@ -442,7 +416,7 @@ export function DecodeWidget({
           </table>
         </div>
       ))}
-      <p className="inf-verdict ok" role="status">
+      <p className="exp-verdict ok" role="status">
         本步每层：新算 1 组 Q/K/V，从缓存读 {decode.position} 组 K/V，打分 {decode.position + 1}{' '}
         次。输出分布选出 {name(step.produced)}（{pct(decode.probs[step.produced])}）。
       </p>
@@ -473,10 +447,10 @@ export function CompareWidget({
     return row.indexOf(Math.max(...row)) === s.produced;
   });
   return (
-    <div className="inf-widget">
+    <div className="exp-widget">
       <DecodeSlider state={state} onChange={onChange} label="Decode 步数" />
-      <div className="inf-table-wrap">
-        <table className="inf-table" aria-label="缓存与重算的工作量对照">
+      <div className="exp-table-wrap">
+        <table className="exp-table" aria-label="缓存与重算的工作量对照">
           <thead>
             <tr>
               <th rowSpan={2}>步骤</th>
@@ -513,7 +487,7 @@ export function CompareWidget({
                 <td>{diffText(s.logitsDiff)}</td>
               </tr>
             ))}
-            <tr className="inf-total">
+            <tr className="exp-total">
               <th scope="row">Decode 合计</th>
               <td>—</td>
               <td>{totals.recomputeKV}</td>
@@ -525,12 +499,12 @@ export function CompareWidget({
           </tbody>
         </table>
       </div>
-      <p className="inf-verdict ok" role="status">
+      <p className="exp-verdict ok" role="status">
         {state.decode.steps} 步里两条路线
         {sameTokens ? '选出的 token 完全相同' : '选出的 token 不同'}，logits 最大差为{' '}
         {diffText(maxDiff)}（容差 1e-12）。
       </p>
-      <p className="inf-caption">
+      <p className="exp-caption">
         K/V 投影按“位置 × 层”计数。计数来自本页实现里实际执行的操作，并与公式 <Tex tex="L\cdot n" />
         、<Tex tex="L\cdot n(n+1)/2" /> 核对过（{NUM_LAYERS} 层、单头）。只统计 Attention 的 K/V
         投影与打分，不含 FFN、输出头和读写内存，也不是实测时间。
@@ -570,7 +544,7 @@ export function InvalidationWidget({
       : predictionHolds(option, upper.slice(1).map(Boolean), 0);
 
   return (
-    <div className="inf-widget">
+    <div className="exp-widget">
       <Segment
         label="改动方式"
         options={['edit', 'slide'] as const}
@@ -594,7 +568,7 @@ export function InvalidationWidget({
             onSelect={(value) => set({ token: value })}
             render={name}
           />
-          <div className="inf-shift">
+          <div className="exp-stack">
             <Tokens ids={ids} label="原序列" highlight={pos} />
             <Tokens
               ids={ids.map((id, i) => (i === pos ? token : id))}
@@ -604,20 +578,20 @@ export function InvalidationWidget({
           </div>
         </>
       ) : (
-        <div className="inf-shift">
+        <div className="exp-stack">
           <Tokens ids={ids} label="原序列" />
           <Tokens ids={ids.slice(1)} label="窗口右移" />
-          <p className="inf-caption">丢掉最早的 token。后面的 token 不变，位置编号都减了 1。</p>
+          <p className="exp-caption">丢掉最早的 token。后面的 token 不变，位置编号都减了 1。</p>
         </div>
       )}
       <Prediction question="第 2 层哪些位置的缓存会失效？" choice={choice} onChoose={setChoice} />
-      <div className="inf-actions">
+      <div className="exp-actions">
         <button className="button primary" disabled={revealed} onClick={onReveal}>
           重算并核对 →
         </button>
       </div>
       {revealed && (
-        <p className="inf-verdict ok" role="status">
+        <p className="exp-verdict ok" role="status">
           {noChange ? (
             `pos ${pos} 本来就是 ${name(token)}，所有条目都可以复用。`
           ) : (

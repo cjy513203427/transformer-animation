@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）、<http://127.0.0.1:5173/position> 与 <http://127.0.0.1:5173/inference-cache>。
+打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）、<http://127.0.0.1:5173/position>、<http://127.0.0.1:5173/inference-cache> 与 <http://127.0.0.1:5173/kv-architectures>。
 
 ```powershell
 npm run check             # 类型检查、数值与状态测试、生产构建
@@ -61,18 +61,30 @@ npm run format           # 格式化项目源码
 5. **缓存对照重算**：两条路线逐步比较 logits 与选出的 token，并列出实际执行的 K/V 投影与打分次数。
 6. **缓存失效**：改一个提示 token 或滑动窗口，先预测第 2 层哪些位置失效，再重算核对。
 
+### 04 KV 架构对照（`/kv-architectures`，第 22、23、30 章与 DeepSeek-V2 论文）
+
+从同一个缓存公式出发对照四种设计，左侧概念图随步骤切换：
+
+1. **缓存账本**：批大小 × 层数 × token × KV 头数 × (d_k + d_v) × 字节，可编辑参数；原书第 22、23 章的例子逐字节一致。
+2. **共享 KV 头**：4 个 Query 头读 4、2、1 组 K/V，分组映射图、各头权重、参数与缓存对照；先预测打分次数是否变化，并与显式复制 K/V 的参考计算核对。
+3. **MLA 压缩**：每个 token 只缓存低维 latent，用时由各头上投影还原 K、V。
+4. **解耦 RoPE**：RoPE 直接加在还原出的 K 上时，同一个吸收矩阵只在 j = t 时正确；解耦后误差为 0，代价是多缓存一个共享 RoPE Key。
+5. **矩阵吸收**：吸收路径只读缓存，与展开路径的分数和输出一致。
+6. **对照**：按 DeepSeek-V2 的头数与头维对照 MHA、GQA-8、MQA、MLA 的缓存，MLA 计入 RoPE Key；不做效果排行。
+
 ## 已实现的范围
 
 - Vite + TypeScript + React，KaTeX 排版，原生 SVG 与矩阵表格，无模型服务。
 - `/attention` 单头计算：X 投影 → 点积与缩放 → Mask → 行 Softmax → 加权输出；多头：投影、view、transpose、各头 Attention、Concatenate 与 Wo，支持 1、2、4 个头与投影后 K 干预。
 - `/position` 位置编码：位置盲、正弦表、加法、RoPE 旋转与相对位置、ALiBi，以及三处对照。
 - `/inference-cache` 训练、生成与缓存：两层玩具解码器上的训练并行、无缓存基线、Prefill、Decode、缓存与重算对照，以及改动前缀或滑动窗口后哪些缓存失效。
+- `/kv-architectures` KV 架构对照：缓存字节账本、MHA/GQA/MQA 的 K/V 头共享与等价核对、MLA 的低秩压缩、解耦 RoPE 与矩阵吸收、真实规模对照。
 - 播放、暂停、前进、后退、跳步、速度、从头看与恢复默认示例；修改参数会暂停播放并按新输入重算。
-- 先预测再验证：只改 V（单头）、只改一个头的 K（多头）、同时平移 RoPE 位置、比较 ALiBi 斜率、只改训练输入 x_j、改前缀后哪些缓存失效。
-- 分享链接：Attention 使用 v3 状态（兼容 v1、v2 链接，多头部分从默认示例开始），位置编码与训练缓存实验分别使用独立的 `#pos=`、`#inf=` 状态；都校验版本、结构、范围和长度，坏链接恢复默认示例。
+- 先预测再验证：只改 V（单头）、只改一个头的 K（多头）、同时平移 RoPE 位置、比较 ALiBi 斜率、只改训练输入 x_j、改前缀后哪些缓存失效、KV 头数是否改变打分次数、不解耦 RoPE 时吸收在哪些位置正确。
+- 分享链接：Attention 使用 v3 状态（兼容 v1、v2 链接，多头部分从默认示例开始），位置编码与训练缓存实验分别使用独立的 `#pos=`、`#inf=`、`#kv=` 状态；都校验版本、结构、范围和长度，坏链接恢复默认示例。
 - 主题延迟加载、后台暂停、键盘控件、窄屏布局（窄屏顶部提供实验切换）与减少动态效果支持。
 
-**尚未实现：**KV 架构对照，MoE，FlashAttention。导航将这些主题明确标为未实现，没有空实验页面。
+**尚未实现：**MoE，FlashAttention。导航将这些主题明确标为未实现，没有空实验页面。
 
 ## 目录
 
@@ -81,7 +93,8 @@ src/
   features/attention/   Attention 实验：架构导读、单头、动手核对、多头
   features/position/    位置编码实验：计算链入口图与各步骤组件
   features/inference/   训练、生成与缓存实验：缓存概念图与各步骤组件
-  math/                 纯数值计算及数学性质测试（attention、multihead、position、inference）
+  features/kv/          KV 架构对照实验：缓存条形图、分组映射、计算路径与各步骤组件
+  math/                 纯数值计算及数学性质测试（attention、multihead、position、inference、kv）
   components/           共享外壳、矩阵与公式视图
   state/                可分享状态、预设、版本校验与测试
   content/              步骤解释、实验目录与参考来源
@@ -102,7 +115,7 @@ docs/                   数值约定与 Cloudflare 准备说明
 
 ## 参考
 
-- [Transformer 架构：从直觉到实现](https://waylandz.com/llm-transformer-book/)：第 3 章为主架构图，第 6、9–12 章为 Attention 解释主线，第 5、14、25 章为位置编码，第 2、16、22 章为训练、生成与缓存。原书源文件见 [waylandzhang/llm-transformer-book](https://github.com/waylandzhang/llm-transformer-book)（MIT）。
+- [Transformer 架构：从直觉到实现](https://waylandz.com/llm-transformer-book/)：第 3 章为主架构图，第 6、9–12 章为 Attention 解释主线，第 5、14、25 章为位置编码，第 2、16、22 章为训练、生成与缓存，第 22、23、30 章与 DeepSeek-V2 论文为 KV 架构对照。原书源文件见 [waylandzhang/llm-transformer-book](https://github.com/waylandzhang/llm-transformer-book)（MIT）。
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)：§3.2 Attention，§3.5 正弦位置编码。
 - [RoFormer（RoPE）](https://arxiv.org/abs/2104.09864)、[ALiBi](https://arxiv.org/abs/2108.12409)。
 

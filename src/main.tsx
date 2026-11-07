@@ -1,30 +1,38 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import ReactDOM from 'react-dom/client';
+import { TOPICS } from './content/topics';
 import './styles/app.css';
 
 const AttentionLab = lazy(() => import('./features/attention/AttentionLab'));
-const PositionLab = lazy(() => import('./features/position/PositionLab'));
-const InferenceLab = lazy(() => import('./features/inference/InferenceLab'));
+
+/** Each experiment loads only when its path is opened. */
+const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
+  '/': AttentionLab,
+  '/attention': AttentionLab,
+  '/position': lazy(() => import('./features/position/PositionLab')),
+  '/inference-cache': lazy(() => import('./features/inference/InferenceLab')),
+  '/kv-architectures': lazy(() => import('./features/kv/KVLab')),
+};
+
 const path = window.location.pathname.replace(/\/+$/, '') || '/';
-const page =
-  path === '/' || path === '/attention' ? (
-    <AttentionLab />
-  ) : path === '/position' ? (
-    <PositionLab />
-  ) : path === '/inference-cache' ? (
-    <InferenceLab />
-  ) : null;
+const Page = ROUTES[path];
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {page ? (
-      <Suspense fallback={<div className="loading">正在准备实验…</div>}>{page}</Suspense>
+    {Page ? (
+      <Suspense fallback={<div className="loading">正在准备实验…</div>}>
+        <Page />
+      </Suspense>
     ) : (
       <main className="not-found">
         <h1>这个实验还不存在</h1>
         <p>
-          <a href="/attention">回到 Attention 计算台</a> · <a href="/position">位置编码</a> ·{' '}
-          <a href="/inference-cache">训练、生成与缓存</a>
+          {TOPICS.map((topic, i) => (
+            <span key={topic.id}>
+              {i > 0 && ' · '}
+              <a href={topic.href}>{topic.title}</a>
+            </span>
+          ))}
         </p>
       </main>
     )}

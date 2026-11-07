@@ -14,7 +14,7 @@ test('训练并行：反事实只改输入，之前的行逐位不变', async ({
 
   await page.getByRole('button', { name: '被改的位置及之后', exact: true }).click();
   await page.getByRole('button', { name: '应用改动并核对 →', exact: true }).click();
-  const verdict = page.locator('.inf-experiment .inf-verdict');
+  const verdict = page.locator('.exp-experiment .exp-verdict');
   await expect(verdict).toContainText('输出分布逐位不变的行：0、1；发生变化的行：2、3');
   await expect(verdict).toContainText('与计算一致');
   await expect(
@@ -39,7 +39,7 @@ test('无缓存基线、Prefill、Decode 与缓存对照', async ({ page }) => {
   await page.getByRole('button', { name: '下一步：无缓存基线 →', exact: true }).click();
   const baseline = page.getByRole('table', { name: '不用缓存时每一步的工作', exact: true });
   await expect(baseline.locator('tbody tr')).toHaveCount(4);
-  await expect(page.locator('.inf-widget > .inf-verdict')).toContainText('最大差为 0');
+  await expect(page.locator('.exp-widget > .exp-verdict')).toContainText('最大差为 0');
   await page.getByRole('slider', { name: '生成步数', exact: true }).fill('5');
   await expect(baseline.locator('tbody tr')).toHaveCount(6);
 
@@ -47,33 +47,33 @@ test('无缓存基线、Prefill、Decode 与缓存对照', async ({ page }) => {
   await expect(
     page.getByRole('table', { name: '第 2 层写入缓存的 K、V', exact: true }).locator('tbody tr'),
   ).toHaveCount(3);
-  await expect(page.locator('.inf-widget > .inf-verdict')).toContainText('第一个新 token 是 c');
+  await expect(page.locator('.exp-widget > .exp-verdict')).toContainText('第一个新 token 是 c');
 
   await page.getByRole('button', { name: '下一步：Decode 一步 →', exact: true }).click();
   await page.getByRole('slider', { name: '看第几次 Decode', exact: true }).fill('1');
   const layer = page.getByRole('table', { name: '第 1 层：新 Query 读缓存', exact: true });
   await expect(layer.locator('tbody tr')).toHaveCount(4);
   await expect(layer.locator('tbody tr').last()).toContainText('本步新算');
-  await expect(page.locator('.inf-widget > .inf-verdict')).toContainText(
+  await expect(page.locator('.exp-widget > .exp-verdict')).toContainText(
     '新算 1 组 Q/K/V，从缓存读 3 组 K/V，打分 4 次',
   );
 
   // In-scene playback advances the Decode step and stops at the last one.
   await page.getByRole('button', { name: '播放逐步 Decode', exact: true }).click();
-  await expect(page.locator('.inf-range output')).toHaveText('3', { timeout: 6000 });
+  await expect(page.locator('.exp-range output')).toHaveText('3', { timeout: 6000 });
   await page.getByRole('button', { name: '暂停逐步 Decode', exact: true }).click();
-  const paused = await page.locator('.inf-range output').textContent();
+  const paused = await page.locator('.exp-range output').textContent();
   await page.waitForTimeout(1800);
-  await expect(page.locator('.inf-range output')).toHaveText(paused ?? '');
+  await expect(page.locator('.exp-range output')).toHaveText(paused ?? '');
 
   await page.getByRole('button', { name: '下一步：缓存对照重算 →', exact: true }).click();
   await page.getByRole('slider', { name: 'Decode 步数', exact: true }).fill('3');
   const compare = page.getByRole('table', { name: '缓存与重算的工作量对照', exact: true });
-  const total = compare.locator('tr.inf-total');
+  const total = compare.locator('tr.exp-total');
   // 2 layers: recompute 8 + 10 + 12 projections and 20 + 30 + 42 scores; cache 2 + 2 + 2 and 8 + 10 + 12.
   await expect(total).toContainText('30');
   await expect(total).toContainText('92');
-  await expect(page.locator('.inf-widget > .inf-verdict')).toContainText(
+  await expect(page.locator('.exp-widget > .exp-verdict')).toContainText(
     '选出的 token 完全相同，logits 最大差为 0',
   );
   expect(errors).toEqual([]);
@@ -90,7 +90,7 @@ test('缓存失效：预测后核对，滑动窗口与键盘操作', async ({ pa
 
   await page.getByRole('button', { name: '被改的位置及之后', exact: true }).click();
   await page.getByRole('button', { name: '重算并核对 →', exact: true }).click();
-  const verdict = page.locator('.inf-widget > .inf-verdict');
+  const verdict = page.locator('.exp-widget > .exp-verdict');
   await expect(verdict).toContainText('第 1 层失效的位置：1；第 2 层失效的位置：1、2、3、4、5');
   await expect(verdict).toContainText('与计算一致');
   await expect(grid).toContainText('失效');
@@ -123,7 +123,7 @@ test('分享链接恢复、坏链接回退与目录导航', async ({ page }) => 
   state.view = { explanations: false, speed: 2 };
   await page.goto('/inference-cache' + serializeInferenceState(state));
   await expect(page.locator('.inf-panel .lesson-progress')).toHaveText('4 / 6');
-  await expect(page.locator('.inf-range output')).toHaveText('4');
+  await expect(page.locator('.exp-range output')).toHaveText('4');
   await expect(page.getByText('先自己说一遍')).toBeVisible();
   await expect(page.getByRole('button', { name: '显示说明', exact: true })).toBeVisible();
 
