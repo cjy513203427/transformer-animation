@@ -1,6 +1,7 @@
-import type { CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 import { formatNumber, type Matrix as MatrixData } from '../math/attention';
 import { Tex } from './Tex';
+import '../styles/attention-interactions.css';
 
 /** Parameter names like W_Q are typeset as W with a subscript; aria-labels keep the plain name. */
 const SUBSCRIPTED = /^[A-Za-z]+_[A-Za-z]+$/;
@@ -28,18 +29,33 @@ export function Matrix({
   parameter,
   onSelect,
 }: Props) {
+  const hintId = useId();
   return (
-    <div className={`matrix-wrap tone-${tone}`}>
+    <div
+      className={`matrix-wrap tone-${tone} ${onSelect ? 'matrix-selectable' : 'matrix-readonly'}`}
+    >
       <div className="matrix-heading">
         <strong>
           {SUBSCRIPTED.test(name) ? <Tex tex={name.replace('_', '_{') + '}'} /> : name}
         </strong>
-        <span>
-          {data.length} × {data[0].length}
-        </span>
+        <div className="matrix-meta">
+          <span>
+            {data.length} × {data[0].length}
+          </span>
+          <small>{onSelect ? '可点选' : '只读数值'}</small>
+        </div>
       </div>
+      {onSelect && (
+        <p id={hintId} className="matrix-interaction-hint">
+          点选格子，核对这一项
+        </p>
+      )}
       <div className="matrix-scroll">
-        <table className="matrix" aria-label={`${name} 矩阵`}>
+        <table
+          className="matrix"
+          aria-label={`${name} 矩阵`}
+          aria-describedby={onSelect ? hintId : undefined}
+        >
           <thead>
             <tr>
               <th scope="col">{parameter ? 'in ↓ out →' : tokenColumns ? 'Q ↓ K →' : 'token'}</th>

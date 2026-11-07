@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { SvgTex, Tex } from '../../components/Tex';
 import '../../styles/attention-diagram.css';
+import '../../styles/attention-interactions.css';
 
 export function AttentionDiagram({
   step,
@@ -61,6 +62,7 @@ export function AttentionDiagram({
         <strong>放大：一个头的内部</strong>
         <span>↑ 沿箭头从下往上读</span>
       </div>
+      <p className="figure-interaction-hint">点选计算节点，跳到对应步骤</p>
       <svg
         viewBox="0 0 540 665"
         role="group"

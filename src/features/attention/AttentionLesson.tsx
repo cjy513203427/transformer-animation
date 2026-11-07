@@ -97,7 +97,7 @@ export function AttentionLesson({
         />
         <div className="lesson-reading">
           <div className="lesson-reading-top">
-            <span>只跟着一个位置看</span>
+            <span>点选一个词，切换观察位置</span>
             <button
               onClick={() =>
                 onState({

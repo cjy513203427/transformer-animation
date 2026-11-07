@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { Rich } from '../../components/Tex';
 import { ARCHITECTURE_NODES, type ArchitectureNode } from '../../state/lesson';
 import '../../styles/architecture.css';
+import '../../styles/attention-interactions.css';
 
 const book = 'https://waylandz.com/llm-transformer-book/';
 const chapters = {
@@ -203,6 +204,7 @@ export function TransformerOverview({
             <span>↑ 从下往上读</span>
             <span>第 3 章 · Post-Norm</span>
           </div>
+          <p className="figure-interaction-hint">点选模块，查看它的输入与输出</p>
           <svg
             viewBox="0 0 440 816"
             role="group"
