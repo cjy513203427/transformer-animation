@@ -27,7 +27,7 @@ import {
   type ExperimentState,
   type Preset,
 } from '../../state/experiment';
-import '../../styles/instrument.css';
+import '../../styles/editorial.css';
 
 function WeightFlow({ probabilities, query }: { probabilities: number[]; query: number }) {
   return (
@@ -216,18 +216,18 @@ export default function AttentionLab() {
     <AppShell
       active="attention"
       crumb="Attention"
-      title="从架构图读懂 Attention"
+      title="Attention：信息怎样在词之间流动"
       indicator="浏览器内计算"
     >
       <section className="page-heading">
         <div>
           <div className="eyebrow">
-            原书导读 <span>·</span> 第 3、9–12 章
+            模型原理 <span>／</span> 第 3、9–12 章
           </div>
           <h1>
-            从架构图，读懂 <span>Attention</span>
+            <span>Attention</span>：信息怎样在词之间流动
           </h1>
-          <p>先找到它在模型里的位置，再跟着一个词，看信息怎样流过每条箭头。</p>
+          <p>一个词如何读取上下文？从 Transformer 架构到 Q、K、V，用三个位置核对完整计算。</p>
         </div>
         <button className="button secondary share-button" onClick={() => void copyLink()}>
           <span aria-hidden="true">↗</span> 复制实验链接
@@ -249,27 +249,22 @@ export default function AttentionLab() {
       )}
 
       <nav className="lesson-tabs" aria-label="学习层次">
+        <span className="lesson-tabs-label">本篇内容</span>
         {(
           [
-            ['overview', '整体架构', '先知道数据走到哪里'],
-            ['guide', '拆开 Attention', '跟着箭头理解每一步'],
-            ['numbers', '动手核对', '修改输入，查看完整矩阵'],
-            ['heads', '多头注意力', '切分、各算、拼接、$W_O$'],
+            ['overview', '整体架构'],
+            ['guide', '拆开 Attention'],
+            ['numbers', '动手核对'],
+            ['heads', '多头注意力'],
           ] as const
-        ).map(([mode, title, subtitle], i) => (
+        ).map(([mode, title]) => (
           <button
             className="lesson-tab"
             key={mode}
             aria-pressed={state.view.lesson === mode}
             onClick={() => switchLesson(mode)}
           >
-            <span>0{i + 1}</span>
-            <div>
-              <strong>{title}</strong>
-              <small>
-                <Rich text={subtitle} />
-              </small>
-            </div>
+            {title}
           </button>
         ))}
       </nav>
@@ -324,11 +319,11 @@ export default function AttentionLab() {
           <div className="numbers-context">
             <strong>现在核对图里的单头计算</strong>
             <span>
-              当前输出 <Tex tex="O = PV" /> 是一个头的结果；切分、拼接与 <Tex tex="W_O" /> 在“04
-              多头注意力”中逐步演算。
+              当前输出 <Tex tex="O = PV" /> 是一个头的结果；切分、拼接与 <Tex tex="W_O" />
+              在“多头注意力”中逐步演算。
             </span>
-            <button onClick={() => switchLesson('guide')}>回到箭头讲解 ↑</button>
-            <button onClick={() => switchLesson('heads')}>下一站：多头注意力 →</button>
+            <button onClick={() => switchLesson('guide')}>查看计算图 ↑</button>
+            <button onClick={() => switchLesson('heads')}>比较多头计算 →</button>
           </div>
 
           <div className="scene-bar">

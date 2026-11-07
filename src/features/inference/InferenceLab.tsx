@@ -35,7 +35,7 @@ import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
 import '../../styles/inference.css';
-import '../../styles/instrument.css';
+import '../../styles/editorial.css';
 
 /** Scenes whose widget is driven by the number of Decode steps. */
 const DECODE_SCENES = new Set([1, 3, 4]);

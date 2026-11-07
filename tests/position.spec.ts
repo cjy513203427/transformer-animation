@@ -109,7 +109,9 @@ test('位置编码链接恢复、坏链接回退与目录导航', async ({ page,
     scale: 'css',
   });
   await page.getByRole('link', { name: /跟图理解 Attention/ }).click();
-  await expect(page.getByRole('heading', { name: '从架构图，读懂 Attention' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Attention：信息怎样在词之间流动' }),
+  ).toBeVisible();
   await page.getByRole('link', { name: /位置编码/ }).click();
   await expect(page.getByRole('heading', { name: '位置编码：顺序从哪里进入计算' })).toBeVisible();
 });

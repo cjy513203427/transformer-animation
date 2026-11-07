@@ -1,4 +1,4 @@
-/* KV 架构对照：条形图、头分组映射、缓存格子与计算路径卡片。颜色同仪器面板，状态都有文字标注。 */
+/* KV 架构对照：条形图、头分组映射、缓存格子与计算路径。状态都有文字标注。 */
 .kv-steps {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
@@ -27,7 +27,7 @@
     'track track';
   gap: 4px 8px;
   font-size: 12px;
-  color: #3f3d38;
+  color: #424d46;
 }
 .kv-bar-name {
   grid-area: name;
@@ -35,9 +35,9 @@
 .kv-bar-name small {
   margin-left: 6px;
   padding: 0 5px;
-  border: 1px solid #d9531a;
+  border: 1px solid #4f7e2d;
   border-radius: 2px;
-  color: #9a3a12;
+  color: #345b19;
   font-size: 10px;
 }
 .kv-bar-value {
@@ -52,8 +52,8 @@
   grid-area: track;
   display: flex;
   height: 14px;
-  background: #d8d4ca;
-  border: 1px solid #a9a597;
+  background: #e7ece7;
+  border: 1px solid #d0dacf;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -65,14 +65,14 @@
   background: #6f7d4f;
 }
 .kv-bar-part-1 {
-  background: repeating-linear-gradient(45deg, #b8c496, #b8c496 3px, #9fac7a 3px, #9fac7a 5px);
+  background: repeating-linear-gradient(45deg, #e2efcc, #e2efcc 3px, #9fac7a 3px, #9fac7a 5px);
 }
 .kv-bar-current .kv-bar-part-0 {
-  background: #d9531a;
+  background: #4f7e2d;
 }
 .kv-bar-current .kv-bar-name {
   font-weight: 700;
-  color: #2a2a27;
+  color: #252a27;
 }
 
 /* ---------- head map ---------- */
@@ -82,11 +82,11 @@
   max-width: 420px;
 }
 .kv-wire {
-  stroke: #a9a597;
+  stroke: #d0dacf;
   stroke-width: 1.6;
 }
 .kv-wire-on {
-  stroke: #d9531a;
+  stroke: #4f7e2d;
   stroke-width: 3;
 }
 .kv-node rect {
@@ -99,26 +99,26 @@
     monospace;
 }
 .kv-q rect {
-  fill: #c7d1ec;
+  fill: #e4ebfa;
   stroke: #3558a4;
 }
 .kv-q text {
   fill: #2c4a8f;
 }
 .kv-kv rect {
-  fill: #e4d7c6;
+  fill: #f8eddd;
   stroke: #8d4b13;
 }
 .kv-kv text {
   fill: #6f3a0e;
 }
 .kv-node-on rect {
-  stroke: #d9531a;
+  stroke: #4f7e2d;
   stroke-width: 3;
 }
 .kv-axis {
   font-size: 11px;
-  fill: #47453f;
+  fill: #59665c;
 }
 
 /* ---------- cache cells ---------- */
@@ -130,7 +130,7 @@
   display: grid;
   gap: 4px;
   font-size: 12px;
-  color: #3f3d38;
+  color: #424d46;
 }
 .kv-cells-row small {
   margin-left: 8px;
@@ -138,7 +138,7 @@
     11px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #47453f;
+  color: #59665c;
 }
 .kv-cells-track {
   display: flex;
@@ -158,22 +158,22 @@
     monospace;
 }
 .kv-cell-k {
-  background: #e4d7c6;
+  background: #f8eddd;
   border-color: #b98a5c;
   color: #6f3a0e;
 }
 .kv-cell-v {
-  background: #dbd0e4;
+  background: #f0e9f7;
   border-color: #a48bbd;
   color: #5d3d7d;
 }
 .kv-cell-latent {
-  background: #b8c496;
+  background: #e2efcc;
   border-color: #6f7d4f;
   color: #1f2a14;
 }
 .kv-cell-rope {
-  background: repeating-linear-gradient(45deg, #f1eee5, #f1eee5 3px, #dfe3cc 3px, #dfe3cc 5px);
+  background: repeating-linear-gradient(45deg, #ffffff, #ffffff 3px, #dfe3cc 3px, #dfe3cc 5px);
   border-color: #6f7d4f;
   color: #1f2a14;
 }
@@ -185,15 +185,15 @@
 }
 .kv-flow {
   padding: 12px 14px;
-  border: 1px solid #a9a597;
+  border: 1px solid #d0dacf;
   border-radius: 4px;
-  background: #ebe7dd;
+  background: #f6f8f5;
   opacity: 0.75;
 }
 .kv-flow-on {
   opacity: 1;
-  border: 2px solid #d9531a;
-  background: #f1eee5;
+  border: 2px solid #4f7e2d;
+  background: #ffffff;
 }
 .kv-flow > strong {
   display: block;
@@ -203,7 +203,7 @@
 .kv-flow > strong small {
   margin-left: 8px;
   font-size: 10px;
-  color: #9a3a12;
+  color: #345b19;
 }
 .kv-flow ol {
   list-style: none;
@@ -218,13 +218,13 @@
   align-items: baseline;
   gap: 4px 10px;
   padding: 6px 8px;
-  border: 1px solid #c9c5bc;
+  border: 1px solid #dee5df;
   border-radius: 3px;
-  background: #f7f5ef;
+  background: #ffffff;
   font-size: 12px;
 }
 .kv-flow-step span {
-  color: #3f3d38;
+  color: #424d46;
 }
 .kv-flow-cache {
   border-color: #6f7d4f;
@@ -238,7 +238,7 @@
   margin: 8px 0 0;
   font-size: 12px;
   line-height: 1.8;
-  color: #3f3d38;
+  color: #424d46;
 }
 
 /* ---------- widgets ---------- */
@@ -251,27 +251,27 @@
   display: grid;
   gap: 3px;
   font-size: 11px;
-  color: #47453f;
+  color: #59665c;
 }
 .kv-field input {
   width: 100%;
   padding: 5px 7px;
-  border: 1px solid #8f8b7e;
+  border: 1px solid #bdc9c0;
   border-radius: 3px;
-  background: #f7f5ef;
+  background: #ffffff;
   font:
     13px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #2a2a27;
+  color: #252a27;
 }
 .kv-result {
   display: grid;
   gap: 6px;
   padding: 12px 14px;
-  border: 3px solid #2a2a27;
+  border: 3px solid #252a27;
   border-radius: 4px;
-  background: #b8c496;
+  background: #e2efcc;
   color: #1f2a14;
   font-size: 12px;
   overflow-x: auto;

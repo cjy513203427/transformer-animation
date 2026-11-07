@@ -1,7 +1,7 @@
 .architecture-panel {
-  border: 1px solid #c4c0b8;
+  border: 1px solid #d9e1db;
   border-radius: 12px;
-  background: #e5e2dc;
+  background: #ffffff;
   overflow: hidden;
 }
 .architecture-panel-head {
@@ -9,7 +9,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 22px 28px;
-  border-bottom: 1px solid #cecbc4;
+  border-bottom: 1px solid #e0e6e1;
   gap: 16px;
 }
 .architecture-panel-head h2 {
@@ -22,7 +22,7 @@
 }
 .lesson-eyebrow {
   font-size: 11px;
-  color: #455e20;
+  color: #38751d;
   letter-spacing: 1.2px;
 }
 .architecture-layout {
@@ -30,15 +30,15 @@
   grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1fr);
 }
 .architecture-map {
-  border-right: 1px solid #cecbc4;
-  background: #e1ded9;
+  border-right: 1px solid #e0e6e1;
+  background: #f6f8f7;
   padding: 16px 24px 18px;
   min-width: 0;
 }
 .architecture-map-label {
   display: flex;
   justify-content: space-between;
-  color: #63605a;
+  color: #68736c;
   font-size: 11px;
 }
 .architecture-map svg {
@@ -62,23 +62,23 @@
 }
 .architecture-node rect,
 .architecture-node circle {
-  fill: #e5e2dc;
-  stroke: #afaba1;
+  fill: #ffffff;
+  stroke: #c4cfc5;
   stroke-width: 1.3;
 }
 .architecture-node.attention-node rect {
-  fill: #d2dbc5;
+  fill: #e6f2db;
   stroke: #6b7a54;
 }
 .architecture-node.selected rect,
 .architecture-node.selected circle {
-  fill: #c8d4b5;
-  stroke: #455e20;
+  fill: #d8ecbf;
+  stroke: #38751d;
   stroke-width: 2.5;
 }
 .architecture-node:hover rect,
 .architecture-node:hover circle {
-  stroke: #455e20;
+  stroke: #38751d;
 }
 .architecture-node:focus-visible rect,
 .architecture-node:focus-visible circle {
@@ -98,7 +98,7 @@
 }
 .architecture-node .architecture-you {
   font-size: 13px;
-  fill: #455e20;
+  fill: #38751d;
 }
 .architecture-block-caption {
   font:
@@ -125,7 +125,7 @@
   fill: #5f5c54;
 }
 .architecture-diagram-note {
-  color: #63615b;
+  color: #68736c;
   font-size: 11px;
   text-align: center;
   line-height: 1.8;
@@ -136,13 +136,13 @@
 }
 .architecture-location {
   font-size: 12px;
-  color: #64625c;
+  color: #65716a;
 }
 .architecture-location strong {
   display: block;
   font-family: Consolas, monospace;
   font-size: 14px;
-  color: #455e20;
+  color: #38751d;
   font-weight: 500;
   margin-top: 7px;
 }
@@ -160,22 +160,22 @@
 }
 .architecture-explanation dt {
   font-size: 11px;
-  color: #65625b;
+  color: #67736b;
   margin-bottom: 7px;
 }
 .architecture-explanation dd {
   margin: 0;
   font-size: 14px;
   line-height: 1.9;
-  color: #534f46;
+  color: #424d46;
 }
 .architecture-hint {
   padding: 14px 16px;
-  background: #d9e0d0;
+  background: #f2f7ed;
   border-left: 3px solid #73835d;
   font-size: 12px;
   line-height: 1.9;
-  color: #5a5750;
+  color: #5d695f;
   margin: 22px 0 13px;
 }
 .architecture-chapter {
@@ -200,17 +200,17 @@
   color: #65625a;
 }
 .architecture-explore {
-  border-top: 1px solid #cecbc4;
+  border-top: 1px solid #e0e6e1;
   margin-top: 24px;
   padding-top: 20px;
 }
 .architecture-explore > span {
   font-size: 11px;
-  color: #455e20;
+  color: #38751d;
 }
 .architecture-explore p {
   font-size: 13px;
-  color: #5d5a54;
+  color: #5c685f;
   line-height: 1.8;
   margin: 8px 0 13px;
 }
@@ -260,7 +260,7 @@
   }
   .architecture-map {
     border-right: 0;
-    border-bottom: 1px solid #cecbc4;
+    border-bottom: 1px solid #e0e6e1;
     padding: 15px 9px;
   }
   .architecture-map svg {

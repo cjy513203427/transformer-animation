@@ -1,8 +1,8 @@
 .diagram-panel {
   min-width: 0;
   padding: 20px 18px;
-  background: #e1ded9;
-  border-right: 1px solid #cecbc4;
+  background: #f6f8f7;
+  border-right: 1px solid #e0e6e1;
 }
 .diagram-caption {
   display: flex;
@@ -49,27 +49,27 @@
   cursor: pointer;
   outline: none;
   --node-color: #605d56;
-  --node-fill: #e5e2dc;
+  --node-fill: #ffffff;
 }
 .diagram-query {
   --node-color: #4267c7;
-  --node-fill: #c7d1ec;
+  --node-fill: #e4ebfa;
 }
 .diagram-key {
   --node-color: #a85a17;
-  --node-fill: #e4d7c6;
+  --node-fill: #f8eddd;
 }
 .diagram-value {
   --node-color: #865dad;
-  --node-fill: #d8cee1;
+  --node-fill: #f0e9f7;
 }
 .diagram-probability {
-  --node-color: #455e20;
-  --node-fill: #d6dec9;
+  --node-color: #38751d;
+  --node-fill: #edf5e5;
 }
 .diagram-node rect {
   fill: var(--node-fill);
-  stroke: #b8b5ab;
+  stroke: #cbd5cc;
   stroke-width: 1.3;
 }
 .diagram-node.active rect {
@@ -110,7 +110,7 @@
   padding: 14px 15px;
   border: 1px dashed #b6b2a7;
   border-radius: 7px;
-  background: #e5e2dc;
+  background: #ffffff;
 }
 .diagram-multihead strong {
   font-size: 11px;
@@ -119,32 +119,32 @@
 }
 .diagram-multihead p {
   font-size: 12px;
-  color: #65625b;
+  color: #67736b;
   line-height: 1.9;
   margin: 7px 0;
 }
 .diagram-multihead em {
   font-style: normal;
-  color: #455e20;
-  background: #d7decd;
+  color: #38751d;
+  background: #eef6e7;
 }
 .diagram-multihead small {
   font-size: 10px;
-  color: #65625c;
+  color: #67736b;
 }
 .diagram-heads-link {
   display: block;
   margin-top: 9px;
   padding: 6px 10px;
   font-size: 11px;
-  color: #455e20;
+  color: #38751d;
   border-color: #a5b490;
   background: #dbe3d1;
 }
 @media (max-width: 700px) {
   .diagram-panel {
     border-right: 0;
-    border-bottom: 1px solid #cecbc4;
+    border-bottom: 1px solid #e0e6e1;
     padding: 18px 8px;
   }
   .diagram-caption {
@@ -183,7 +183,7 @@
   color: #6f4a92;
 }
 .pp-insert .svg-tex {
-  color: #65625d;
+  color: #67736b;
 }
 .pp-insert.active .svg-tex {
   color: var(--insert);

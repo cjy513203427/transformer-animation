@@ -190,8 +190,8 @@ export function TransformerOverview({
     <section className="architecture-panel" aria-label="Transformer 整体架构">
       <div className="architecture-panel-head">
         <div>
-          <span className="lesson-eyebrow">先定位，再放大</span>
-          <h2>Attention 在整张图的哪里？</h2>
+          <span className="lesson-eyebrow">Transformer 架构</span>
+          <h2>Attention 在模型的哪个位置？</h2>
         </div>
         <a href={chapters.map} target="_blank" rel="noreferrer">
           对照原书第 3 章 ↗
@@ -221,7 +221,7 @@ export function TransformerOverview({
                 <path d="M0 0 L10 5 L0 10Z" fill="#6d6961" />
               </marker>
             </defs>
-            <rect x="61" y="263" width="318" height="305" rx="14" fill="#d0dcd7" stroke="#a1b1a7" />
+            <rect x="61" y="263" width="318" height="305" rx="6" fill="#eaf2e6" stroke="#bdcfb9" />
             <text x="75" y="284" className="architecture-block-caption">
               Block
             </text>
@@ -328,22 +328,22 @@ export function TransformerOverview({
         </div>
         <div className="architecture-explanation" aria-live="polite">
           <div className="architecture-location">
-            你正在看 <strong>{current.english}</strong>
+            当前模块 <strong>{current.english}</strong>
           </div>
           <h3>{current.title}</h3>
           <dl>
             <div>
-              <dt>进来什么</dt>
+              <dt>输入</dt>
               <dd>{current.input}</dd>
             </div>
             <div>
-              <dt>做什么</dt>
+              <dt>计算</dt>
               <dd>
                 <Rich text={current.action} />
               </dd>
             </div>
             <div>
-              <dt>交给谁</dt>
+              <dt>输出</dt>
               <dd>{current.output}</dd>
             </div>
           </dl>
@@ -371,8 +371,7 @@ export function TransformerOverview({
             </button>
           </div>
           <div className="architecture-explore">
-            <span>本次动手学习的部分</span>
-            <p>把图里的 Attention 方框打开，跟着一个位置看清 Q、K、V 的分工。</p>
+            <p>在三个位置上展开 Q、K、V，观察一个词怎样读取其他词的信息。</p>
             <button className="button primary" onClick={onExploreAttention}>
               拆开 Attention →
             </button>

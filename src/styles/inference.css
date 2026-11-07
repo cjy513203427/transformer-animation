@@ -1,4 +1,4 @@
-/* 训练、生成与缓存：沿用仪器面板的暖灰 / 橄榄绿 / 液晶底色，格子同时用文字标注状态。 */
+/* 训练、生成与缓存：格子用颜色和文字共同标注读取、复用与失效状态。 */
 .inf-steps {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
@@ -26,7 +26,7 @@
 }
 .inf-grid th {
   font-weight: 500;
-  color: #47453f;
+  color: #59665c;
   text-align: center;
   white-space: nowrap;
   padding: 2px 4px;
@@ -49,7 +49,7 @@
     600 13px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #2a2a27;
+  color: #252a27;
 }
 .inf-cell {
   min-width: 44px;
@@ -62,14 +62,14 @@
   transition: background-color 0.2s;
 }
 .inf-visible {
-  background: #d6dec9;
+  background: #edf5e5;
   border-color: #9fb07f;
   color: #2f4214;
 }
 .inf-masked,
 .inf-dropped {
-  background: repeating-linear-gradient(135deg, #dad8d3, #dad8d3 4px, #c9c6be 4px, #c9c6be 5px);
-  color: #47453f;
+  background: repeating-linear-gradient(135deg, #edf0ed, #edf0ed 4px, #c9c6be 4px, #c9c6be 5px);
+  color: #59665c;
 }
 .inf-repeat {
   background: #f0dccb;
@@ -77,14 +77,14 @@
   color: #7a3210;
 }
 .inf-fresh {
-  background: #455e20;
+  background: #38751d;
   border-color: #344a15;
-  color: #f1eee5;
+  color: #ffffff;
   font-weight: 600;
 }
 .inf-write,
 .inf-keep {
-  background: #b8c496;
+  background: #e2efcc;
   border-color: #7d8c5a;
   color: #1f2a14;
 }
@@ -94,8 +94,8 @@
   color: #2f4214;
 }
 .inf-new {
-  background: #d9531a;
-  border-color: #9a3a12;
+  background: #4f7e2d;
+  border-color: #345b19;
   color: #fff;
   font-weight: 600;
 }
@@ -109,23 +109,23 @@
   font-weight: 600;
 }
 .inf-unknown {
-  background: #f1eee5;
-  border: 1px dashed #8f8b7e;
-  color: #47453f;
+  background: #ffffff;
+  border: 1px dashed #bdc9c0;
+  color: #59665c;
 }
 .inf-count {
-  background: #f1eee5;
+  background: #ffffff;
   border-color: #c4c0b5;
-  color: #2a2a27;
+  color: #252a27;
 }
 .inf-target {
-  background: #f1eee5;
-  border: 2px solid #2a2a27;
-  color: #2a2a27;
+  background: #ffffff;
+  border: 2px solid #252a27;
+  color: #252a27;
   font-weight: 700;
 }
 .inf-row-changed th {
-  color: #9a3a12;
+  color: #345b19;
 }
 .inf-legend {
   list-style: none;
@@ -134,7 +134,7 @@
   display: grid;
   gap: 5px;
   font-size: 11px;
-  color: #3f3d38;
+  color: #424d46;
 }
 .inf-legend li {
   display: flex;

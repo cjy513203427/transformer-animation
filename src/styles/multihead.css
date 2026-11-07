@@ -12,7 +12,7 @@
 }
 .mh-segment > span {
   font-size: 12px;
-  color: #63605a;
+  color: #68736c;
   margin-right: 4px;
 }
 .mh-segment button {
@@ -24,9 +24,9 @@
   color: #5c5a53;
 }
 .mh-segment button[aria-pressed='true'] {
-  background: #d5ddca;
-  border-color: #455e20;
-  color: #455e20;
+  background: #edf5e5;
+  border-color: #38751d;
+  color: #38751d;
   font-weight: 600;
 }
 .mh-dkey {
@@ -36,7 +36,7 @@
   color: #5f5c55;
 }
 .mh-dkey strong {
-  color: #455e20;
+  color: #38751d;
   font-size: 15px;
 }
 .mh-causal {
@@ -81,7 +81,7 @@
   stroke-width: 1.5;
 }
 .mh-card {
-  fill: #e5e2dc;
+  fill: #ffffff;
   fill-opacity: 0.55;
   stroke-width: 1.6;
   stroke-dasharray: 5 4;
@@ -94,7 +94,7 @@
 }
 .mh-query-row {
   fill: none;
-  stroke: #35322b;
+  stroke: #303634;
   stroke-width: 1.6;
   stroke-dasharray: 3 2;
   pointer-events: none;
@@ -113,7 +113,7 @@
   align-items: center;
   gap: 6px 14px;
   font-size: 10px;
-  color: #65625b;
+  color: #67736b;
 }
 .mh-legend span {
   display: inline-block;
@@ -124,7 +124,7 @@
   border-radius: 2px;
 }
 .mh-legend-row {
-  border: 1.5px dashed #35322b;
+  border: 1.5px dashed #303634;
 }
 .mh-legend-changed {
   border: 2px solid #c2410c;
@@ -136,14 +136,14 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
-  background: #e5e2dc;
+  background: #ffffff;
   border-radius: 6px;
   overflow: hidden;
 }
 .mh-shapes th,
 .mh-shapes td {
   padding: 7px 8px;
-  border-bottom: 1px solid #d3d0c9;
+  border-bottom: 1px solid #e2e7e2;
   text-align: left;
   font-weight: 400;
 }
@@ -160,7 +160,7 @@
   white-space: nowrap;
 }
 .mh-shapes tr.current {
-  background: #d5ddca;
+  background: #edf5e5;
 }
 .mh-shapes tr.current th,
 .mh-shapes tr.current td {
@@ -178,13 +178,13 @@
 .mh-table th,
 .mh-table td {
   padding: 9px 6px;
-  border-bottom: 1px solid #d1cec7;
+  border-bottom: 1px solid #e0e6e1;
   text-align: left;
   font-weight: 400;
 }
 .mh-table thead th {
   font-size: 10px;
-  color: #64625c;
+  color: #65716a;
 }
 .mh-table td {
   font:
@@ -247,7 +247,7 @@
 .mh-note {
   font-size: 12px;
   line-height: 1.9;
-  color: #65625b;
+  color: #67736b;
   margin-top: 12px;
 }
 .mh-note code,
@@ -348,7 +348,7 @@
   margin: 21px 0;
 }
 .mh-experiment > p {
-  color: #63605a;
+  color: #68736c;
   font-size: 12px;
   line-height: 1.9;
 }
@@ -370,8 +370,8 @@
   text-align: left;
 }
 .mh-predictions button[aria-pressed='true'] {
-  border-color: #455e20;
-  background: #d8e0cc;
+  border-color: #38751d;
+  background: #edf5e5;
   color: #3e541d;
 }
 .mh-experiment .prediction-feedback {

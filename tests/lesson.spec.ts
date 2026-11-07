@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { initialState, serializeState } from '../src/state/experiment';
 
 test('按书的架构定位模块，再进入分支图逐步解释', async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -60,7 +61,7 @@ test('按书的架构定位模块，再进入分支图逐步解释', async ({ pa
 test('导读可回退、播放、暂停并通过链接恢复当前层次', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/attention');
-  await page.getByRole('button', { name: /02 拆开 Attention/ }).click();
+  await page.getByRole('button', { name: '拆开 Attention', exact: true }).click();
   await page
     .getByRole('button', { name: '图中步骤：Softmax → P，分配取用比例', exact: true })
     .click();
@@ -79,8 +80,53 @@ test('导读可回退、播放、暂停并通过链接恢复当前层次', async
   await page.getByRole('button', { name: '暂停导读' }).click();
   await page.waitForTimeout(3700);
   await expect(page.locator('.lesson-progress')).toHaveText('2 / 5');
-  await page.getByRole('button', { name: /01 整体架构/ }).click();
+  await page.getByRole('button', { name: '整体架构', exact: true }).click();
   await expect(
     page.getByRole('region', { name: 'Transformer 整体架构', exact: true }),
   ).toBeVisible();
+});
+
+test('当前实验入口在窄屏可见，键盘跳到正文保留分享状态', async ({ page }) => {
+  await page.goto('/moe');
+  const navigation = page.getByRole('navigation', { name: '实验目录', exact: true });
+  await expect(navigation.locator('[aria-current="page"]')).toHaveText('MoE 与专家并行');
+  await expect
+    .poll(() =>
+      navigation.evaluate((nav) => {
+        const active = nav.querySelector('[aria-current="page"]');
+        if (!active) return false;
+        const navBounds = nav.getBoundingClientRect();
+        const activeBounds = active.getBoundingClientRect();
+        return activeBounds.left >= navBounds.left - 1 && activeBounds.right <= navBounds.right + 1;
+      }),
+    )
+    .toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
+    false,
+  );
+
+  const state = initialState();
+  state.view.lesson = 'guide';
+  state.step = 3;
+  await page.goto('/attention' + serializeState(state));
+  const guide = page.getByRole('region', { name: '跟图理解 Attention', exact: true });
+  await expect(guide).toBeVisible();
+  await expect(guide.locator('.lesson-progress')).toHaveText('4 / 5');
+  const sharedUrl = page.url();
+  const sharedHash = new URL(sharedUrl).hash;
+
+  await page.keyboard.press('Tab');
+  const skipLink = page.getByRole('link', { name: '跳到实验内容', exact: true });
+  await expect(skipLink).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  await expect(page.getByRole('main', { name: 'Attention', exact: true })).toBeFocused();
+  await expect(page).toHaveURL(sharedUrl);
+  expect(await page.evaluate(() => window.location.hash)).toBe(sharedHash);
+  await expect(page.getByRole('button', { name: '拆开 Attention', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(guide).toBeVisible();
+  await expect(guide.locator('.lesson-progress')).toHaveText('4 / 5');
 });

@@ -4,7 +4,7 @@ test('多头：切分步骤、头数变化、形状对照与预测验证', async
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/attention');
-  await page.getByRole('button', { name: /04 多头注意力/ }).click();
+  await page.getByRole('button', { name: '多头注意力', exact: true }).click();
   const panel = page.getByRole('region', { name: '多头注意力：切分与合并', exact: true });
   await expect(panel).toBeVisible();
   await expect(panel.locator('.lesson-progress')).toHaveText('1 / 6');
@@ -50,7 +50,7 @@ test('多头：切分步骤、头数变化、形状对照与预测验证', async
 test('多头：播放、暂停、键盘、链接恢复与单头入口', async ({ page, context }, testInfo) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/attention');
-  await page.getByRole('button', { name: /02 拆开 Attention/ }).click();
+  await page.getByRole('button', { name: '拆开 Attention', exact: true }).click();
   await page.getByRole('button', { name: '看多头怎样切分与合并 →', exact: true }).click();
   const progress = page.locator('.mh-panel .lesson-progress');
   await expect(progress).toHaveText('1 / 6');

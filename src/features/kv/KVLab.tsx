@@ -24,7 +24,7 @@ import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
 import '../../styles/kv.css';
-import '../../styles/instrument.css';
+import '../../styles/editorial.css';
 
 export default function KVLab() {
   const [restored] = useState(() => restoreKVState(window.location.hash));

@@ -27,7 +27,7 @@ import {
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/position.css';
-import '../../styles/instrument.css';
+import '../../styles/editorial.css';
 
 const explanations = [
   'Attention 打分只用到两个向量的点积。如果输入只有词嵌入，“我”放在第 0 位还是第 2 位都是同一个向量；把句子倒过来，每个词看到的仍是同一组向量，只是排列不同。结果是：模型分不清“我爱你”和“你爱我”。',

@@ -1,6 +1,6 @@
 /*
  * 各实验共用的右侧控件：表格、分段按钮、先预测再核对、结论框、滑杆、token 芯片与概率条。
- * 颜色沿用仪器面板的暖灰 / 橄榄绿；按键外观由 instrument.css 统一提供。
+ * 张量角色使用固定配色；阅读排版和交互控件外观由 editorial.css 统一提供。
  */
 .exp-table-wrap {
   max-width: 100%;
@@ -26,21 +26,21 @@
 .exp-tokens-label {
   min-width: 52px;
   font-size: 11px;
-  color: #47453f;
+  color: #59665c;
 }
 .exp-chip {
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
   padding: 3px 9px;
-  border: 1px solid #8f8b7e;
+  border: 1px solid #bdc9c0;
   border-radius: 3px;
-  background: #f1eee5;
+  background: #ffffff;
   font:
     600 13px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #2a2a27;
+  color: #252a27;
 }
 .exp-chip small {
   font-size: 9px;
@@ -48,14 +48,14 @@
   color: #55534d;
 }
 .exp-chip-on {
-  border-color: #d9531a;
-  box-shadow: inset 0 -2px 0 #d9531a;
+  border-color: #4f7e2d;
+  box-shadow: inset 0 -2px 0 #4f7e2d;
 }
 .exp-caption {
   margin: 0;
   font-size: 12px;
   line-height: 1.9;
-  color: #3f3d38;
+  color: #424d46;
 }
 .exp-table {
   width: 100%;
@@ -65,14 +65,14 @@
 .exp-table caption {
   text-align: left;
   font-size: 12px;
-  color: #3f3d38;
+  color: #424d46;
   padding-bottom: 6px;
   line-height: 1.8;
 }
 .exp-table th,
 .exp-table td {
   padding: 7px 6px;
-  border-bottom: 1px solid #c9c5bc;
+  border-bottom: 1px solid #dee5df;
   text-align: right;
   font-weight: 400;
   white-space: nowrap;
@@ -82,7 +82,7 @@
   font-family: 'IBM Plex Mono', Consolas, monospace;
 }
 .exp-table thead th {
-  color: #47453f;
+  color: #59665c;
   font-size: 11px;
 }
 .exp-table th:first-child {
@@ -99,7 +99,7 @@
 }
 .exp-total th,
 .exp-total td {
-  border-top: 2px solid #8f8b7e;
+  border-top: 2px solid #bdc9c0;
   font-weight: 600;
 }
 .exp-experiment {
@@ -107,9 +107,9 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px;
-  border: 1px solid #8f8b7e;
+  border: 1px solid #bdc9c0;
   border-radius: 4px;
-  background: #ebe7dd;
+  background: #f6f8f5;
 }
 .exp-experiment > strong {
   font-size: 13px;
@@ -123,7 +123,7 @@
 .exp-segment > span {
   min-width: 64px;
   font-size: 11px;
-  color: #47453f;
+  color: #59665c;
 }
 .exp-segment button,
 .exp-predict button {
@@ -156,8 +156,8 @@
   margin: 0;
   padding: 10px 13px;
   border-radius: 4px;
-  border: 1px solid #8f8b7e;
-  background: #f1eee5;
+  border: 1px solid #bdc9c0;
+  background: #ffffff;
   font-size: 12px;
   line-height: 1.9;
 }
@@ -171,12 +171,12 @@
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: #3f3d38;
+  color: #424d46;
   flex-wrap: wrap;
 }
 .exp-range input {
   width: 180px;
-  accent-color: #d9531a;
+  accent-color: #4f7e2d;
 }
 .exp-range output {
   font:
@@ -217,7 +217,7 @@
   font-weight: 700;
 }
 .exp-bar-on i {
-  background: #d9531a;
+  background: #4f7e2d;
 }
 .exp-notes-title {
   display: block;

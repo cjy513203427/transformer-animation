@@ -18,7 +18,7 @@ import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
 import '../../styles/moe.css';
-import '../../styles/instrument.css';
+import '../../styles/editorial.css';
 
 export default function MoELab() {
   const [restored] = useState(() => restoreMoEState(window.location.hash));
