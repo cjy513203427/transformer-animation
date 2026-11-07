@@ -1,4 +1,4 @@
-# 数值约定
+﻿# 数值约定
 
 ## 单头自注意力
 
@@ -154,3 +154,30 @@ score = (q^C·k^C + q^R·k^R) / √(d_h + d_h^R)，o_{t,i} = Σ_j p v^C_{j,i}，
 **真实规模对照**：DeepSeek-V2 取 60 层、128 头、d_h = 128、d_c = 512、d_h^R = 64（论文 §3.1.2 与表 1 说明 d_c = 4d_h、d_h^R = d_h/2）。MLA 每 token 每层 576 个数 = (9/2) d_h，相当于 2.25 组的 GQA；只算 latent 会少算 64 个（11.1%）。同头数同头维的 MHA、GQA-8、MQA 是套公式得到的假想配置，只用来对照缓存；页面不比较效果，也不给排行。原书第 30.4.3 节“KV Cache 减少 75%”是假设 latent 维度为 1/4 时的示意计算，不是 DeepSeek 的实测。
 
 依据：原书第 22、23、30 章；[MQA（Shazeer, 2019）](https://arxiv.org/abs/1911.02150)；[GQA（Ainslie et al., 2023）](https://arxiv.org/abs/2305.13245) §2.1–2.2；[DeepSeek-V2](https://arxiv.org/html/2405.04434v5) §2.1、表 1、§3.1.2。2026-11-07 在线读取。
+
+## MoE 与专家并行（原书第 30 章）
+
+单个、未训练的教学 MoE 层。行向量，T = 4、D = 2、E = 4 个专家、F = 3；忽略 batch 和偏置。输入是无语义的二维向量；专家编号 E0–E3 不表示预设的语义分工。
+
+```text
+X: [T, D]                         W_R: [D, E]
+Z = X W_R: [T, E]                 p = softmax(Z, axis=expert)
+A_t = TopK(p_t, K)                K ∈ {1, 2}，并列时取编号小的专家
+g[t,e] = p[t,e] / Σ_{j∈A_t} p[t,j]（e∈A_t）；未选中为 0
+f_e(x_t) = ReLU(x_t W_1,e) W_2,e   W_1,e: [D, F]，W_2,e: [F, D]
+y_t = Σ_{e∈A_t} g[t,e] f_e(x_t)    Y: [T, D]
+```
+
+**门控变体**：采用 Softmax → Top-K → 选中概率重新归一化；Top-1 的唯一门值为 1。对有限分数，这等价于把未选中的 logits 设为 −∞ 后做 Softmax；没有 Shazeer 2017 的噪声。Mixtral 的路由实现也有选中后归一化，但它的专家网络与本例不同。Switch 的 Top-1 保留原 Softmax 门值，因此不能用本例的门值冒充 Switch 的完整复现。Softmax 计算减去每行最大值，内部保留 float64，显示时才舍入。
+
+**隔离变量**：输入对照仅编辑所选 token 的第 0 维，其他输入和权重不变。E0 输出倍率属于专家计算后的干预，默认 1；改变它不会改变 Router 的 logits、概率、选中集合或门值，只改变经过 E0 的分支输出。该倍率不表示训练，也不增加模型参数计数。分散/集中预设用来观察负载，固定随机种子可重建相同教学权重。
+
+**参数与计算账本**：一个专家有 DF + FD = 12 个参数，路由器有 DE = 8 个。总参数为 DE + E·2DF = 56；每 token 激活参数为 DE + K·2DF，K = 1 时 20，K = 2 时 32。即使某专家当前没有任务，仍需保存它的权重；本例未实现权重卸载。只计矩阵乘加时，Router 为 TDE = 32 MAC，专家为 TK·2DF，分别为 48 或 96 MAC；不含 Softmax、Top-K、ReLU、门值乘法、合并和通信。一个 MAC 是一次乘加，不能直接标作完整 FLOPs 或实际耗时。负载 n_e 是派发到专家 e 的 token 分支数，Σ_e n_e = TK。
+
+**Dispatch / Combine**：先按专家分组计算，保留每条分支的 token 编号和门值；返回后按原 token 编号加权累加，输出行顺序仍为 t0、t1、t2、t3。独立基线逐 token 直接计算选中专家，用于比较分组执行是否保持数据对应；比较容差 1e-12。
+
+**设备与通信账本**：单设备时全部 token 与专家都在设备 0。双设备时，token 的起始设备为 t mod 2；E0、E1 在设备 0，E2、E3 在设备 1。专家权重不随任务移动；远端分支传一份 D 维输入，再返回一份 D 维输出。若远端分支数为 R，假设每元素 b = 4 字节，则派发 RDb、返回 RDb、合计 2RDb = 16R 字节。这是理论有效载荷计数，数值运算仍为 float64；不含 token 编号、门值、填充、协议、链路跳数、训练反向通信，也不合并发给同设备的重复输入。图中的箭头表示逻辑来源与目的地，不假设中央中转节点；All-to-All 可以批量完成这类交换，实际通信成本取决于具体实现和拓扑。改变放置只改变通信，不改变数学输出。
+
+**简化边界**：没有共享专家、容量限制、丢弃、重路由、辅助负载损失、反向传播与优化器更新，也没有 Attention、残差和归一化。本例只计算 MoE 子层，不把激活参数比例当作整个模型的计算量或加速比。原书第 30.2.3 节的语义专家命名仅可作为类比，本例用编号；第 30.2.5 节“Top-2 计算是 Top-1 两倍”仅对应固定专家结构下的专家部分，Router 的工作量并不翻倍。
+
+依据：[原书第 30 章](https://waylandz.com/llm-transformer-book/第30章-Mixture-of-Experts-稀疏激活的秘密/) 用于章节映射；[Shazeer et al., 2017](https://arxiv.org/html/1701.06538v1) §2–4；[Switch Transformers](https://arxiv.org/html/2101.03961v3) §2.1、§5.4；[GShard](https://arxiv.org/html/2006.16668v1) §3.1、§3.3.2；[Transformers 的 Mixtral 路由实现](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mixtral/modeling_mixtral.py)。2026-11-07 在线读取；说明和教学数值自行编写，没有复用论文或原书图文。

@@ -1,4 +1,4 @@
-export type TopicId = 'attention' | 'position' | 'inference' | 'kv';
+export type TopicId = 'attention' | 'position' | 'inference' | 'kv' | 'moe';
 
 /** Implemented experiments. Everything else stays in ROADMAP until it has a working page. */
 export const TOPICS: {
@@ -36,8 +36,15 @@ export const TOPICS: {
     title: 'KV 架构对照',
     subtitle: 'MHA、GQA、MQA 与 MLA 的缓存',
   },
+  {
+    id: 'moe',
+    number: '05',
+    href: '/moe',
+    title: 'MoE 与专家并行',
+    subtitle: '路由、加权合并与通信账本',
+  },
 ];
 
-export const ROADMAP = ['MoE 与专家并行', 'FlashAttention'];
+export const ROADMAP = ['FlashAttention'];
 
 export const BOOK_URL = 'https://waylandz.com/llm-transformer-book/';

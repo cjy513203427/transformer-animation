@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { steps } from './attention';
 import { inferenceMyths, inferenceSteps } from './inference';
 import { kvMyths, kvSteps } from './kv';
+import { moeMyths, moeSteps } from './moe';
 import { bookNotes, positionSteps } from './position';
 
 // Prose strings mark inline math as $...$. In an ordinary JS string "\sqrt" silently becomes
@@ -22,12 +23,15 @@ const proseStrings = [
   ...inferenceMyths,
   ...kvSteps.flatMap((s) => [s.explanation, s.takeaway, s.prompt, s.title]),
   ...kvMyths,
+  ...moeSteps.flatMap((s) => [s.explanation, s.takeaway, s.prompt, s.title]),
+  ...moeMyths,
 ];
 const displayFormulas = [
   ...steps.map((s) => s.formula),
   ...positionSteps.map((s) => s.formula),
   ...inferenceSteps.map((s) => s.formula),
   ...kvSteps.map((s) => s.formula),
+  ...moeSteps.map((s) => s.formula),
 ];
 
 describe('公式标记', () => {
