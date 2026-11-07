@@ -15,7 +15,7 @@ test('多头：切分步骤、头数变化、形状对照与预测验证', async
 
   const heads = page.getByRole('group', { name: '头数 num_heads', exact: true });
   await heads.getByRole('button', { name: '4', exact: true }).click();
-  await expect(page.locator('.mh-dkey')).toContainText('d_key = 4 ÷ 4 = 1');
+  await expect(page.locator('.mh-dkey strong')).toHaveText('1');
   await page.getByRole('button', { name: /每头 Attention$/ }).click();
   await expect(page.getByRole('table', { name: /^head \d 的打分与权重$/ })).toHaveCount(4);
   await heads.getByRole('button', { name: '2', exact: true }).click();
@@ -75,7 +75,7 @@ test('多头：播放、暂停、键盘、链接恢复与单头入口', async ({
     page.getByRole('region', { name: '多头注意力：切分与合并', exact: true }),
   ).toBeVisible();
   await expect(progress).toHaveText('3 / 6');
-  await expect(page.locator('.mh-dkey')).toContainText('d_key = 4 ÷ 1 = 4');
+  await expect(page.locator('.mh-dkey strong')).toHaveText('4');
   await expect(
     page.getByText('只有一个头时，所有维度都属于同一个头。', { exact: false }),
   ).toBeVisible();

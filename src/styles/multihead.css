@@ -12,7 +12,7 @@
 }
 .mh-segment > span {
   font-size: 12px;
-  color: #6d8496;
+  color: #63605a;
   margin-right: 4px;
 }
 .mh-segment button {
@@ -21,22 +21,22 @@
   font:
     13px Consolas,
     monospace;
-  color: #5f7486;
+  color: #5c5a53;
 }
 .mh-segment button[aria-pressed='true'] {
-  background: #eaf6f6;
-  border-color: #087e8b;
-  color: #087e8b;
+  background: #d5ddca;
+  border-color: #455e20;
+  color: #455e20;
   font-weight: 600;
 }
 .mh-dkey {
   font:
     12px Consolas,
     monospace;
-  color: #627a8c;
+  color: #5f5c55;
 }
 .mh-dkey strong {
-  color: #087e8b;
+  color: #455e20;
   font-size: 15px;
 }
 .mh-causal {
@@ -61,7 +61,7 @@
   font:
     13px 'Microsoft YaHei',
     sans-serif;
-  fill: #36566c;
+  fill: #4c483e;
 }
 .mh-label {
   font:
@@ -77,11 +77,11 @@
 }
 .mh-wire {
   fill: none;
-  stroke: #9db0bf;
+  stroke: #847f74;
   stroke-width: 1.5;
 }
 .mh-card {
-  fill: #ffffff;
+  fill: #e5e2dc;
   fill-opacity: 0.55;
   stroke-width: 1.6;
   stroke-dasharray: 5 4;
@@ -90,11 +90,11 @@
   font:
     20px Consolas,
     monospace;
-  fill: #8094a5;
+  fill: #6d6a63;
 }
 .mh-query-row {
   fill: none;
-  stroke: #24364b;
+  stroke: #35322b;
   stroke-width: 1.6;
   stroke-dasharray: 3 2;
   pointer-events: none;
@@ -113,7 +113,7 @@
   align-items: center;
   gap: 6px 14px;
   font-size: 10px;
-  color: #7c8fa0;
+  color: #65625b;
 }
 .mh-legend span {
   display: inline-block;
@@ -124,47 +124,47 @@
   border-radius: 2px;
 }
 .mh-legend-row {
-  border: 1.5px dashed #24364b;
+  border: 1.5px dashed #35322b;
 }
 .mh-legend-changed {
   border: 2px solid #c2410c;
 }
 .mh-legend-mask {
-  background: repeating-linear-gradient(135deg, #eef1f4, #eef1f4 3px, #d3dae2 3px, #d3dae2 5px);
+  background: repeating-linear-gradient(135deg, #d7d5d2, #d7d5d2 3px, #bcb9b3 3px, #bcb9b3 5px);
 }
 .mh-shapes {
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
-  background: #fff;
+  background: #e5e2dc;
   border-radius: 6px;
   overflow: hidden;
 }
 .mh-shapes th,
 .mh-shapes td {
   padding: 7px 8px;
-  border-bottom: 1px solid #e5ecf2;
+  border-bottom: 1px solid #d3d0c9;
   text-align: left;
   font-weight: 400;
 }
 .mh-shapes thead th {
-  color: #8a9cab;
+  color: #64625b;
   font-size: 10px;
 }
 .mh-shapes td {
   font-family: Consolas, monospace;
-  color: #5b7286;
+  color: #5c5952;
 }
 .mh-shapes tbody th {
-  color: #557085;
+  color: #5b5850;
   white-space: nowrap;
 }
 .mh-shapes tr.current {
-  background: #eaf6f6;
+  background: #d5ddca;
 }
 .mh-shapes tr.current th,
 .mh-shapes tr.current td {
-  color: #06606a;
+  color: #354818;
   font-weight: 600;
 }
 .mh-detail {
@@ -178,19 +178,19 @@
 .mh-table th,
 .mh-table td {
   padding: 9px 6px;
-  border-bottom: 1px solid #e3eaf1;
+  border-bottom: 1px solid #d1cec7;
   text-align: left;
   font-weight: 400;
 }
 .mh-table thead th {
   font-size: 10px;
-  color: #91a0af;
+  color: #64625c;
 }
 .mh-table td {
   font:
     12px Consolas,
     monospace;
-  color: #5d778b;
+  color: #5e5b53;
 }
 .mh-table td strong {
   color: #3558a4;
@@ -198,7 +198,7 @@
 }
 .mh-table tbody th {
   white-space: nowrap;
-  color: #4c667a;
+  color: #57534b;
 }
 .mh-mix td,
 .mh-split td {
@@ -206,9 +206,9 @@
 }
 .mh-total th,
 .mh-total td {
-  color: #06606a;
+  color: #354818;
   font-weight: 600;
-  border-top: 2px solid #c9dee2;
+  border-top: 2px solid #b3bea3;
 }
 .mh-head-tag {
   display: inline-block;
@@ -224,7 +224,7 @@
 .mh-check {
   margin-top: 14px;
   padding: 10px 12px;
-  background: #edf7f4;
+  background: #cdddd9;
   color: #2c6b5b;
   font-size: 12px;
   line-height: 1.8;
@@ -233,7 +233,7 @@
 .mh-weights {
   margin-top: 14px;
   font-size: 12px;
-  color: #6f8597;
+  color: #64615b;
 }
 .mh-weights summary {
   cursor: pointer;
@@ -247,7 +247,7 @@
 .mh-note {
   font-size: 12px;
   line-height: 1.9;
-  color: #7b8f9f;
+  color: #65625b;
   margin-top: 12px;
 }
 .mh-note code,
@@ -278,7 +278,7 @@
     11px Consolas,
     'Microsoft YaHei',
     monospace;
-  color: #7f93a4;
+  color: #65615b;
 }
 .mh-mini-row {
   display: grid;
@@ -289,7 +289,7 @@
   display: inline-block;
   width: 60px;
   height: 9px;
-  background: #edf2f5;
+  background: #d8d6d1;
   border-radius: 3px;
   overflow: hidden;
   margin-right: 8px;
@@ -309,7 +309,7 @@
 .mh-output-line {
   margin-top: 10px;
   font-size: 12px;
-  color: #4f6b7e;
+  color: #58554d;
 }
 .mh-concat {
   display: flex;
@@ -327,7 +327,7 @@
     14px Consolas,
     monospace;
   color: #1f5d4c;
-  background: #f4faf8;
+  background: #d4e1dd;
 }
 .mh-concat > span + span {
   border-left-width: 0;
@@ -338,7 +338,7 @@
 .mh-caution {
   margin-top: 16px;
   padding: 11px 13px;
-  background: #fbf6ee;
+  background: #e4dbcc;
   border-left: 3px solid #d9b77f;
   color: #7a5d31;
   font-size: 12px;
@@ -348,7 +348,7 @@
   margin: 21px 0;
 }
 .mh-experiment > p {
-  color: #6f8394;
+  color: #63605a;
   font-size: 12px;
   line-height: 1.9;
 }
@@ -366,13 +366,13 @@
 .mh-predictions button {
   padding: 8px 12px;
   font-size: 12px;
-  color: #5f7487;
+  color: #5d5a53;
   text-align: left;
 }
 .mh-predictions button[aria-pressed='true'] {
-  border-color: #087e8b;
-  background: #edf8f8;
-  color: #07717c;
+  border-color: #455e20;
+  background: #d8e0cc;
+  color: #3e541d;
 }
 .mh-experiment .prediction-feedback {
   font-size: 12px;

@@ -7,18 +7,18 @@ export const steps = [
     question: '同一份输入，为什么要变成三个矩阵？',
     explanation:
       '每个 token 的隐藏状态 X 分别乘上三个参数矩阵，得到 Query、Key 和 Value。Q 与 K 用来算分数，V 提供最后要汇总的内容。',
-    caution: 'Q/K/V 是本次前向的激活。W_Q/W_K/W_V 是固定参数；播放计算不会训练或更新参数。',
+    caution: 'Q/K/V 是本次前向的激活。$W_Q$/$W_K$/$W_V$ 是固定参数；播放计算不会训练或更新参数。',
   },
   {
     title: '打分',
     symbol: 'S',
     formula: 'S=\\frac{QK^\\top}{\\sqrt{d_k}}',
-    shape: '[3, 2] × [2, 3] → [3, 3]，d_k = 2',
+    shape: '[3, 2] × [2, 3] → [3, 3]，$d_k = 2$',
     question: '矩阵里的一个分数是怎样算出来的？',
     explanation:
-      '取 Q 的一行和 K 的一行，逐维相乘再相加，最后除以 √2。S 的行对应 Query，列对应 Key。点击一个格子核对这一次点积。',
+      '取 Q 的一行和 K 的一行，逐维相乘再相加，最后除以 $\\sqrt{2}$。S 的行对应 Query，列对应 Key。点击一个格子核对这一次点积。',
     caution:
-      '点积同时受方向和模长影响，不等于余弦相似度。缩放对照只是教学开关，标准公式使用 1/√d_k。',
+      '点积同时受方向和模长影响，不等于余弦相似度。缩放对照只是教学开关，标准公式使用 $1/\\sqrt{d_k}$。',
   },
   {
     title: '屏蔽',
@@ -36,7 +36,7 @@ export const steps = [
     title: '归一化',
     symbol: 'P',
     formula:
-      'P_{ij}=\\frac{e^{(S+M)_{ij}-m_i}}{\\sum_k e^{(S+M)_{ik}-m_i}},\\quad m_i=\\max_j(S+M)_{ij}',
+      '\\begin{gathered}P_{ij}=\\frac{\\exp\\big((S+M)_{ij}-m_i\\big)}{\\sum_k \\exp\\big((S+M)_{ik}-m_i\\big)}\\\\[0.5em] m_i=\\max_j\\,(S+M)_{ij}\\end{gathered}',
     shape: '[3, 3] → [3, 3]，沿 Key 轴逐行计算',
     question: '为什么改一个分数，整行权重都可能变化？',
     explanation:

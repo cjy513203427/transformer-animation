@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Rich, Tex } from '../../components/Tex';
 import { formatNumber as fmt } from '../../math/attention';
 import {
   addVectors,
@@ -117,9 +118,11 @@ export function BlindnessWidget({ state, onChange }: WidgetProps) {
           <input
             type="checkbox"
             checked={withPE}
+            aria-label="加入正弦位置编码（d_model = 4）"
             onChange={(e) => set({ withPE: e.target.checked })}
           />
-          加入正弦位置编码（d_model = 4）
+          加入正弦位置编码（
+          <Tex tex="d_{\mathrm{model}} = 4" />）
         </label>
       </div>
       <div className="pos-sentences">
@@ -167,7 +170,8 @@ export function BlindnessWidget({ state, onChange }: WidgetProps) {
           : causal
             ? '因果 Mask 规定了每个位置能看见谁；但两句里的“你”都看见 {我、爱、你} 这同一组向量，先后顺序依然分不出来。'
             : '没有位置编码时，“我”在两句话里的向量一模一样，看到的也是同一组向量（只是排列不同），所以结果完全相同。'}
-        为了只看位置的作用，这里令 W_Q = W_K = W_V = I，并且不加 Mask（除非选了因果对照）。
+        为了只看位置的作用，这里令 <Tex tex="W_Q = W_K = W_V = I" />
+        ，并且不加 Mask（除非选了因果对照）。
       </p>
     </div>
   );
@@ -225,7 +229,8 @@ function Clock({
         第 {index} 对 · d{2 * index}/d{2 * index + 1}
       </strong>
       <span>
-        ω = {omega < 0.001 ? omega.toExponential(2) : fmt(omega, 4)}，每步 {fmt(degrees(omega), 2)}°
+        <Tex tex="\omega =" /> {omega < 0.001 ? omega.toExponential(2) : fmt(omega, 4)}，每步{' '}
+        {fmt(degrees(omega), 2)}°
       </span>
       <code>
         ({fmt(pe[2 * index])}, {fmt(pe[2 * index + 1])})
@@ -306,7 +311,9 @@ export function SinusoidalWidget({
     <div className="pos-widget">
       <div className="pos-controls">
         <div className="pos-segment" role="group" aria-label="d_model">
-          <span>d_model</span>
+          <span>
+            <Tex tex="d_{\mathrm{model}}" />
+          </span>
           {D_MODEL_OPTIONS.map((option) => (
             <button
               key={option}
@@ -348,8 +355,8 @@ export function SinusoidalWidget({
         ))}
       </div>
       <p className="pos-caption">
-        每对 (sin, cos) 是单位圆上的一个点：pos 每加 1，第 i 对转 ω_i
-        弧度。指针转动只是为了看清方向；编码只在整数位置取值。
+        每对 <Tex tex="(\sin,\ \cos)" /> 是单位圆上的一个点：pos 每加 1，第 <Tex tex="i" /> 对转{' '}
+        <Tex tex="\omega_i" /> 弧度。指针转动只是为了看清方向；编码只在整数位置取值。
       </p>
       <Wave index={selectedPair} dModel={dModel} pos={pos} />
       <p className="pos-caption">
@@ -383,8 +390,9 @@ export function SinusoidalWidget({
       </div>
       {dModel === 64 ? (
         <p className="pos-book">
-          这正是书中第 5 章“LLM张老师”表格的设置：d_model = 64，表中只列前 4
-          维。书中把数值截断到两位小数
+          这正是书中第 5 章“LLM张老师”表格的设置：
+          <Tex tex="d_{\mathrm{model}} = 64" />
+          ，表中只列前 4 维。书中把数值截断到两位小数
           {pos <= 5 &&
             `，pos = ${pos} 那一行印作 ${sinusoidalPE(pos, 64)
               .slice(0, 4)
@@ -394,8 +402,10 @@ export function SinusoidalWidget({
         </p>
       ) : (
         <p className="pos-book">
-          d_model = {dModel} 时，第 1 对的频率是 {fmt(sinusoidalFrequency(1, dModel), 4)}，所以
-          d2、d3 与书中表格（d_model = 64）不同：频率由 2i / d_model 决定。
+          <Tex tex={`d_{\\mathrm{model}} = ${dModel}`} /> 时，第 1 对的频率是{' '}
+          {fmt(sinusoidalFrequency(1, dModel), 4)}，所以 d2、d3 与书中表格（
+          <Tex tex="d_{\mathrm{model}} = 64" />
+          ）不同：频率由 <Tex tex="2i / d_{\mathrm{model}}" /> 决定。
         </p>
       )}
     </div>
@@ -438,7 +448,10 @@ export function AdditionWidget({ state, onChange }: WidgetProps) {
             }
           />
         </label>
-        <span className="pos-chip">d_model = {dModel}，显示前 4 维</span>
+        <span className="pos-chip">
+          <Tex tex={`d_{\\mathrm{model}} = ${dModel}`} />
+          ，显示前 4 维
+        </span>
       </div>
       <div className="pos-add-layout">
         <div className="pos-table-wrap">
@@ -533,8 +546,9 @@ export function AdditionWidget({ state, onChange }: WidgetProps) {
       <details className="pos-details">
         <summary>展开：为什么书中说加法让内容和位置“混在一起”</summary>
         <p>
-          取 d_model = 4 的“我”（pos 0）与“你”（pos 2），令 W_Q = W_K = I，它们的点积拆成四项（第
-          25.2.2 节）：
+          取 <Tex tex="d_{\mathrm{model}} = 4" /> 的“我”（pos 0）与“你”（pos 2），令{' '}
+          <Tex tex="W_Q = W_K = I" />
+          ，它们的点积拆成四项（第 25.2.2 节）：
         </p>
         <table className="pos-table" aria-label="加法位置编码点积的四项">
           <tbody>
@@ -560,7 +574,10 @@ export function AdditionWidget({ state, onChange }: WidgetProps) {
             </tr>
           </tbody>
         </table>
-        <p>四项里有三项含位置；真实模型中 W_Q、W_K 不是单位矩阵，各项还会被投影混合。</p>
+        <p>
+          四项里有三项含位置；真实模型中 <Tex tex="W_Q" />、<Tex tex="W_K" />{' '}
+          不是单位矩阵，各项还会被投影混合。
+        </p>
       </details>
     </div>
   );
@@ -626,7 +643,7 @@ function RotationPlane({
       </svg>
       <figcaption>
         <strong>
-          第 {index} 对 θ{index} = {fmt(theta, 4)}
+          第 {index} 对 <Tex tex={`\\theta_{${index}} =`} /> {fmt(theta, 4)}
         </strong>
         <span>
           q 转 {fmt(degrees(m * theta), 1)}°，k 转 {fmt(degrees(n * theta), 1)}°
@@ -685,8 +702,9 @@ export function RopeWidget({
         ))}
       </div>
       <p className="pos-caption">
-        虚线是旋转前的内容向量（固定不变），实线是旋转后。d = 8 分成 4 对，θ 依次为
-        1、0.1、0.01、0.001：第 0 对每个位置转 57.3°，第 3 对只转 0.057°。
+        虚线是旋转前的内容向量（固定不变），实线是旋转后。
+        <Tex tex="d = 8" /> 分成 4 对， <Tex tex="\theta" /> 依次为 1、0.1、0.01、0.001：第 0
+        对每个位置转 57.3°，第 3 对只转 0.057°。
       </p>
       <div className="pos-table-wrap">
         <table className="pos-table" aria-label="RoPE 旋转前后的 q 与 k">
@@ -722,8 +740,9 @@ export function RopeWidget({
         </table>
       </div>
       <p className="pos-verdict same" role="status">
-        q′·k′ = 四对之和 = <strong>{fmt(score)}</strong>，除以 √8 后 = {fmt(score / Math.sqrt(8))}{' '}
-        进入 Softmax。旋转前后长度不变；V 不旋转。
+        <Tex tex="q'\cdot k'" /> = 四对之和 = <strong>{fmt(score)}</strong>，除以{' '}
+        <Tex tex="\sqrt{8}" /> 后 = {fmt(score / Math.sqrt(8))} 进入 Softmax。旋转前后长度不变；V
+        不旋转。
       </p>
     </div>
   );
@@ -895,7 +914,8 @@ export function RelativeWidget({
         落在同一个点上；但曲线上下起伏，距离 5 的分数就比距离 0 更高。
       </p>
       <p className="pos-note">
-        成立条件：q、k 的内容固定，m、n 用同一套 θ 旋转。真实模型里改变 token
+        成立条件：q、k 的内容固定，
+        <Tex tex="m" />、<Tex tex="n" /> 用同一套 <Tex tex="\theta" /> 旋转。真实模型里改变 token
         也会改变内容向量，分数随之变化。
       </p>
     </div>
@@ -1106,7 +1126,7 @@ export function SummaryWidget({ onJump }: { onJump: (step: number) => void }) {
       'X → Q、K、V 全部',
       '带位置',
       '绝对位置（训练得到）',
-      'max_len × d_model',
+      '$\\text{max\\_len}\\times d_{\\mathrm{model}}$',
       null,
     ],
     ['RoPE（第 25 章）', '投影后，旋转 Q、K', '只有 Q、K', '不带位置', '分数只看相对距离', '无', 3],
@@ -1150,7 +1170,9 @@ export function SummaryWidget({ onJump }: { onJump: (step: number) => void }) {
                 <td>{what}</td>
                 <td>{value}</td>
                 <td>{kind}</td>
-                <td>{params}</td>
+                <td>
+                  <Rich text={params} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -1161,7 +1183,10 @@ export function SummaryWidget({ onJump }: { onJump: (step: number) => void }) {
           位置编码不是把 1、2、3 直接加上去：书中 5.2 节的整数方案数值会越加越大，也没有可学的规律。
         </li>
         <li>RoPE 不加到 X 上，也不旋转 V；ALiBi 不改 Q、K、V，只改分数。</li>
-        <li>RoPE 的“相对位置”成立需要固定内容、同一套 θ；单个分数并不随距离单调下降。</li>
+        <li>
+          RoPE 的“相对位置”成立需要固定内容、同一套 <Tex tex="\theta" />
+          ；单个分数并不随距离单调下降。
+        </li>
         <li>
           能计算更远的位置，不等于模型能可靠处理任意长的上下文（外推还取决于训练长度与方法）。
         </li>

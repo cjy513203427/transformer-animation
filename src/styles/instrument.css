@@ -1,0 +1,373 @@
+/*
+ * Instrument-panel skin: warm-gray chassis, raised keys with indicator lights, LCD readouts,
+ * and printed label plates for formulas and notes.
+ * Loaded after every other stylesheet so it can restyle shared selectors; the palette itself
+ * (warm grays, LCD green, role colours) lives in the other files and in the tokens below.
+ */
+:root {
+  --chassis: #cfcbc0;
+  --chassis-dark: #bdb9ad;
+  --face: #e4e0d6;
+  --face-hi: #f1eee5;
+  --edge: #8f8b7e;
+  --edge-soft: #b0ac9f;
+  --silk: #3f3d38;
+  --muted: #47453f;
+  --lcd: #b8c496;
+  --lcd-ink: #1f2a14;
+  --led: #ff7a3d;
+  --key-top: #ebe7dc;
+  --key-bottom: #d1cdc1;
+  --orange: #d9531a;
+  --orange-deep: #9a3a12;
+  --mono: 'IBM Plex Mono', Consolas, monospace;
+  background: var(--chassis);
+  color: #2a2a27;
+}
+/*
+ * Everything below is nested in :root so each rule is one class-level more specific than the
+ * component stylesheets. Vite may load this file before or after them; the skin must not depend on it.
+ */
+:root {
+  body,
+  .main-shell {
+    background: var(--chassis);
+  }
+  ::selection {
+    background: #f0c9a8;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
+  }
+
+  /* ---------- left control strip ---------- */
+  .sidebar {
+    background: var(--chassis-dark);
+    border-right: 2px solid var(--edge);
+    box-shadow: inset -1px 0 0 #d9d5ca;
+  }
+  .brand {
+    background: #2a2a27;
+    color: #e8e4d8;
+    padding: 9px 12px;
+    border-radius: 3px;
+  }
+  .brand small {
+    display: none;
+  }
+  .brand-mark {
+    font-size: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--orange) 0 5px,
+      #2a2a27 5.5px 8px,
+      #e8e4d8 8.5px 10px,
+      #2a2a27 10.5px
+    );
+  }
+  .nav-label {
+    font: 500 10px var(--mono);
+    letter-spacing: 0.14em;
+    color: var(--silk);
+    margin: 30px 2px 10px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--edge);
+  }
+  .nav-link,
+  .nav-active {
+    background: linear-gradient(var(--key-top), #d3cfc3);
+    border: 1px solid var(--edge);
+    border-radius: 4px;
+    box-shadow:
+      0 2px 0 var(--edge),
+      inset 0 1px 0 #fff;
+    color: #2a2a27;
+  }
+  .nav-link:hover {
+    background: linear-gradient(#f1eee4, #d8d4c8);
+    border-color: var(--edge);
+  }
+  .nav-active {
+    background: linear-gradient(#c7c3b7, #d6d2c6);
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.25);
+    transform: translateY(2px);
+    color: #2a2a27;
+  }
+  .nav-link small,
+  .nav-active small {
+    color: var(--silk);
+  }
+  .nav-number,
+  .nav-active .nav-number {
+    color: var(--silk);
+  }
+  .nav-dot,
+  .live-dot,
+  .local-indicator i {
+    width: 8px;
+    height: 8px;
+    background: var(--led);
+    box-shadow: 0 0 6px var(--led);
+  }
+  .roadmap-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #47453f;
+  }
+  .page-heading p,
+  .scene-bar,
+  .scene-bar .section-kicker,
+  main > footer,
+  .main-content > footer {
+    color: #3f3d38;
+  }
+  .sidebar-note {
+    margin: auto 0 16px;
+    padding: 10px 12px;
+    background: var(--face-hi);
+    border: 1px solid var(--edge);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 0 #fff;
+    font-size: 11px;
+  }
+  .sidebar-note strong {
+    font: 500 10px var(--mono);
+    letter-spacing: 0.14em;
+    color: var(--silk);
+  }
+  .sidebar-note ol {
+    margin: 6px 0 0;
+    padding-left: 1.4em;
+    color: #3e3c36;
+    line-height: 1.8;
+  }
+  .book-link {
+    border-top: 1px solid var(--edge);
+    color: var(--silk);
+  }
+
+  /* ---------- top status strip ---------- */
+  .topbar {
+    background: #2a2a27;
+    border-bottom: 0;
+    font-family: var(--mono);
+    color: #c9d3a8;
+  }
+  .breadcrumb-root,
+  .local-indicator {
+    color: #aab58a;
+  }
+  .slash {
+    color: #6b7358;
+  }
+
+  /* ---------- headings ---------- */
+  .eyebrow,
+  .lesson-eyebrow,
+  .section-kicker {
+    font: 500 11px var(--mono);
+    letter-spacing: 0.1em;
+    color: var(--silk);
+  }
+  h1 {
+    letter-spacing: -0.5px;
+    text-shadow: 0 1px 0 #f2efe6;
+  }
+
+  /* ---------- panels ---------- */
+  .lab-panel,
+  .lesson-panel,
+  .architecture-panel,
+  .experiment-card,
+  .settings-card,
+  .details-panel,
+  .recall-card {
+    background: var(--face);
+    border: 1px solid var(--edge);
+    border-radius: 6px;
+    box-shadow:
+      inset 0 1px 0 #f4f1e8,
+      0 2px 0 #9b978a;
+  }
+  .lab-toolbar,
+  .pipeline,
+  .explanation-pane,
+  .lesson-reading {
+    background: var(--face-hi);
+  }
+  .lab-toolbar {
+    border-bottom-color: var(--edge-soft);
+  }
+  .calculation-pane {
+    background-image: none;
+  }
+
+  /* ---------- keys ---------- */
+  .button,
+  .scene-buttons button,
+  .icon-button,
+  .play-button,
+  .prediction-options button,
+  .query-picker button,
+  .explanation-heading button,
+  .notice button,
+  .lesson-tokens button,
+  .lesson-reading-top button,
+  .pos-segment button,
+  .mh-segment button,
+  .mh-predictions button,
+  .numbers-context button {
+    background: linear-gradient(var(--key-top), var(--key-bottom));
+    border: 1px solid var(--edge);
+    border-radius: 4px;
+    box-shadow:
+      0 2px 0 var(--edge),
+      inset 0 1px 0 #fff;
+    color: #2a2a27;
+  }
+  .button:hover:not(:disabled),
+  .scene-buttons button:hover:not(:disabled),
+  .icon-button:hover:not(:disabled),
+  .play-button:hover:not(:disabled),
+  .prediction-options button:hover:not(:disabled),
+  .query-picker button:hover:not(:disabled),
+  .lesson-tokens button:hover:not(:disabled),
+  .pos-segment button:hover:not(:disabled),
+  .mh-segment button:hover:not(:disabled),
+  .mh-predictions button:hover:not(:disabled) {
+    background: linear-gradient(#f1eee4, #d8d4c8);
+    border-color: #7f7b6e;
+  }
+  .button:active:not(:disabled),
+  .scene-buttons button:active:not(:disabled),
+  .icon-button:active:not(:disabled),
+  .play-button:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.25);
+  }
+  .button.primary {
+    background: linear-gradient(#e8662a, #c64714);
+    border-color: var(--orange-deep);
+    box-shadow:
+      0 2px 0 var(--orange-deep),
+      inset 0 1px 0 #f7a47c;
+    color: #fff;
+  }
+  .button.primary:hover:not(:disabled) {
+    background: linear-gradient(#ee7338, #cf4f1b);
+    border-color: var(--orange-deep);
+  }
+  button[aria-pressed='true']:not(.matrix-cell),
+  .scene-buttons button[aria-current='true'] {
+    background: linear-gradient(#c7c3b7, #d6d2c6);
+    border-color: #7f7b6e;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.25);
+    transform: translateY(2px);
+    color: #2a2a27;
+  }
+  .lesson-steps button[aria-current='step'] {
+    background: var(--face-hi);
+    color: #2a2a27;
+    box-shadow: inset 0 -3px var(--orange);
+  }
+  .pipeline-step {
+    background: linear-gradient(var(--key-top), var(--key-bottom));
+    border-color: var(--edge);
+    box-shadow:
+      0 2px 0 var(--edge),
+      inset 0 1px 0 #fff;
+  }
+  .pipeline-step::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7b786e;
+  }
+  .pipeline-step.current {
+    background: linear-gradient(#c7c3b7, #d6d2c6);
+    border-color: #7f7b6e;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.25);
+  }
+  .pipeline-step.current::before {
+    background: var(--led);
+    box-shadow: 0 0 6px var(--led);
+  }
+  .pipeline-step.passed {
+    background: linear-gradient(var(--key-top), var(--key-bottom));
+  }
+  .pipeline-step.current strong,
+  .pipeline-step.current .step-top {
+    color: #2a2a27;
+  }
+
+  /* ---------- LCD readouts ---------- */
+  .matrix-cell[style] {
+    background: color-mix(in srgb, #3f551d calc(8% + var(--intensity) * 52%), var(--lcd));
+    color: #101808;
+    border-radius: 2px;
+  }
+  .matrix-cell.masked-cell {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--lcd),
+      var(--lcd) 4px,
+      rgba(31, 42, 20, 0.3) 4px,
+      rgba(31, 42, 20, 0.3) 5px
+    );
+    color: rgba(31, 42, 20, 0.7);
+  }
+  .large-value,
+  .output-values strong {
+    font-family: var(--mono);
+  }
+
+  /* ---------- printed plates: formulas and notes ---------- */
+  .formula {
+    background: var(--face-hi);
+    border: 1px solid var(--edge);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 0 #fff;
+    color: #1f1f1c;
+  }
+  .formula {
+    font-size: 14px;
+    padding: 2px 14px;
+  }
+  .formula .katex-display {
+    margin: 0.6em 0;
+  }
+  .tex {
+    white-space: nowrap;
+  }
+  .tex .katex {
+    font-size: 1.08em;
+  }
+  .numbers-context,
+  .operation-note,
+  .intervention-note,
+  .lesson-takeaway,
+  .pos-book,
+  .mh-caution,
+  .architecture-hint,
+  .remember,
+  .notice {
+    border-left: 0;
+    background: var(--face-hi);
+    border: 1px solid var(--edge);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 0 #fff;
+    color: #3e3c36;
+  }
+}

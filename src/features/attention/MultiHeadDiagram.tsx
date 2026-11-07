@@ -1,7 +1,8 @@
+import { SvgRich } from '../../components/Tex';
 import { formatNumber as fmt, type Matrix } from '../../math/attention';
 import { MH_WEIGHTS, MH_X, type MultiHeadResult } from '../../math/multihead';
 
-export const HEAD_COLORS = ['#1f8a70', '#c0507a', '#5262c4', '#a8741f'];
+export const HEAD_COLORS = ['#4d622f', '#c0507a', '#5262c4', '#a8741f'];
 const CW = 34;
 const CH = 22;
 const WIDTH = 480;
@@ -10,22 +11,22 @@ const ROW_Y = [62, 200, 338];
 
 type Tone = 'neutral' | 'query' | 'key' | 'value' | 'probability' | 'output' | 'weight';
 const TINTS: Record<Tone, string> = {
-  neutral: '#eef2f6',
-  query: '#e8eefc',
-  key: '#fbf1e5',
-  value: '#f3edf9',
-  probability: '#e6f4f4',
-  output: '#e9f5f1',
-  weight: '#f4f6f9',
+  neutral: '#d9d7d2',
+  query: '#dbd8d0',
+  key: '#e3d5c3',
+  value: '#d7cde1',
+  probability: '#d2dac6',
+  output: '#cadad5',
+  weight: '#dddbd7',
 };
 const INKS: Record<Tone, string> = {
-  neutral: '#43586c',
+  neutral: '#504d46',
   query: '#3558a4',
   key: '#8d4b13',
   value: '#6f4a92',
-  probability: '#06606a',
+  probability: '#354818',
   output: '#1f5d4c',
-  weight: '#4f6375',
+  weight: '#55524c',
 };
 
 interface Placement {
@@ -133,9 +134,7 @@ function Grid({
       )}
       {data.map((row, i) =>
         row.map((value, j) => {
-          const fill = heat
-            ? `rgba(8, 126, 139, ${0.06 + Math.max(0, value) * 0.62})`
-            : TINTS[tone];
+          const fill = heat ? `rgba(69, 94, 32, ${0.06 + Math.max(0, value) * 0.62})` : TINTS[tone];
           return (
             <g key={`${i}-${j}`}>
               <rect
@@ -154,7 +153,7 @@ function Grid({
                   x={j * CW + CW / 2}
                   y={i * CH + 15}
                   textAnchor="middle"
-                  fill={heat && value > 0.55 ? '#ffffff' : INKS[tone]}
+                  fill={heat && value > 0.55 ? '#e5e2dc' : INKS[tone]}
                 >
                   {fmt(value, 2)}
                 </text>
@@ -191,7 +190,7 @@ function Label({
   x,
   y,
   children,
-  tone = '#5b7083',
+  tone = '#5b5852',
   anchor = 'start',
 }: {
   x: number;
@@ -200,6 +199,19 @@ function Label({
   tone?: string;
   anchor?: 'start' | 'middle' | 'end';
 }) {
+  if (children.includes('$')) {
+    return (
+      <SvgRich
+        x={x}
+        y={y}
+        text={children}
+        anchor={anchor}
+        size={11}
+        width={340}
+        style={{ color: tone }}
+      />
+    );
+  }
   return (
     <text className="mh-label" x={x} y={y} fill={tone} textAnchor={anchor}>
       {children}
@@ -244,7 +256,7 @@ export function MultiHeadDiagram({
     `矩阵变形：→ ${shape([numHeads, 3, dKey])}`,
     `每个头独立计算：P_h ${shape([3, 3])}，A_h ${shape([3, dKey])}`,
     `Concatenate：→ A ${shape([3, 4])}`,
-    `输出投影：A × Wo → Output ${shape([3, 4])}`,
+    `输出投影：A × W_O → Output ${shape([3, 4])}`,
   ];
   return (
     <svg
@@ -261,8 +273,8 @@ export function MultiHeadDiagram({
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(45)"
         >
-          <rect width="5" height="5" fill="#eef1f4" />
-          <line x1="0" y1="0" x2="0" y2="5" stroke="#d3dae2" strokeWidth="2" />
+          <rect width="5" height="5" fill="#d7d5d2" />
+          <line x1="0" y1="0" x2="0" y2="5" stroke="#bcb9b3" strokeWidth="2" />
         </pattern>
         <marker
           id="mh-arrow"
@@ -273,7 +285,7 @@ export function MultiHeadDiagram({
           markerHeight="6"
           orient="auto"
         >
-          <path d="M0 0 L10 5 L0 10Z" fill="#8ea2b3" />
+          <path d="M0 0 L10 5 L0 10Z" fill="#79756c" />
         </marker>
       </defs>
       <text className="mh-title" x={WIDTH / 2} y="18" textAnchor="middle">
@@ -292,8 +304,8 @@ export function MultiHeadDiagram({
               className="mh-wire"
               markerEnd="url(#mh-arrow)"
             />
-            <Label x={300} y={y + 24} anchor="end" tone="#6a7f91">
-              {['× Wq', '× Wk', '× Wv'][i]}
+            <Label x={300} y={y + 24} anchor="end" tone="#615f58">
+              {['$\\times W_Q$', '$\\times W_K$', '$\\times W_V$'][i]}
             </Label>
             <Label x={320} y={y - 12} tone={['#3558a4', '#8d4b13', '#6f4a92'][i]}>
               {['Q [3, 4]', 'K [3, 4]', 'V [3, 4]'][i]}
@@ -341,7 +353,7 @@ export function MultiHeadDiagram({
         {step === 2 &&
           ['Q', 'K', 'V'].map((name, i) => (
             <Label key={name} x={14} y={ROW_Y[i] + 37} tone={['#3558a4', '#8d4b13', '#6f4a92'][i]}>
-              {`${name}_h`}
+              {`$${name}_h$`}
             </Label>
           ))}
       </g>
@@ -352,7 +364,7 @@ export function MultiHeadDiagram({
             return (
               <g key={h}>
                 <Label x={20} y={y - 11} tone={HEAD_COLORS[h]}>
-                  {`head ${h + 1} · P${h + 1} = softmax(Q${h + 1}K${h + 1}ᵀ/√${dKey})`}
+                  {`head ${h + 1} · $P_{${h + 1}}=\\operatorname{softmax}\\!\\left(Q_{${h + 1}}K_{${h + 1}}^{\\top}/\\sqrt{${dKey}}\\right)$`}
                 </Label>
                 <text className="mh-operator" x={140} y={y + 38} textAnchor="middle">
                   ×
@@ -360,20 +372,22 @@ export function MultiHeadDiagram({
                 <text className="mh-operator" x={160 + slice + 25} y={y + 38} textAnchor="middle">
                   =
                 </text>
-                <Label x={160} y={y + 3 * CH + 14} tone="#6f4a92">{`V${h + 1}`}</Label>
-                <Label x={160 + slice + 50} y={y + 3 * CH + 14} tone="#1f5d4c">{`A${h + 1}`}</Label>
+                <Label x={160} y={y + 3 * CH + 14} tone="#6f4a92">{`$V_{${h + 1}}$`}</Label>
+                <Label x={160 + slice + 50} y={y + 3 * CH + 14} tone="#1f5d4c">
+                  {`$A_{${h + 1}}$`}
+                </Label>
               </g>
             );
           })}
       </g>
       <g className="mh-overlay" style={{ opacity: step === 4 ? 1 : 0 }} aria-hidden="true">
         <Label x={WIDTH / 2} y={ROW_Y[1] - 14} anchor="middle" tone="#1f5d4c">
-          {`A = Concat(${heads.map((h) => `A${h + 1}`).join(', ')})  [3, 4]`}
+          {`$A=\\operatorname{Concat}(${heads.map((h) => `A_{${h + 1}}`).join(',\\,')})$  [3, 4]`}
         </Label>
         <Label x={WIDTH / 2} y={ROW_Y[1] + 3 * CH + 30} anchor="middle">
           {`[${numHeads}, 3, ${dKey}] → 转置 [3, ${numHeads}, ${dKey}] → view [3, 4]`}
         </Label>
-        <Label x={WIDTH / 2} y={ROW_Y[1] + 3 * CH + 52} anchor="middle" tone="#8496a6">
+        <Label x={WIDTH / 2} y={ROW_Y[1] + 3 * CH + 52} anchor="middle" tone="#6f6c65">
           拼接只是并排摆放，头与头之间还没有交流
         </Label>
       </g>
@@ -382,16 +396,16 @@ export function MultiHeadDiagram({
           A [3, 4]
         </Label>
         <Label x={172} y={161}>
-          × Wo [4, 4]
+          {'$\\times W_O$ [4, 4]'}
         </Label>
         <Label x={330} y={172}>
           = Output [3, 4]
         </Label>
-        <Label x={WIDTH / 2} y={310} anchor="middle" tone="#8496a6">
-          Wo 的每一列都读取 A 的全部列：每个输出数都混合了所有头
+        <Label x={WIDTH / 2} y={310} anchor="middle" tone="#6f6c65">
+          {'$W_O$ 的每一列都读取 A 的全部列：每个输出数都混合了所有头'}
         </Label>
-        <Label x={WIDTH / 2} y={332} anchor="middle" tone="#8496a6">
-          Wo 左侧色条：这几行只与对应头的 A 列相乘
+        <Label x={WIDTH / 2} y={332} anchor="middle" tone="#6f6c65">
+          {'$W_O$ 左侧色条：这几行只与对应头的 A 列相乘'}
         </Label>
       </g>
 

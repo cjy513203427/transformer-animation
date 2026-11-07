@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { SvgTex, Tex } from '../../components/Tex';
 import '../../styles/attention-diagram.css';
 
 export function AttentionDiagram({
@@ -23,6 +24,7 @@ export function AttentionDiagram({
     sublabel: string,
     phase: number,
     tone = 'neutral',
+    tex?: string,
   ) {
     return (
       <g
@@ -40,9 +42,13 @@ export function AttentionDiagram({
         }}
       >
         <rect x={x - width / 2} y={y - 23} width={width} height="46" rx="7" />
-        <text x={x} y={y - 3} textAnchor="middle">
-          {label}
-        </text>
+        {tex ? (
+          <SvgTex x={x} y={y - 3} tex={tex} size={15} width={width} />
+        ) : (
+          <text x={x} y={y - 3} textAnchor="middle">
+            {label}
+          </text>
+        )}
         <text className="diagram-node-sub" x={x} y={y + 14} textAnchor="middle">
           {sublabel}
         </text>
@@ -74,7 +80,7 @@ export function AttentionDiagram({
             >
               <path
                 d="M0 0 L10 5 L0 10Z"
-                fill={['#9aaebb', '#4267c7', '#a85a17', '#865dad', '#087e8b'][i]}
+                fill={['#817c73', '#4267c7', '#a85a17', '#865dad', '#455e20'][i]}
               />
             </marker>
           ))}
@@ -117,13 +123,22 @@ export function AttentionDiagram({
           留到最后，按比例取内容
         </text>
         {node(270, 611, 194, 'X', '各位置当前的表示', 0)}
-        {node(85, 530, 119, '× W_Q', '生成 Query', 0, 'query')}
-        {node(245, 530, 119, '× W_K', '生成 Key', 0, 'key')}
-        {node(425, 530, 119, '× W_V', '生成 Value', 0, 'value')}
+        {node(85, 530, 119, '× W_Q', '生成 Query', 0, 'query', '\\times W_Q')}
+        {node(245, 530, 119, '× W_K', '生成 Key', 0, 'key', '\\times W_K')}
+        {node(425, 530, 119, '× W_V', '生成 Value', 0, 'value', '\\times W_V')}
         {node(85, 460, 100, 'Q', '要找什么', 0, 'query')}
         {node(245, 460, 100, 'K', '用什么来匹配', 0, 'key')}
         {node(425, 460, 100, 'V', '实际取出的内容', 0, 'value')}
-        {node(185, 385, 198, 'MatMul · QKᵀ', '逐对打分', 1)}
+        {node(
+          185,
+          385,
+          198,
+          'MatMul · QKᵀ',
+          '逐对打分',
+          1,
+          'neutral',
+          '\\mathrm{MatMul}\\cdot QK^{\\top}',
+        )}
         {node(
           185,
           322,
@@ -131,6 +146,8 @@ export function AttentionDiagram({
           scaled ? 'Scale · ÷ √d_k' : 'Scale · 对照关闭',
           scaled ? '缩放分数' : '保留未缩放分数',
           1,
+          'neutral',
+          scaled ? '\\mathrm{Scale}\\cdot\\div\\sqrt{d_k}' : undefined,
         )}
         {node(
           185,
@@ -141,15 +158,28 @@ export function AttentionDiagram({
           2,
         )}
         {node(185, 202, 198, 'Softmax → P', '分配取用比例', 3, 'probability')}
-        {node(185, 130, 198, 'MatMul · P × V', '按比例混合内容', 4, 'probability')}
+        {node(
+          185,
+          130,
+          198,
+          'MatMul · P × V',
+          '按比例混合内容',
+          4,
+          'probability',
+          '\\mathrm{MatMul}\\cdot P\\times V',
+        )}
         {node(185, 65, 198, '单头输出 O', '新的上下文向量', 4, 'probability')}
       </svg>
       <div className="diagram-multihead">
         <strong>放回完整 MHA</strong>
         <p>
-          投影 → 拆成多个头 → <em>每头执行上图</em> → Concat 拼接 → W_O 输出投影 → 返回残差连接
+          投影 → 拆成多个头 → <em>每头执行上图</em> → Concat 拼接 → <Tex tex="W_O" /> 输出投影 →
+          返回残差连接
         </p>
-        <small>上图只演算一个头；拆头、拼接、Wo 的数值演算在“多头注意力”。</small>
+        <small>
+          上图只演算一个头；拆头、拼接、
+          <Tex tex="W_O" /> 的数值演算在“多头注意力”。
+        </small>
         {onOpenHeads && (
           <button className="diagram-heads-link" onClick={onOpenHeads}>
             看多头怎样切分与合并 →

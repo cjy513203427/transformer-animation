@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Formula } from '../../components/Formula';
+import { Rich, Tex } from '../../components/Tex';
 import { steps } from '../../content/attention';
 import { explainRow, formatNumber as fmt, type computeExperiment } from '../../math/attention';
 import type { ExperimentState } from '../../state/experiment';
@@ -58,7 +59,7 @@ export function AttentionLesson({
   const hide = !state.view.explanations;
   const explanations = [
     `先看“${words[query]}”这一行。它当前的表示是 X[${query}] = ${vector(state.input.x[query])}。同一行分别乘三个参数矩阵，得到三条不同用途的向量；其他位置也做同样的事。`,
-    `现在把“${words[query]}”作为读取信息的一方。拿它的 Q，分别和“我”“喜欢”“学习”的 K 做点积。每次把对应维度相乘，再相加。${state.config.scaled ? '最后除以 √2，得到缩放后的分数 S。' : '当前关闭缩放，直接用点积作分数；这是对照设置。'}`,
+    `现在把“${words[query]}”作为读取信息的一方。拿它的 Q，分别和“我”“喜欢”“学习”的 K 做点积。每次把对应维度相乘，再相加。${state.config.scaled ? '最后除以 $\\sqrt{2}$，得到缩放后的分数 S。' : '当前关闭缩放，直接用点积作分数；这是对照设置。'}`,
     state.config.causal
       ? `我们正在算 t${query}“${words[query]}”。它可以看${visible.map((w) => `“${w}”`).join('、')}。${masked.length ? `${masked.map((w) => `“${w}”`).join('、')}在它后面，所以把分数改为 −∞。` : '它已经是最后一个位置，因此这一行没有未来 token 要屏蔽。'}`
       : '当前是双向读取对照。三个位置都可见，不屏蔽未来 token；这不符合生成式 Decoder 的因果约束。',
@@ -125,7 +126,9 @@ export function AttentionLesson({
               <p>哪条向量进来？做了什么？产生什么？V 有没有经过这一步？</p>
             </div>
           ) : (
-            <p className="lesson-explanation">{explanations[state.step]}</p>
+            <p className="lesson-explanation">
+              <Rich text={explanations[state.step]} />
+            </p>
           )}
 
           {state.step === 0 && (
@@ -169,7 +172,15 @@ export function AttentionLesson({
                   <tr>
                     <th>与谁匹配</th>
                     <th>对应相乘再相加</th>
-                    <th>{state.config.scaled ? '÷ √2 后' : '未缩放 S'}</th>
+                    <th>
+                      {state.config.scaled ? (
+                        <>
+                          ÷ <Tex tex="\sqrt{2}" /> 后
+                        </>
+                      ) : (
+                        '未缩放 S'
+                      )}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -291,8 +302,10 @@ export function AttentionLesson({
                 <small>一个头的输出，不是词表概率</small>
               </div>
               <p>
-                完整 MHA 还要拼接各头输出，再乘 Wo，才能回到总图中的残差加法。这里的 O 对应书中第
-                11–12 章 A 的一个头（一片 [T, d_key]）。
+                完整 MHA 还要拼接各头输出，再乘 <Tex tex="W_O" />
+                ，才能回到总图中的残差加法。这里的 O 对应书中第 11–12 章 A 的一个头（一片{' '}
+                <Tex tex="[T,\,d_{\mathrm{key}}]" />
+                ）。
               </p>
             </div>
           )}
@@ -318,8 +331,12 @@ export function AttentionLesson({
                 state.step === 1 && !state.config.scaled ? 'S=QK^\\top' : steps[state.step].formula
               }
             />
-            <p>{steps[state.step].shape}</p>
-            <p>{steps[state.step].caution}</p>
+            <p>
+              <Rich text={steps[state.step].shape} />
+            </p>
+            <p>
+              <Rich text={steps[state.step].caution} />
+            </p>
           </details>
           <a
             className="lesson-source"

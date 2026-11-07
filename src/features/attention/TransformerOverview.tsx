@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { Rich } from '../../components/Tex';
 import { ARCHITECTURE_NODES, type ArchitectureNode } from '../../state/lesson';
 import '../../styles/architecture.css';
 
@@ -60,7 +61,7 @@ const content: Record<ArchitectureNode, NodeContent> = {
     english: 'Masked Multi-Head Attention',
     input: '每个位置当前的表示 X。',
     action:
-      '每个位置先用 Q 与可见位置的 K 打分，得到取用比例；再按比例汇总 V。多个头各算各的，拼接后通过 W_O。',
+      '每个位置先用 Q 与可见位置的 K 打分，得到取用比例；再按比例汇总 V。多个头各算各的，拼接后通过 $W_O$。',
     output: '各位置得到一份上下文信息，交给第一个残差加法。',
     hint: '本页接下来会放大一个头。这里得到的是向量，还没有预测出下一个词。',
     chapter: '第 9–12 章',
@@ -71,7 +72,7 @@ const content: Record<ArchitectureNode, NodeContent> = {
     input: 'Attention 的输入 X，以及完整 MHA 的输出。',
     action: '绕行箭头保留子层输入，与 MHA 输出逐元素相加。不是将两条向量拼长。',
     output: '相加后的表示交给 LayerNorm。',
-    hint: '这里必须先完成多头拼接与 W_O，不能把单头 O 直接当作完整 MHA 输出。',
+    hint: '这里必须先完成多头拼接与 $W_O$，不能把单头 O 直接当作完整 MHA 输出。',
     chapter: '第 13 章',
   },
   'attention-norm': {
@@ -118,7 +119,7 @@ const content: Record<ArchitectureNode, NodeContent> = {
     action:
       '映射到词表维度，为每个候选 token 产生一个 logit。生成下一个 token 时使用最后位置的 logits。',
     output: '词表分数交给末端 Softmax。',
-    hint: '这一步与 Attention 内的 W_O 不同：这里的输出维度对应整个词表。',
+    hint: '这一步与 Attention 内的 $W_O$ 不同：这里的输出维度对应整个词表。',
     chapter: '第 3、15 章',
   },
   softmax: {
@@ -217,10 +218,10 @@ export function TransformerOverview({
                 markerHeight="6"
                 orient="auto-start-reverse"
               >
-                <path d="M0 0 L10 5 L0 10Z" fill="#7c94a6" />
+                <path d="M0 0 L10 5 L0 10Z" fill="#6d6961" />
               </marker>
             </defs>
-            <rect x="61" y="263" width="318" height="305" rx="14" fill="#eff6f3" stroke="#c7d9ce" />
+            <rect x="61" y="263" width="318" height="305" rx="14" fill="#d0dcd7" stroke="#a1b1a7" />
             <text x="75" y="284" className="architecture-block-caption">
               Block
             </text>
@@ -266,7 +267,7 @@ export function TransformerOverview({
             >
               保留 FFN 输入
             </text>
-            <rect x="291" y="590" width="134" height="32" rx="5" fill="#f7f0e8" stroke="#e1c8a7" />
+            <rect x="291" y="590" width="134" height="32" rx="5" fill="#ddd3c8" stroke="#e1c8a7" />
             <text x="358" y="610" textAnchor="middle" className="architecture-position-label">
               Positional Encoding
             </text>
@@ -337,14 +338,18 @@ export function TransformerOverview({
             </div>
             <div>
               <dt>做什么</dt>
-              <dd>{current.action}</dd>
+              <dd>
+                <Rich text={current.action} />
+              </dd>
             </div>
             <div>
               <dt>交给谁</dt>
               <dd>{current.output}</dd>
             </div>
           </dl>
-          <p className="architecture-hint">{current.hint}</p>
+          <p className="architecture-hint">
+            <Rich text={current.hint} />
+          </p>
           <div className="architecture-chapter">
             对应 {current.chapter} ·{' '}
             <a href={chapters.map} target="_blank" rel="noreferrer">

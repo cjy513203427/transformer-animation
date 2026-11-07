@@ -1,4 +1,5 @@
 import { useId, type KeyboardEvent } from 'react';
+import { SvgTex } from '../../components/Tex';
 import type { Insertion } from '../../content/position';
 
 export const INSERTION_COLORS: Record<Insertion, string> = {
@@ -18,6 +19,7 @@ function Box({
   y,
   width,
   label,
+  tex,
   sub,
   tone = 'neutral',
 }: {
@@ -25,15 +27,21 @@ function Box({
   y: number;
   width: number;
   label: string;
+  /** When given, shown instead of `label` as typeset math. */
+  tex?: string;
   sub?: string;
   tone?: 'neutral' | 'query' | 'key' | 'value' | 'probability';
 }) {
   return (
     <g className={`pp-box pp-${tone}`}>
       <rect x={x - width / 2} y={y - 17} width={width} height="34" rx="6" />
-      <text x={x} y={sub ? y - 2 : y + 5} textAnchor="middle">
-        {label}
-      </text>
+      {tex ? (
+        <SvgTex x={x} y={sub ? y - 2 : y + 5} tex={tex} size={14} width={width} />
+      ) : (
+        <text x={x} y={sub ? y - 2 : y + 5} textAnchor="middle">
+          {label}
+        </text>
+      )}
       {sub && (
         <text className="pp-sub" x={x} y={y + 11} textAnchor="middle">
           {sub}
@@ -97,7 +105,7 @@ export function PositionPipeline({
             >
               <path
                 d="M0 0 L10 5 L0 10Z"
-                fill={tone === 'base' ? '#9aaebb' : INSERTION_COLORS[tone]}
+                fill={tone === 'base' ? '#817c73' : INSERTION_COLORS[tone]}
               />
             </marker>
           ))}
@@ -179,15 +187,29 @@ export function PositionPipeline({
           输出 O
         </text>
 
-        <Box x={230} y={610} width={170} label="E[token]" sub="查嵌入表：只有内容" />
+        <Box
+          x={230}
+          y={610}
+          width={170}
+          label="E[token]"
+          tex="E[\text{token}]"
+          sub="查嵌入表：只有内容"
+        />
         <Box x={230} y={504} width={120} label="X" sub="进入 Attention 的表示" />
-        <Box x={110} y={446} width={86} label="× W_Q" tone="query" />
-        <Box x={230} y={446} width={86} label="× W_K" tone="key" />
-        <Box x={350} y={446} width={86} label="× W_V" tone="value" />
+        <Box x={110} y={446} width={86} label="× W_Q" tex="\times W_Q" tone="query" />
+        <Box x={230} y={446} width={86} label="× W_K" tex="\times W_K" tone="key" />
+        <Box x={350} y={446} width={86} label="× W_V" tex="\times W_V" tone="value" />
         <Box x={110} y={388} width={64} label="Q" tone="query" />
         <Box x={230} y={388} width={64} label="K" tone="key" />
         <Box x={350} y={388} width={64} label="V" tone="value" />
-        <Box x={170} y={272} width={170} label="Q·Kᵀ / √d" sub="逐对打分" />
+        <Box
+          x={170}
+          y={272}
+          width={170}
+          label="Q·Kᵀ / √d"
+          tex="QK^{\top}/\sqrt{d}"
+          sub="逐对打分"
+        />
         <Box x={170} y={168} width={150} label="Mask" sub="挡住未来" />
         <Box x={170} y={118} width={150} label="Softmax" tone="probability" />
         <Box x={230} y={64} width={180} label="P · V" sub="按比例汇总 V" tone="probability" />
@@ -202,9 +224,14 @@ export function PositionPipeline({
             ⊕
           </text>
           <rect x="300" y="540" width="140" height="32" rx="6" className="pp-side" />
-          <text x="370" y="561" textAnchor="middle" className="pp-side-text">
-            ① PE[pos]
-          </text>
+          <SvgTex
+            x={370}
+            y={561}
+            width={140}
+            size={12}
+            prefix="① "
+            tex="\mathrm{PE}[\mathrm{pos}]"
+          />
           <path d="M300 556 H249" className="pp-insert-wire" />
         </g>
         {/* ② RoPE on Q and K */}
@@ -212,9 +239,14 @@ export function PositionPipeline({
           {[110, 230].map((x) => (
             <g key={x}>
               <rect x={x - 54} y="313" width="108" height="34" rx="6" className="pp-side" />
-              <text x={x} y={335} textAnchor="middle" className="pp-side-text">
-                {x === 110 ? '② ↻ R_m q' : '② ↻ R_n k'}
-              </text>
+              <SvgTex
+                x={x}
+                y={335}
+                width={108}
+                size={12}
+                prefix="② ↻ "
+                tex={x === 110 ? 'R_m\\,q' : 'R_n\\,k'}
+              />
             </g>
           ))}
         </g>
@@ -225,9 +257,7 @@ export function PositionPipeline({
             ⊕
           </text>
           <rect x="16" y="202" width="118" height="32" rx="6" className="pp-side" />
-          <text x="75" y="223" textAnchor="middle" className="pp-side-text">
-            ③ −m·距离
-          </text>
+          <SvgTex x={75} y={223} width={118} size={12} prefix="③ " tex="-m\cdot\text{距离}" />
           <path d="M134 218 H151" className="pp-insert-wire" />
         </g>
         {!active.length && (

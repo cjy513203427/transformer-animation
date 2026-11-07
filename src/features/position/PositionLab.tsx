@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
+import { Rich, Tex } from '../../components/Tex';
 import { bookNotes, positionSources, positionSteps } from '../../content/position';
 import { BOOK_URL } from '../../content/topics';
 import {
@@ -26,14 +27,15 @@ import {
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/position.css';
+import '../../styles/instrument.css';
 
 const explanations = [
   'Attention 打分只用到两个向量的点积。如果输入只有词嵌入，“我”放在第 0 位还是第 2 位都是同一个向量；把句子倒过来，每个词看到的仍是同一组向量，只是排列不同。结果是：模型分不清“我爱你”和“你爱我”。',
-  '原始 Transformer 用 sin 和 cos 给每个位置造一个向量：第 i 对维度按频率 ω_i = 10000^(−2i/d_model) 转动。低维转得快，能区分相邻位置；高维转得慢，能区分相隔很远的位置。所有值都在 [−1, 1] 之间，不会像整数编号那样越加越大。',
-  '位置向量与词嵌入逐维相加（不是拼接），维度仍是 d_model。这一步发生在第一个 Block 之前：之后的 W_Q、W_K、W_V 都作用在相加后的 X 上，所以 Q、K、V 都带位置。正弦表是固定的，嵌入表会在训练中更新。',
-  'RoPE（LLaMA 等模型使用）不再把位置加到 X 上。投影得到 Q、K 之后，把它们每两维一组，按位置旋转 m·θ_i。旋转只改变方向、不改变长度；V 不旋转。',
-  '两个向量各自转了 mθ_i 与 nθ_i，它们的点积只与夹角有关，而夹角的改变量只取决于 (n − m)θ_i。所以同时平移两个位置，分数不变：这就是“相对位置”。',
-  'ALiBi（BLOOM、MPT 等使用）连 Q、K 都不动：算出 QKᵀ/√d 之后，每个 Key 按与 Query 的距离扣掉 m × 距离，再做 Softmax。不同的头用不同的斜率 m，有的头只看附近，有的头几乎不受距离影响。',
+  '原始 Transformer 用 $\\sin$ 和 $\\cos$ 给每个位置造一个向量：第 $i$ 对维度按频率 $\\omega_i = 10000^{-2i/d_{\\mathrm{model}}}$ 转动。低维转得快，能区分相邻位置；高维转得慢，能区分相隔很远的位置。所有值都在 $[-1, 1]$ 之间，不会像整数编号那样越加越大。',
+  '位置向量与词嵌入逐维相加（不是拼接），维度仍是 $d_{\\mathrm{model}}$。这一步发生在第一个 Block 之前：之后的 $W_Q$、$W_K$、$W_V$ 都作用在相加后的 X 上，所以 Q、K、V 都带位置。正弦表是固定的，嵌入表会在训练中更新。',
+  'RoPE（LLaMA 等模型使用）不再把位置加到 X 上。投影得到 Q、K 之后，把它们每两维一组，按位置旋转 $m\\theta_i$。旋转只改变方向、不改变长度；V 不旋转。',
+  '两个向量各自转了 $m\\theta_i$ 与 $n\\theta_i$，它们的点积只与夹角有关，而夹角的改变量只取决于 $(n-m)\\theta_i$。所以同时平移两个位置，分数不变：这就是“相对位置”。',
+  'ALiBi（BLOOM、MPT 等使用）连 Q、K 都不动：算出 $QK^{\\top}/\\sqrt{d}$ 之后，每个 Key 按与 Query 的距离扣掉 $m\\times\\text{距离}$，再做 Softmax。不同的头用不同的斜率 $m$，有的头只看附近，有的头几乎不受距离影响。',
   '三种方法回答同一个问题“模型怎样知道顺序”，但加在计算的不同位置：加法在最底部改 X，RoPE 在中间改 Q、K，ALiBi 在 Softmax 前改分数。',
 ];
 
@@ -181,7 +183,7 @@ export default function PositionLab() {
   ][state.step];
 
   return (
-    <AppShell active="position" crumb="位置编码" indicator="跟着原书学" title="位置编码">
+    <AppShell active="position" crumb="位置编码" indicator="浏览器内计算" title="位置编码">
       <section className="page-heading">
         <div>
           <div className="eyebrow">
@@ -258,15 +260,21 @@ export default function PositionLab() {
             {hide ? (
               <div className="lesson-recall">
                 <strong>先自己说一遍</strong>
-                <p>{step.prompt}</p>
+                <p>
+                  <Rich text={step.prompt} />
+                </p>
               </div>
             ) : (
-              <p className="lesson-explanation">{explanations[state.step]}</p>
+              <p className="lesson-explanation">
+                <Rich text={explanations[state.step]} />
+              </p>
             )}
             {widget}
             <div className="lesson-takeaway">
               <strong>这一步，记住一句话</strong>
-              <p>{hide ? '先自己复述，再点击“显示说明”核对。' : step.takeaway}</p>
+              <p>
+                <Rich text={hide ? '先自己复述，再点击“显示说明”核对。' : step.takeaway} />
+              </p>
             </div>
             <details className="lesson-formula">
               <summary>需要时再看公式</summary>
@@ -383,14 +391,19 @@ export default function PositionLab() {
         <div className="details-body">
           <p>
             所有数值由浏览器实时计算，均为教学数字而不是训练好的模型参数；行向量约定，单头，忽略
-            batch。位置盲与四项分解令 W_Q = W_K = W_V = I（d_model = 4）。“L”的嵌入取书中第 5
-            章列出的前 4 维。RoPE 演示取 d = 8、base = 10000 的固定内容向量。ALiBi 演示取 6 个
-            token、8 个头的标准斜率 2^(−h)，并带因果 Mask；示例内容分数为人为设定。
+            batch。位置盲与四项分解令 <Tex tex="W_Q = W_K = W_V = I" />（
+            <Tex tex="d_{\mathrm{model}} = 4" />
+            ）。“L”的嵌入取书中第 5 章列出的前 4 维。RoPE 演示取 <Tex tex="d = 8" />、
+            <Tex tex="\mathrm{base} = 10000" />
+            的固定内容向量。ALiBi 演示取 6 个 token、8 个头的标准斜率 <Tex tex="2^{-h}" />
+            ，并带因果 Mask；示例内容分数为人为设定。
           </p>
           <strong className="pos-notes-title">与原书说法的对照</strong>
           <ul>
             {bookNotes.map((note) => (
-              <li key={note}>{note}</li>
+              <li key={note}>
+                <Rich text={note} />
+              </li>
             ))}
           </ul>
           <ul>

@@ -10,8 +10,8 @@
   max-height: 640px;
 }
 .pp-box rect {
-  fill: #ffffff;
-  stroke: #cbd7e2;
+  fill: #e5e2dc;
+  stroke: #b8b5ab;
   stroke-width: 1.3;
 }
 .pp-box text {
@@ -19,39 +19,39 @@
     14px 'Microsoft YaHei',
     Consolas,
     sans-serif;
-  fill: #415a6e;
+  fill: #514d45;
 }
 .pp-box .pp-sub {
   font-size: 10px;
-  fill: #7d8fa1;
+  fill: #6a6761;
 }
 .pp-query rect {
-  fill: #edf2ff;
+  fill: #c7d1ec;
 }
 .pp-query text {
   fill: #3558a4;
 }
 .pp-key rect {
-  fill: #fbf3e8;
+  fill: #e4d7c6;
 }
 .pp-key text {
   fill: #8d4b13;
 }
 .pp-value rect {
-  fill: #f4eef9;
+  fill: #d8cee1;
 }
 .pp-value text {
   fill: #6f4a92;
 }
 .pp-probability rect {
-  fill: #eaf7f7;
+  fill: #d6dec9;
 }
 .pp-probability text {
-  fill: #06606a;
+  fill: #354818;
 }
 .pp-wire {
   fill: none;
-  stroke: #a9b9c6;
+  stroke: #8e897f;
   stroke-width: 1.6;
 }
 .pp-lit {
@@ -70,7 +70,7 @@
   font:
     13px 'Microsoft YaHei',
     sans-serif;
-  fill: #476175;
+  fill: #545149;
 }
 .pp-note {
   font:
@@ -84,30 +84,30 @@
 }
 .pp-insert circle,
 .pp-insert .pp-side {
-  fill: #ffffff;
-  stroke: #b8c4ce;
+  fill: #e5e2dc;
+  stroke: #9c9991;
   stroke-width: 1.5;
   stroke-dasharray: 4 3;
 }
 .pp-insert .pp-plus {
   font-size: 22px;
-  fill: #9aa8b4;
+  fill: #7c7972;
 }
 .pp-insert .pp-side-text {
   font:
     12px 'Microsoft YaHei',
     Consolas,
     sans-serif;
-  fill: #8b99a6;
+  fill: #716e68;
 }
 .pp-insert .pp-insert-wire {
-  stroke: #b8c4ce;
+  stroke: #9c9991;
   stroke-width: 1.5;
   stroke-dasharray: 4 3;
 }
 .pp-insert.active circle,
 .pp-insert.active .pp-side {
-  fill: color-mix(in srgb, var(--insert) 10%, white);
+  fill: color-mix(in srgb, var(--insert) 10%, #e5e2dc);
   stroke: var(--insert);
   stroke-width: 2.6;
   stroke-dasharray: none;
@@ -132,15 +132,15 @@
   stroke-width: 3.5;
 }
 .pp-empty rect {
-  fill: #fbfcfd;
-  stroke: #c6d3dd;
+  fill: #e1dfdb;
+  stroke: #b1ada5;
   stroke-dasharray: 5 4;
 }
 .pp-empty text {
   font:
     11px 'Microsoft YaHei',
     sans-serif;
-  fill: #6f8395;
+  fill: #63615b;
 }
 .pp-legend {
   list-style: none;
@@ -149,11 +149,11 @@
   display: grid;
   gap: 6px;
   font-size: 11px;
-  color: #8b9aa7;
+  color: #64625c;
 }
 .pp-legend li {
   padding-left: 14px;
-  border-left: 3px dashed #c3ced7;
+  border-left: 3px dashed #aaa79f;
 }
 .pp-legend li.active {
   color: var(--insert);
@@ -179,7 +179,7 @@
 }
 .pos-segment > span {
   font-size: 12px;
-  color: #6d8496;
+  color: #63605a;
   margin-right: 2px;
 }
 .pos-segment button,
@@ -187,13 +187,13 @@
 .pos-play {
   padding: 7px 11px;
   font-size: 12px;
-  color: #5c7387;
+  color: #5c5952;
   min-height: 34px;
 }
 .pos-segment button[aria-pressed='true'] {
-  background: #eaf6f6;
-  border-color: #087e8b;
-  color: #07717c;
+  background: #d5ddca;
+  border-color: #455e20;
+  color: #3e541d;
   font-weight: 600;
 }
 .pos-heads button {
@@ -202,16 +202,16 @@
   font-family: Consolas, monospace;
 }
 .pos-play {
-  border-color: #b9dadd;
-  color: #087e8b;
-  background: #f2fafa;
+  border-color: #a5b490;
+  color: #455e20;
+  background: #dbe3d1;
 }
 .pos-switch {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #466c7e;
+  color: #535d44;
   cursor: pointer;
 }
 .pos-switch input {
@@ -224,27 +224,27 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #5c7387;
+  color: #5c5952;
   flex-wrap: wrap;
 }
 .pos-range output {
   font:
     600 14px Consolas,
     monospace;
-  color: #24364b;
+  color: #35322b;
   min-width: 18px;
 }
 .pos-range input {
   width: 180px;
-  accent-color: #087e8b;
+  accent-color: #455e20;
 }
 .pos-chip {
   font:
     11px Consolas,
     'Microsoft YaHei',
     monospace;
-  color: #627a8c;
-  background: #f1f5f8;
+  color: #5f5c55;
+  background: #dcdad5;
   border-radius: 4px;
   padding: 3px 8px;
 }
@@ -254,10 +254,10 @@
   gap: 12px;
 }
 .pos-sentence {
-  border: 1px solid #e0e8ef;
+  border: 1px solid #cecbc4;
   border-radius: 8px;
   padding: 12px;
-  background: #fbfcfe;
+  background: #e3e0da;
   min-width: 0;
 }
 .pos-token-row {
@@ -270,15 +270,15 @@
   flex-direction: column;
   align-items: center;
   padding: 6px 10px;
-  border: 1px solid #dbe3eb;
+  border: 1px solid #c9c5be;
   border-radius: 6px;
   font-size: 16px;
-  color: #3f586c;
-  background: #ffffff;
+  color: #4f4c44;
+  background: #e5e2dc;
 }
 .pos-token-row span.focus {
   border: 2px solid #4267c7;
-  background: #eef2fc;
+  background: #ccd3e6;
   color: #2b4c97;
   font-weight: 600;
 }
@@ -286,7 +286,7 @@
   font:
     9px Consolas,
     monospace;
-  color: #95a2ae;
+  color: #64625c;
 }
 .pos-sentence dl {
   margin: 0;
@@ -296,7 +296,7 @@
 }
 .pos-sentence dt {
   font-size: 10px;
-  color: #8a9aa8;
+  color: #65625c;
 }
 .pos-sentence dd {
   margin: 2px 0 0;
@@ -304,11 +304,11 @@
     12px Consolas,
     'Microsoft YaHei',
     monospace;
-  color: #4f687c;
+  color: #57544d;
   overflow-wrap: anywhere;
 }
 .pos-sentence dd strong {
-  color: #087e8b;
+  color: #455e20;
   font-size: 13px;
 }
 .pos-verdict {
@@ -319,11 +319,11 @@
   line-height: 1.9;
 }
 .pos-verdict.same {
-  background: #edf7f4;
+  background: #cdddd9;
   color: #2c6b5b;
 }
 .pos-verdict.different {
-  background: #fdf3ec;
+  background: #e8d6c9;
   color: #8a4a17;
 }
 .pos-note,
@@ -331,17 +331,17 @@
 .pos-book {
   font-size: 12px;
   line-height: 1.9;
-  color: #7b8f9f;
+  color: #65625b;
   margin-top: 10px;
 }
 .pos-caption {
   font-size: 11px;
-  color: #8a9cab;
+  color: #64625b;
   margin: 6px 0 12px;
 }
 .pos-book {
   padding: 10px 12px;
-  background: #fbf6ee;
+  background: #e4dbcc;
   border-left: 3px solid #d9b77f;
   color: #7a5d31;
 }
@@ -356,12 +356,12 @@
   align-items: center;
   gap: 2px;
   padding: 8px 4px 10px;
-  background: #fbfcfe;
+  background: #e3e0da;
   min-width: 0;
 }
 .pos-clock.selected {
   border-color: #b45309;
-  background: #fff8f1;
+  background: #eddbc9;
 }
 .pos-clock svg {
   width: 84px;
@@ -372,11 +372,11 @@
     600 11px Consolas,
     'Microsoft YaHei',
     monospace;
-  color: #4f687c;
+  color: #57544d;
 }
 .pos-clock span {
   font-size: 10px;
-  color: #8293a2;
+  color: #64615c;
   text-align: center;
 }
 .pos-clock code {
@@ -386,12 +386,12 @@
   color: #8d5c1d;
 }
 .pos-clock-face {
-  fill: #ffffff;
-  stroke: #cfd9e2;
+  fill: #e5e2dc;
+  stroke: #bab7af;
   stroke-width: 2;
 }
 .pos-clock-tick {
-  stroke: #8fa2b1;
+  stroke: #78746c;
   stroke-width: 2;
 }
 .pos-clock-hand {
@@ -406,7 +406,7 @@
   fill: #b45309;
 }
 .pos-clock-center {
-  fill: #6c7f8f;
+  fill: #615e59;
 }
 .pos-wave {
   display: block;
@@ -415,14 +415,14 @@
   max-height: 190px;
 }
 .pos-grid {
-  stroke: #e1e8ee;
+  stroke: #cecbc5;
   stroke-width: 1;
 }
 .pos-axis {
   font:
     10px Consolas,
     monospace;
-  fill: #8a9aa8;
+  fill: #726f68;
 }
 .pos-axis.strong {
   font-weight: 600;
@@ -454,11 +454,11 @@
   fill: #be185d;
 }
 .pos-dot.rope.current {
-  stroke: #ffffff;
+  stroke: #e5e2dc;
   stroke-width: 2;
 }
 .pos-marker {
-  stroke: #24364b;
+  stroke: #35322b;
   stroke-width: 1.2;
   stroke-dasharray: 3 3;
 }
@@ -474,34 +474,34 @@
 .pos-table th,
 .pos-table td {
   padding: 7px 6px;
-  border-bottom: 1px solid #e3eaf1;
+  border-bottom: 1px solid #d1cec7;
   text-align: right;
   font-weight: 400;
   white-space: nowrap;
 }
 .pos-table thead th {
   font-size: 10px;
-  color: #91a0af;
+  color: #64625c;
 }
 .pos-table tbody th {
   text-align: left;
-  color: #4c667a;
+  color: #57534b;
 }
 .pos-table td {
   font-family: Consolas, monospace;
-  color: #5d778b;
+  color: #5e5b53;
 }
 .pos-table tr.current {
-  background: #f2f8fb;
+  background: #dce5cf;
 }
 .pos-table tr.current td,
 .pos-table tr.current th {
-  color: #24485f;
+  color: #403b31;
   font-weight: 600;
 }
 .pos-table small {
   font-size: 9px;
-  color: #98a5b1;
+  color: #65625c;
   margin-left: 3px;
 }
 .pos-add-layout {
@@ -525,27 +525,27 @@
   stroke-linecap: round;
 }
 .pos-arrow.content {
-  stroke: #687c8d;
+  stroke: #605d57;
 }
 .pos-arrow.position {
   stroke: #b45309;
 }
 .pos-arrow.sum {
-  stroke: #24364b;
+  stroke: #35322b;
   stroke-dasharray: 6 3;
 }
 .pos-ghost {
-  fill: #ffffff;
-  stroke: #24364b;
+  fill: #e5e2dc;
+  stroke: #35322b;
   stroke-width: 1.5;
 }
 .pos-tip {
-  fill: #24364b;
+  fill: #35322b;
 }
 .pos-details {
   margin-top: 14px;
   font-size: 12px;
-  color: #6f8597;
+  color: #64615b;
 }
 .pos-details summary {
   cursor: pointer;
@@ -564,10 +564,10 @@
 }
 .pos-rot {
   margin: 0;
-  border: 1px solid #e3e9ef;
+  border: 1px solid #cfcdc7;
   border-radius: 8px;
   padding: 6px 4px 8px;
-  background: #fbfcfe;
+  background: #e3e0da;
   min-width: 0;
 }
 .pos-rot svg {
@@ -588,11 +588,11 @@
     600 11px Consolas,
     'Microsoft YaHei',
     monospace;
-  color: #4f687c;
+  color: #57544d;
 }
 .pos-rot span {
   font-size: 10px;
-  color: #8293a2;
+  color: #64615c;
 }
 .pos-rot code {
   font:
@@ -630,26 +630,26 @@
   flex-wrap: wrap;
   gap: 8px 18px;
   padding: 10px 12px;
-  background: #f6f8fb;
+  background: #e0ddd7;
   border-radius: 6px;
   font-size: 12px;
-  color: #6a7f91;
+  color: #615f58;
 }
 .pos-now strong {
   font-family: Consolas, monospace;
-  color: #24364b;
+  color: #35322b;
   font-size: 14px;
 }
 .pos-predict {
   margin: 14px 0;
   padding: 13px 14px;
-  border: 1px dashed #cbd8e2;
+  border: 1px dashed #b8b5ab;
   border-radius: 8px;
-  background: #fbfcfe;
+  background: #e3e0da;
 }
 .pos-predict > p {
   font-size: 12px;
-  color: #556f83;
+  color: #5a5750;
   line-height: 1.9;
   margin-bottom: 10px;
 }
@@ -667,8 +667,8 @@
   padding: 5px 3px;
 }
 .pos-bias td.masked {
-  background: repeating-linear-gradient(135deg, #f1f3f6, #f1f3f6 4px, #e8edf2 4px, #e8edf2 5px);
-  color: #9aa6b2;
+  background: repeating-linear-gradient(135deg, #dad8d5, #dad8d5 4px, #d4d1cc 4px, #d4d1cc 5px);
+  color: #65625d;
 }
 .pos-row-pick {
   padding: 2px 6px;
@@ -677,7 +677,7 @@
 }
 .pos-row-pick[aria-pressed='true'] {
   border-color: #4d7c0f;
-  background: #f1f7e9;
+  background: #d5ddc9;
   color: #3f6610;
   font-weight: 600;
 }
@@ -685,7 +685,7 @@
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: #4d6478;
+  color: #56534b;
   margin-bottom: 6px;
 }
 .pos-bar {
@@ -693,7 +693,7 @@
   display: inline-block;
   width: 64px;
   height: 10px;
-  background: #edf2f5;
+  background: #d8d6d1;
   border-radius: 3px;
   overflow: hidden;
   margin-right: 6px;
@@ -706,7 +706,7 @@
   height: 100%;
 }
 .pos-bar > span.plain {
-  background: #c8d2da;
+  background: #afaca5;
   top: 6px;
   height: 4px;
 }
@@ -721,7 +721,7 @@
   border: 0;
   padding: 0;
   background: none;
-  color: #087e8b;
+  color: #455e20;
   text-align: left;
   font-size: 12px;
 }
@@ -730,12 +730,12 @@
   padding-left: 18px;
   font-size: 12px;
   line-height: 2;
-  color: #6f8394;
+  color: #63605a;
 }
 .pos-notes-title {
   display: block;
   font-size: 12px;
-  color: #4f687c;
+  color: #57544d;
   margin-bottom: 4px;
 }
 @media (max-width: 1150px) {

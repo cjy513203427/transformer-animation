@@ -27,9 +27,9 @@ export const positionSteps: {
     insertion: ['add'],
     takeaway:
       '每对维度是一根转速不同的指针：低维转得快，高维转得慢，合起来给每个位置一组独特的“门牌号”。',
-    prompt: '第 i 对维度每前进一个位置转多少？为什么同一对里的 sin 和 cos 频率相同？',
+    prompt: '第 $i$ 对维度每前进一个位置转多少？为什么同一对里的 $\\sin$ 和 $\\cos$ 频率相同？',
     formula:
-      'PE_{(pos,2i)}=\\sin\\frac{pos}{10000^{2i/d_{model}}},\\qquad PE_{(pos,2i+1)}=\\cos\\frac{pos}{10000^{2i/d_{model}}}',
+      'PE_{(\\mathrm{pos},2i)}=\\sin\\frac{\\mathrm{pos}}{10000^{2i/d_{\\mathrm{model}}}},\\qquad PE_{(\\mathrm{pos},2i+1)}=\\cos\\frac{\\mathrm{pos}}{10000^{2i/d_{\\mathrm{model}}}}',
     chapter: ['第 5.3 节 · 正弦位置编码', '第05章-Positional-Encoding-给文字加位置/'],
   },
   {
@@ -39,7 +39,7 @@ export const positionSteps: {
     takeaway: '加法发生在投影之前：X 变了，Q、K、V 三条支路都带上了位置。',
     prompt: '两个“L”的嵌入相同，为什么相加后不同？位置信息会不会进入 V？',
     formula:
-      'X_{pos}=E[\\text{token}]+PE_{pos},\\qquad (e_m+p_m)\\cdot(e_n+p_n)=e_m\\cdot e_n+e_m\\cdot p_n+p_m\\cdot e_n+p_m\\cdot p_n',
+      'X_{\\mathrm{pos}}=E[\\text{token}]+PE_{\\mathrm{pos}},\\qquad (e_m+p_m)\\cdot(e_n+p_n)=e_m\\cdot e_n+e_m\\cdot p_n+p_m\\cdot e_n+p_m\\cdot p_n',
     chapter: [
       '第 5.4 节、第 14 章 · 为什么相加',
       '第14章-词嵌入与位置信息的深层逻辑-为什么相加而不是拼接/',
@@ -59,8 +59,8 @@ export const positionSteps: {
     name: '相对距离',
     title: '同时平移两个位置，RoPE 分数不变',
     insertion: ['rope'],
-    takeaway: '内容固定时，(R_m q)·(R_n k) 只取决于 n − m；但它会随距离起伏，并不单调下降。',
-    prompt: '为什么 R_mᵀR_n = R_{n−m}？“分数只看相对距离”需要哪些条件？',
+    takeaway: '内容固定时，$(R_m q)\\cdot(R_n k)$ 只取决于 $n-m$；但它会随距离起伏，并不单调下降。',
+    prompt: '为什么 $R_m^{\\top}R_n = R_{n-m}$？“分数只看相对距离”需要哪些条件？',
     formula: '(R_m q)^{\\top}(R_n k)=q^{\\top}R_m^{\\top}R_n\\,k=q^{\\top}R_{n-m}\\,k',
     chapter: [
       '第 25.3.7 节 · 为什么能编码相对位置',
@@ -71,7 +71,8 @@ export const positionSteps: {
     name: 'ALiBi',
     title: 'ALiBi：不改 Q、K、V，只在分数上减去距离惩罚',
     insertion: ['alibi'],
-    takeaway: 'ALiBi 把 −m·距离 加到 Softmax 之前的分数上；斜率越大，注意力越集中在附近。',
+    takeaway:
+      'ALiBi 把 $-m\\cdot\\text{距离}$ 加到 Softmax 之前的分数上；斜率越大，注意力越集中在附近。',
     prompt: 'ALiBi 改的是哪个矩阵？为什么每个头的斜率不同？能算更长序列意味着什么、不意味着什么？',
     formula:
       'P=\\operatorname{softmax}\\!\\left(\\frac{QK^{\\top}}{\\sqrt d}+m\\cdot B+M\\right),\\qquad B_{ij}=-(i-j)\\quad(j\\le i)',
@@ -116,8 +117,8 @@ export const positionSources = [
 
 /** Places where this page deliberately differs from the book's wording, with the reason. */
 export const bookNotes = [
-  '第 5 章的位置表是 d_model = 64 时的前 4 维，并且截断（不是四舍五入）到两位小数：例如 sin 2 = 0.909… 印成 0.90。本页保留 3 位小数并四舍五入，所以个别格子会差 0.01。',
-  '第 5.3.2 节说 Col 6 频率最低、Col 9 最高。按公式，同一对 sin/cos 频率相同，维度序号越大频率越低，书中的波形图本身也是 Col 6、7 比 Col 8、9 转得快。',
-  '第 25.3.6 节的 θ = 0.1、0.2、0.4 是示意数字。按 θ_i = 10000^(−2i/d)，θ 随 i 变小；本页取 d = 8，θ 恰为 1、0.1、0.01、0.001。',
+  '第 5 章的位置表是 $d_{\\mathrm{model}} = 64$ 时的前 4 维，并且截断（不是四舍五入）到两位小数：例如 $\\sin 2 = 0.909\\ldots$ 印成 0.90。本页保留 3 位小数并四舍五入，所以个别格子会差 0.01。',
+  '第 5.3.2 节说 Col 6 频率最低、Col 9 最高。按公式，同一对 $\\sin$/$\\cos$ 频率相同，维度序号越大频率越低，书中的波形图本身也是 Col 6、7 比 Col 8、9 转得快。',
+  '第 25.3.6 节的 $\\theta = 0.1$、0.2、0.4 是示意数字。按 $\\theta_i = 10000^{-2i/d}$，$\\theta$ 随 $i$ 变小；本页取 $d = 8$，$\\theta$ 恰为 1、0.1、0.01、0.001。',
   '第 25.3.8 节说相邻 token 能获得更高注意力。RoFormer 论文证明的是一个上界随距离衰减；单个分数可能随距离上下起伏，见“相对距离”一步的曲线。',
 ];

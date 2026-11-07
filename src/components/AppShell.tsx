@@ -22,9 +22,7 @@ export function AppShell({
       <aside className="sidebar">
         <a className="brand" href="/attention" aria-label="LLM 原理实验室首页">
           <span className="brand-mark">[∑]</span>
-          <span>
-            LLM 原理实验室<small>MECHANISM LAB</small>
-          </span>
+          <span>LLM 原理实验室</span>
         </a>
         <div className="nav-label">实验目录</div>
         <nav aria-label="实验目录">
@@ -54,13 +52,13 @@ export function AppShell({
           ))}
         </div>
         <div className="sidebar-note">
-          <span className="tiny-grid">▦</span>
-          <strong>先预测，再计算。</strong>
-          <p>
-            改动一个量，核对每一步，
-            <br />
-            然后试着用自己的话解释。
-          </p>
+          <strong>使用方法</strong>
+          <ol>
+            <li>改一个量</li>
+            <li>先预测变化</li>
+            <li>逐步核对数值</li>
+            <li>隐藏说明，自己复述</li>
+          </ol>
         </div>
         <a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">
           参考阅读 <span>↗</span>
@@ -83,7 +81,7 @@ export function AppShell({
           {children}
           <footer>
             <span>LLM 原理实验室</span>
-            <span>理解，来自一次可以核对的计算。</span>
+            <span>所有数值在浏览器内计算，不上传数据</span>
           </footer>
         </main>
       </div>

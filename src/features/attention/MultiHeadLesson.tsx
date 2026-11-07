@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Formula } from '../../components/Formula';
 import { Matrix } from '../../components/Matrix';
+import { plain, Rich, Tex } from '../../components/Tex';
 import { formatNumber as fmt, matmul } from '../../math/attention';
 import {
   attentionWeightCount,
@@ -22,37 +23,37 @@ const TOLERANCE = 1e-12;
 const KEY_TARGET = { token: 0, column: 3 };
 const vector = (values: number[]) => `[${values.map((value) => fmt(value)).join(', ')}]`;
 
-const stepNames = ['投影', '切分多头', '矩阵变形', '每头 Attention', 'Concatenate', 'Wo 融合'];
+const stepNames = ['投影', '切分多头', '矩阵变形', '每头 Attention', 'Concatenate', '$W_O$ 融合'];
 const titles = [
   '先做一次大的投影，得到完整的 Q、K、V',
-  '切分多头：把 d_model 平均分给每个头',
+  '切分多头：把 $d_{\\mathrm{model}}$ 平均分给每个头',
   '矩阵变形：把“头”这一维换到前面',
   '每个头独立算一遍 Attention',
   'Concatenate：把各头的 A 并排拼回去',
-  '乘 Wo：各头的信息第一次混合',
+  '乘 $W_O$：各头的信息第一次混合',
 ];
 const takeaways = [
   '先一次投影，再切分；每个头的列都用到了 X 的全部 4 个输入维度。',
-  '切分切的是特征维 d_model，不是把 token 切开，数值一个也没变。',
+  '切分切的是特征维 $d_{\\mathrm{model}}$，不是把 token 切开，数值一个也没变。',
   '转置只交换“头”和“token”两个轴的顺序，第 t 行始终是同一个 token。',
   '每个头有自己的一张 P：同一套公式，读的是不同的列。',
-  '拼接把 [头, token, d_key] 摆回 [token, d_model]，此时各头还没有交流。',
-  'Wo 的每一列读取 A 的全部列：Output = Σ A_h · Wo_h，头的信息在这里融合。',
+  '拼接把 [头, token, $d_{\\mathrm{key}}$] 摆回 [token, $d_{\\mathrm{model}}$]，此时各头还没有交流。',
+  '$W_O$ 的每一列读取 A 的全部列：$\\text{Output}=\\sum_h A_h\\,W_O^{(h)}$，头的信息在这里融合。',
 ];
 const prompts = [
   '这一步的输入、输出形状各是什么？为什么说此时还没有“头”？',
-  'd_key 怎样由 d_model 和 num_heads 算出？切分改变数值了吗？',
+  '$d_{\\mathrm{key}}$ 怎样由 $d_{\\mathrm{model}}$ 和 $\\mathrm{num\\_heads}$ 算出？切分改变数值了吗？',
   '转置前后，head 2 的第 3 行分别对应哪个 token 的哪些数？',
-  '每个头除以的是 √d_model 还是 √d_key？两个头的 P 为什么不同？',
+  '每个头除以的是 $\\sqrt{d_{\\mathrm{model}}}$ 还是 $\\sqrt{d_{\\mathrm{key}}}$？两个头的 P 为什么不同？',
   '拼接后的 A 是什么形状？这一步有没有让头之间交流？',
-  'Wo 为什么能让输出的每一列都受所有头影响？',
+  '$W_O$ 为什么能让输出的每一列都受所有头影响？',
 ];
 const formulas = [
   'Q=XW_Q,\\quad K=XW_K,\\quad V=XW_V',
-  'd_{key}=\\frac{d_{model}}{num\\_heads},\\qquad [T,\\,d_{model}]\\to[T,\\,num\\_heads,\\,d_{key}]',
-  '[T,\\,num\\_heads,\\,d_{key}]\\xrightarrow{\\text{transpose}}[num\\_heads,\\,T,\\,d_{key}]',
-  'A_h=\\operatorname{softmax}\\!\\left(\\frac{Q_hK_h^\\top}{\\sqrt{d_{key}}}+M\\right)V_h',
-  'A=\\operatorname{Concat}(A_1,\\dots,A_{num\\_heads})\\in\\mathbb{R}^{T\\times d_{model}}',
+  'd_{\\mathrm{key}}=\\frac{d_{\\mathrm{model}}}{\\mathrm{num\\_heads}},\\qquad [T,\\,d_{\\mathrm{model}}]\\to[T,\\,\\mathrm{num\\_heads},\\,d_{\\mathrm{key}}]',
+  '[T,\\,\\mathrm{num\\_heads},\\,d_{\\mathrm{key}}]\\xrightarrow{\\ \\text{transpose}\\ }[\\mathrm{num\\_heads},\\,T,\\,d_{\\mathrm{key}}]',
+  'A_h=\\operatorname{softmax}\\!\\left(\\frac{Q_hK_h^\\top}{\\sqrt{d_{\\mathrm{key}}}}+M\\right)V_h',
+  'A=\\operatorname{Concat}(A_1,\\dots,A_{\\mathrm{num\\_heads}})\\in\\mathbb{R}^{T\\times d_{\\mathrm{model}}}',
   '\\text{Output}=AW_O=\\sum_h A_h\\,W_O^{(h)}',
 ];
 const chapterLinks: [string, string][] = [
@@ -145,12 +146,12 @@ export function MultiHeadLesson({
   const changedOut = [0, 1, 2, 3].filter((j) => changed.output.some((row) => row[j]));
 
   const explanation = [
-    `X 的形状是 [3, 4]：3 个 token，每个 4 维（d_model = 4）。和第 10 章一样，X 分别乘 Wq、Wk、Wv，得到同形状的 Q、K、V。书中是 [4, 16, 512] @ [512, 512]；这里去掉 batch，缩小到可以手算。此时还没有“头”。`,
-    `把 Q 的最后一维 4 平均切成 ${numHeads} 份，每份 d_key = 4 ÷ ${numHeads} = ${dKey} 维，就像书中在向量上“砍 N 刀”。数值一个也没改，只是规定第几段属于第几个头。K、V 同样切分。`,
+    `X 的形状是 [3, 4]：3 个 token，每个 4 维（$d_{\\mathrm{model}} = 4$）。和第 10 章一样，X 分别乘 $W_Q$、$W_K$、$W_V$，得到同形状的 Q、K、V。书中是 [4, 16, 512] @ [512, 512]；这里去掉 batch，缩小到可以手算。此时还没有“头”。`,
+    `把 Q 的最后一维 4 平均切成 ${numHeads} 份，每份 $d_{\\mathrm{key}} = 4 \\div ${numHeads} = ${dKey}$ 维，就像书中在向量上“砍 N 刀”。数值一个也没改，只是规定第几段属于第几个头。K、V 同样切分。`,
     `转置把形状从 [3, ${numHeads}, ${dKey}] 变成 [${numHeads}, 3, ${dKey}]。现在每个头拿到一张完整的 [3, ${dKey}] 小表：3 个 token 都在，每个 token 只保留属于这个头的 ${dKey} 维。`,
-    `每个头拿自己的 Q_h、K_h、V_h，独立走一遍第 10 章的流程：打分、除以 √d_key（这里是 √${dKey}）、${causal ? 'Mask、' : ''}Softmax，再乘 V_h 得到 A_h。这时头与头之间不交换任何数字。`,
-    `把 ${numHeads} 个 A_h 按头的顺序并排放回：先转置回 [3, ${numHeads}, ${dKey}]，再 view 成 [3, 4]。得到的 A 与 X 同形状。拼接只是“摆在一起”，还没有融合。`,
-    `最后乘 [4, 4] 的 Wo。Wo 的每一列都与 A 的整行做点积，所以 Output 的每个数都同时用到所有头的结果，这就是书中说的“融合不同头的信息”。之后结果进入残差相加。`,
+    `每个头拿自己的 $Q_h$、$K_h$、$V_h$，独立走一遍第 10 章的流程：打分、除以 $\\sqrt{d_{\\mathrm{key}}}$（这里是 $\\sqrt{${dKey}}$）、${causal ? 'Mask、' : ''}Softmax，再乘 $V_h$ 得到 $A_h$。这时头与头之间不交换任何数字。`,
+    `把 ${numHeads} 个 $A_h$ 按头的顺序并排放回：先转置回 [3, ${numHeads}, ${dKey}]，再 view 成 [3, 4]。得到的 A 与 X 同形状。拼接只是“摆在一起”，还没有融合。`,
+    `最后乘 [4, 4] 的 $W_O$。$W_O$ 的每一列都与 A 的整行做点积，所以 Output 的每个数都同时用到所有头的结果，这就是书中说的“融合不同头的信息”。之后结果进入残差相加。`,
   ];
   const bookShapes: [string, string, string][] = [
     ['投影', '[3,4] @ [4,4] = [3,4]', '[4,16,512] @ [512,512] = [4,16,512]'],
@@ -162,7 +163,7 @@ export function MultiHeadLesson({
       '[4,4,16,16]，A [4,4,16,128]',
     ],
     ['Concatenate', `→ [3,${numHeads},${dKey}] → [3,4]`, '→ [4,16,4,128] → [4,16,512]'],
-    ['Wo', '[3,4] @ [4,4] = [3,4]', '[4,16,512] @ [512,512] = [4,16,512]'],
+    ['$W_O$', '[3,4] @ [4,4] = [3,4]', '[4,16,512] @ [512,512] = [4,16,512]'],
   ];
 
   function verify() {
@@ -199,7 +200,7 @@ export function MultiHeadLesson({
             ))}
           </div>
           <span className="mh-dkey">
-            d_key = 4 ÷ {numHeads} = <strong>{dKey}</strong>
+            <Tex tex={`d_{\\mathrm{key}} = 4 \\div ${numHeads} =`} /> <strong>{dKey}</strong>
           </span>
           <label className="lesson-switch mh-causal">
             <input
@@ -221,7 +222,7 @@ export function MultiHeadLesson({
               onClick={() => onJump(i)}
             >
               <span>{i + 1}</span>
-              {name}
+              <Rich text={name} />
             </button>
           ))}
         </div>
@@ -255,7 +256,9 @@ export function MultiHeadLesson({
               <tbody>
                 {bookShapes.map(([name, mine, theirs], i) => (
                   <tr key={name} className={i === step ? 'current' : ''}>
-                    <th scope="row">{name}</th>
+                    <th scope="row">
+                      <Rich text={name} />
+                    </th>
                     <td>{mine}</td>
                     <td>{theirs}</td>
                   </tr>
@@ -287,15 +290,25 @@ export function MultiHeadLesson({
                 </button>
               ))}
             </div>
-            <p className="lesson-token-note">固定教学数字，d_model = 4，不是训练好的模型参数。</p>
-            <h3>{titles[step]}</h3>
+            <p className="lesson-token-note">
+              固定教学数字，
+              <Tex tex="d_{\mathrm{model}} = 4" />
+              ，不是训练好的模型参数。
+            </p>
+            <h3>
+              <Rich text={titles[step]} />
+            </h3>
             {hide ? (
               <div className="lesson-recall">
                 <strong>先自己说一遍</strong>
-                <p>{prompts[step]}</p>
+                <p>
+                  <Rich text={prompts[step]} />
+                </p>
               </div>
             ) : (
-              <p className="lesson-explanation">{explanation[step]}</p>
+              <p className="lesson-explanation">
+                <Rich text={explanation[step]} />
+              </p>
             )}
 
             {step === 0 && (
@@ -307,7 +320,9 @@ export function MultiHeadLesson({
                   <thead>
                     <tr>
                       <th>Q 的列</th>
-                      <th>X[{query}] 逐项乘 Wq 这一列，再相加</th>
+                      <th>
+                        X[{query}] 逐项乘 <Tex tex="W_Q" /> 这一列，再相加
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -327,16 +342,21 @@ export function MultiHeadLesson({
                   </tbody>
                 </table>
                 <p className="mh-check" role="status">
-                  {methodsAgree ? '✓' : '✗'} 书中“方式一”：每个头单独用 Wq 的对应列（[4, {dKey}
-                  ]）计算 Q_h，与“方式二”切出的结果
+                  {methodsAgree ? '✓' : '✗'} 书中“方式一”：每个头单独用 <Tex tex="W_Q" />{' '}
+                  的对应列（[4, {dKey}
+                  ]）计算 <Tex tex="Q_h" />
+                  ，与“方式二”切出的结果
                   {methodsAgree ? '完全相同' : '不一致'}。
                 </p>
                 <details className="mh-weights">
-                  <summary>查看 Wq、Wk、Wv（固定教学参数）</summary>
+                  <summary>
+                    查看 <Tex tex="W_Q" />、<Tex tex="W_K" />、<Tex tex="W_V" />
+                    （固定教学参数）
+                  </summary>
                   <div className="mh-weight-grid">
-                    <Matrix name="Wq" data={MH_WEIGHTS.wq} parameter tone="query" />
-                    <Matrix name="Wk" data={MH_WEIGHTS.wk} parameter tone="key" />
-                    <Matrix name="Wv" data={MH_WEIGHTS.wv} parameter tone="value" />
+                    <Matrix name="W_Q" data={MH_WEIGHTS.wq} parameter tone="query" />
+                    <Matrix name="W_K" data={MH_WEIGHTS.wk} parameter tone="key" />
+                    <Matrix name="W_V" data={MH_WEIGHTS.wv} parameter tone="value" />
                   </div>
                 </details>
               </div>
@@ -421,7 +441,9 @@ export function MultiHeadLesson({
                         <thead>
                           <tr>
                             <th>Key</th>
-                            <th>Q·K ÷ √{dKey}</th>
+                            <th>
+                              <Tex tex={`Q\\cdot K \\div \\sqrt{${dKey}}`} />
+                            </th>
                             <th>权重 P</th>
                           </tr>
                         </thead>
@@ -494,7 +516,7 @@ export function MultiHeadLesson({
                     {heads.map((h) => (
                       <tr key={h}>
                         <th scope="row">
-                          {numHeads > 1 ? headTag(h) : 'A'} · Wo 行 {h * dKey}
+                          {numHeads > 1 ? headTag(h) : 'A'} · <Tex tex="W_O" /> 行 {h * dKey}
                           {dKey > 1 ? `–${(h + 1) * dKey - 1}` : ''}
                         </th>
                         {[0, 1, 2, 3].map((j) => {
@@ -518,16 +540,26 @@ export function MultiHeadLesson({
                   </tbody>
                 </table>
                 <p className="mh-note">
-                  参数量：Wq、Wk、Wv、Wo 各 [4, 4]，共 4 × 4² = {attentionWeightCount(4)}{' '}
-                  个权重（忽略偏置）。 按同一公式，书中 GPT-2 Small 的 d_model = 768，每层 4 × 768²
-                  = {attentionWeightCount(768).toLocaleString('zh-CN')} 个。
+                  参数量：
+                  <Tex tex="W_Q" />、<Tex tex="W_K" />、<Tex tex="W_V" />、
+                  <Tex tex="W_O" /> 各 [4, 4]，共{' '}
+                  <Tex tex={`4 \\times 4^2 = ${attentionWeightCount(4)}`} />{' '}
+                  个权重（忽略偏置）。按同一公式，书中 GPT-2 Small 的{' '}
+                  <Tex tex="d_{\mathrm{model}} = 768" />
+                  ，每层{' '}
+                  <Tex
+                    tex={`4 \\times 768^2 = ${attentionWeightCount(768).toLocaleString('en-US')}`}
+                  />{' '}
+                  个。
                 </p>
               </div>
             )}
 
             <div className="lesson-takeaway">
               <strong>这一步，记住一句话</strong>
-              <p>{hide ? '先自己复述，再点击“显示说明”核对。' : takeaways[step]}</p>
+              <p>
+                <Rich text={hide ? '先自己复述，再点击“显示说明”核对。' : takeaways[step]} />
+              </p>
             </div>
             <details className="lesson-formula">
               <summary>需要时再看公式</summary>
@@ -535,8 +567,9 @@ export function MultiHeadLesson({
               {step === 3 && (
                 <p>
                   打分的乘加次数：{numHeads} 个头 × 3 × 3 × {dKey} ={' '}
-                  {scoreMultiplyAdds(3, 4, numHeads)}， 与头数无关，总是 T² × d_model（书中第 11.9
-                  节）。
+                  {scoreMultiplyAdds(3, 4, numHeads)}，与头数无关，总是{' '}
+                  <Tex tex="T^2 \times d_{\mathrm{model}}" />
+                  （书中第 11.9 节）。
                 </p>
               )}
             </details>
@@ -548,8 +581,9 @@ export function MultiHeadLesson({
             )}
             {step === 5 && (
               <p className="mh-caution">
-                与第 12 章对照：前向计算只是产生新的表示 Output，交给残差相加和后续层；嵌入表与
-                Wq、Wk、Wv、Wo 只在训练时由反向传播和优化器更新，推理时保持不变。
+                与第 12 章对照：前向计算只是产生新的表示 Output，交给残差相加和后续层；嵌入表与{' '}
+                <Tex tex="W_Q" />、<Tex tex="W_K" />、<Tex tex="W_V" />、<Tex tex="W_O" />{' '}
+                只在训练时由反向传播和优化器更新，推理时保持不变。
               </p>
             )}
             <a
@@ -575,8 +609,17 @@ export function MultiHeadLesson({
               className="button primary"
               disabled={step === HEAD_STEP_COUNT - 1}
               onClick={() => onJump(step + 1)}
+              aria-label={
+                step === HEAD_STEP_COUNT - 1
+                  ? '已到最后一步'
+                  : `下一步：${plain(stepNames[step + 1]).replace('W_O', 'Wo')} →`
+              }
             >
-              {step === HEAD_STEP_COUNT - 1 ? '已到最后一步' : `下一步：${stepNames[step + 1]} →`}
+              {step === HEAD_STEP_COUNT - 1 ? (
+                '已到最后一步'
+              ) : (
+                <Rich text={`下一步：${stepNames[step + 1]} →`} />
+              )}
             </button>
           </div>
           <div>
@@ -692,9 +735,16 @@ export function MultiHeadLesson({
                   ； A 变化的列：{changedA.length ? changedA.map((j) => `d${j}`).join('、') : '无'}
                   ；Output 变化的列：
                   {changedOut.length ? changedOut.map((j) => `d${j}`).join('、') : '无'}。
-                  {changedHeads.length
-                    ? ' 各头在 Concatenate 之前互不影响；Wo 的每一列都读取 A 的全部列，所以变化扩散到 Output 的每一列。t0 只能看自己，它那一行不受影响。'
-                    : ' 当前设置下被改的分数没有影响任何可见权重。'}
+                  {changedHeads.length ? (
+                    <>
+                      {' '}
+                      各头在 Concatenate 之前互不影响；
+                      <Tex tex="W_O" /> 的每一列都读取 A 的全部列，所以变化扩散到 Output
+                      的每一列。t0 只能看自己，它那一行不受影响。
+                    </>
+                  ) : (
+                    ' 当前设置下被改的分数没有影响任何可见权重。'
+                  )}
                 </>
               ) : draft === 0 ? (
                 'ΔK 为 0 时没有可验证的变化。'
@@ -723,7 +773,10 @@ export function MultiHeadLesson({
         <div>
           <span className="section-kicker">离开之前 · 试着复述</span>
           <h2>不看图，讲清楚多头的五个动作。</h2>
-          <p>切分切的是哪一维？为什么要转置？每个头除以多少？Concatenate 与 Wo 各做什么？</p>
+          <p>
+            切分切的是哪一维？为什么要转置？每个头除以多少？Concatenate 与 <Tex tex="W_O" />{' '}
+            各做什么？
+          </p>
         </div>
         <button
           className="button secondary"
@@ -734,10 +787,17 @@ export function MultiHeadLesson({
         </button>
         {recallOpen && (
           <p className="recall-answer">
-            先用 Wq、Wk、Wv 一次投影得到 [T, d_model] 的 Q、K、V；把最后一维切成 num_heads 份（d_key
-            = d_model ÷ num_heads），再转置成 [num_heads, T, d_key]，让每个头拿到全部 token
-            的一段特征。每个头独立做缩放点积 Attention（除以 √d_key）得到 A_h；把各头的 A_h
-            转置回去并拼接成 [T, d_model]，最后乘 Wo，让每个输出维度混合所有头的信息。
+            先用 <Tex tex="W_Q" />、<Tex tex="W_K" />、<Tex tex="W_V" /> 一次投影得到{' '}
+            <Tex tex="[T,\,d_{\mathrm{model}}]" /> 的 Q、K、V；把最后一维切成{' '}
+            <Tex tex="\mathrm{num\_heads}" /> 份（
+            <Tex tex="d_{\mathrm{key}} = d_{\mathrm{model}} \div \mathrm{num\_heads}" />
+            ），再转置成 <Tex tex="[\mathrm{num\_heads},\,T,\,d_{\mathrm{key}}]" />
+            ，让每个头拿到全部 token 的一段特征。每个头独立做缩放点积 Attention（除以{' '}
+            <Tex tex="\sqrt{d_{\mathrm{key}}}" />
+            ）得到 <Tex tex="A_h" />
+            ；把各头的 <Tex tex="A_h" /> 转置回去并拼接成 <Tex tex="[T,\,d_{\mathrm{model}}]" />
+            ，最后乘 <Tex tex="W_O" />
+            ，让每个输出维度混合所有头的信息。
           </p>
         )}
       </section>

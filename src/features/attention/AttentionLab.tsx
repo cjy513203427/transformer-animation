@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
+import { Rich, Tex } from '../../components/Tex';
 import { Matrix } from '../../components/Matrix';
 import { sources, steps } from '../../content/attention';
 import { TransformerOverview } from './TransformerOverview';
@@ -26,6 +27,7 @@ import {
   type ExperimentState,
   type Preset,
 } from '../../state/experiment';
+import '../../styles/instrument.css';
 
 function WeightFlow({ probabilities, query }: { probabilities: number[]; query: number }) {
   return (
@@ -40,7 +42,7 @@ function WeightFlow({ probabilities, query }: { probabilities: number[]; query: 
           <path
             d={`M110 85 C190 85 205 ${30 + j * 55} 290 ${30 + j * 55}`}
             fill="none"
-            stroke={p ? '#087e8b' : '#b5c2d1'}
+            stroke={p ? '#455e20' : '#9e9a8f'}
             strokeWidth={p ? 1.5 + p * 9 : 1}
             strokeDasharray={p ? undefined : '4 4'}
             opacity={p ? 0.4 + p * 0.6 : 0.7}
@@ -51,18 +53,18 @@ function WeightFlow({ probabilities, query }: { probabilities: number[]; query: 
             width="60"
             height="32"
             rx="6"
-            fill="#f1ecf7"
-            stroke="#d6c5e8"
+            fill="#d4ccdd"
+            stroke="#b1a1c3"
           />
           <text x="320" y={35 + j * 55} textAnchor="middle" fill="#6e438e">
             V t{j}
           </text>
-          <text x="365" y={35 + j * 55} fill="#08717d">
+          <text x="365" y={35 + j * 55} fill="#3f551d">
             {(p * 100).toFixed(1)}%
           </text>
         </g>
       ))}
-      <rect x="25" y="64" width="85" height="42" rx="8" fill="#eaf0ff" stroke="#a8bce7" />
+      <rect x="25" y="64" width="85" height="42" rx="8" fill="#c5d0ec" stroke="#a8bce7" />
       <text x="67" y="90" textAnchor="middle" fill="#3558a4">
         Q t{query}
       </text>
@@ -215,7 +217,7 @@ export default function AttentionLab() {
       active="attention"
       crumb="Attention"
       title="从架构图读懂 Attention"
-      indicator={state.view.lesson === 'numbers' ? '浏览器内计算' : '跟着原书学'}
+      indicator="浏览器内计算"
     >
       <section className="page-heading">
         <div>
@@ -252,7 +254,7 @@ export default function AttentionLab() {
             ['overview', '整体架构', '先知道数据走到哪里'],
             ['guide', '拆开 Attention', '跟着箭头理解每一步'],
             ['numbers', '动手核对', '修改输入，查看完整矩阵'],
-            ['heads', '多头注意力', '切分、各算、拼接、Wo'],
+            ['heads', '多头注意力', '切分、各算、拼接、$W_O$'],
           ] as const
         ).map(([mode, title, subtitle], i) => (
           <button
@@ -264,7 +266,9 @@ export default function AttentionLab() {
             <span>0{i + 1}</span>
             <div>
               <strong>{title}</strong>
-              <small>{subtitle}</small>
+              <small>
+                <Rich text={subtitle} />
+              </small>
             </div>
           </button>
         ))}
@@ -320,7 +324,8 @@ export default function AttentionLab() {
           <div className="numbers-context">
             <strong>现在核对图里的单头计算</strong>
             <span>
-              当前输出 O = P V 是一个头的结果；切分、拼接与 Wo 在“04 多头注意力”中逐步演算。
+              当前输出 <Tex tex="O = PV" /> 是一个头的结果；切分、拼接与 <Tex tex="W_O" /> 在“04
+              多头注意力”中逐步演算。
             </span>
             <button onClick={() => switchLesson('guide')}>回到箭头讲解 ↑</button>
             <button onClick={() => switchLesson('heads')}>下一站：多头注意力 →</button>
@@ -542,9 +547,13 @@ export default function AttentionLab() {
                   <>
                     <h3>{step.question}</h3>
                     <p>
-                      {state.step === 1 && !state.config.scaled
-                        ? '当前为关闭缩放的对照：取 Q 的一行和 K 的一行，逐维相乘再相加，直接作为分数。标准 Attention 还会除以 √d_k；重新开启缩放可比较同一输入的结果。'
-                        : step.explanation}
+                      <Rich
+                        text={
+                          state.step === 1 && !state.config.scaled
+                            ? '当前为关闭缩放的对照：取 Q 的一行和 K 的一行，逐维相乘再相加，直接作为分数。标准 Attention 还会除以 $\\sqrt{d_k}$；重新开启缩放可比较同一输入的结果。'
+                            : step.explanation
+                        }
+                      />
                     </p>
                     <div className="step-formula">
                       <Formula
@@ -556,10 +565,14 @@ export default function AttentionLab() {
                       />
                     </div>
                     <div className="shape-label">输入 → 输出形状</div>
-                    <div className="shape-value">{step.shape}</div>
+                    <div className="shape-value">
+                      <Rich text={step.shape} />
+                    </div>
                     <div className="remember">
                       <span>留意</span>
-                      <p>{step.caution}</p>
+                      <p>
+                        <Rich text={step.caution} />
+                      </p>
                     </div>
                   </>
                 ) : (
@@ -743,12 +756,15 @@ export default function AttentionLab() {
               </label>
               <label className="toggle-row">
                 <span>
-                  <strong>缩放 1/√d_k</strong>
+                  <strong>
+                    缩放 <Tex tex="1/\sqrt{d_k}" />
+                  </strong>
                   <small>关闭后比较分数与概率的变化</small>
                 </span>
                 <input
                   type="checkbox"
                   role="switch"
+                  aria-label="缩放 1/√d_k"
                   checked={state.config.scaled}
                   onChange={(e) => changeConfig({ scaled: e.target.checked }, 1)}
                 />
@@ -756,7 +772,7 @@ export default function AttentionLab() {
               </label>
               <div className="settings-footnote">
                 调整计算条件会暂停播放，并跳到对应步骤。缩放的方差直觉假设 q/k 各分量独立、均值
-                0、方差 1，此时点积方差为 d_k。
+                0、方差 1，此时点积方差为 <Tex tex="d_k" />。
               </div>
             </section>
           </div>
@@ -846,7 +862,9 @@ export default function AttentionLab() {
                       setState((s) => ({ ...s, input: { ...s.input, keyDelta }, step: 1 }));
                     }}
                   />
-                  <small>可能改变 S 的 t1 列，以及各行归一化后的 P。参数 W_K 保持不变。</small>
+                  <small>
+                    可能改变 S 的 t1 列，以及各行归一化后的 P。参数 <Tex tex="W_K" /> 保持不变。
+                  </small>
                 </div>
                 <div>
                   <label htmlFor="seed">可复现随机种子</label>
@@ -922,9 +940,11 @@ export default function AttentionLab() {
           <p>
             总图与模块顺序以原书第 3 章 Post-Norm 图为主，Attention 解释对应第 9–12
             章。架构图是结构导航；单头实验忽略 batch、偏置、位置编码、Dropout 和残差，3 个 token、D
-            = d_k = d_v = 2。多头实验对应第 11–12 章：d_model = 4，可选 1、2、4
-            个头，演算切分、转置、各头 Attention、Concatenate 与 Wo；始终按 √d_key
-            缩放，与单头实验共用因果 Mask 开关。
+            = <Tex tex="d_k = d_v = 2" />
+            。多头实验对应第 11–12 章：
+            <Tex tex="d_{\mathrm{model}} = 4" />
+            ，可选 1、2、4 个头，演算切分、转置、各头 Attention、Concatenate 与 <Tex tex="W_O" />
+            ；始终按 <Tex tex="\sqrt{d_{\mathrm{key}}}" /> 缩放，与单头实验共用因果 Mask 开关。
           </p>
           <p>
             “只改变 V / K”是在投影之后人为干预一个激活，用于隔离因果关系；真实模型改变 X 时，Q、K、V

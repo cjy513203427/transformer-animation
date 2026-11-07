@@ -1,5 +1,9 @@
 import type { CSSProperties } from 'react';
 import { formatNumber, type Matrix as MatrixData } from '../math/attention';
+import { Tex } from './Tex';
+
+/** Parameter names like W_Q are typeset as W with a subscript; aria-labels keep the plain name. */
+const SUBSCRIPTED = /^[A-Za-z]+_[A-Za-z]+$/;
 
 interface Props {
   name: string;
@@ -27,7 +31,9 @@ export function Matrix({
   return (
     <div className={`matrix-wrap tone-${tone}`}>
       <div className="matrix-heading">
-        <strong>{name}</strong>
+        <strong>
+          {SUBSCRIPTED.test(name) ? <Tex tex={name.replace('_', '_{') + '}'} /> : name}
+        </strong>
         <span>
           {data.length} × {data[0].length}
         </span>
