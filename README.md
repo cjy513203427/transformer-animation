@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）与 <http://127.0.0.1:5173/position>。
+打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）、<http://127.0.0.1:5173/position> 与 <http://127.0.0.1:5173/inference-cache>。
 
 ```powershell
 npm run check             # 类型检查、数值与状态测试、生产构建
@@ -50,17 +50,29 @@ npm run format           # 格式化项目源码
 
 正弦表与 RoPE 两步可以“逐个位置播放”，指针和向量只在相邻位置之间做转动过渡，跳跃时直接到位；减少动态效果时不做过渡。
 
+### 03 训练、生成与缓存（`/inference-cache`，第 2、16、22 章）
+
+同一个两层、单头、d = 2 的玩具解码器（词表 a–f，无语义，固定教学权重）。左侧概念图随步骤切换，格子都带文字状态；右侧六步：
+
+1. **训练并行**：样本 a b c d e 错开一位得到输入与目标，一次因果前向算出 4 行的分布与 loss。先预测“只改输入 x_j，哪些行会变”，再核对：之前的行逐位不变。
+2. **无缓存基线**：每生成一个 token 就把整段重算一遍；表格核对重算出的旧行与上一步完全相同。
+3. **Prefill**：提示 a b c 一次前向，每层每个位置的 K、V 写入缓存，最后一个位置选出第一个新 token。
+4. **Decode 一步**：只为新 token 算 q、k、v，追加缓存，新 q 读全部历史；可以逐步播放 1–5 次 Decode。
+5. **缓存对照重算**：两条路线逐步比较 logits 与选出的 token，并列出实际执行的 K/V 投影与打分次数。
+6. **缓存失效**：改一个提示 token 或滑动窗口，先预测第 2 层哪些位置失效，再重算核对。
+
 ## 已实现的范围
 
 - Vite + TypeScript + React，KaTeX 排版，原生 SVG 与矩阵表格，无模型服务。
 - `/attention` 单头计算：X 投影 → 点积与缩放 → Mask → 行 Softmax → 加权输出；多头：投影、view、transpose、各头 Attention、Concatenate 与 Wo，支持 1、2、4 个头与投影后 K 干预。
 - `/position` 位置编码：位置盲、正弦表、加法、RoPE 旋转与相对位置、ALiBi，以及三处对照。
+- `/inference-cache` 训练、生成与缓存：两层玩具解码器上的训练并行、无缓存基线、Prefill、Decode、缓存与重算对照，以及改动前缀或滑动窗口后哪些缓存失效。
 - 播放、暂停、前进、后退、跳步、速度、从头看与恢复默认示例；修改参数会暂停播放并按新输入重算。
-- 先预测再验证：只改 V（单头）、只改一个头的 K（多头）、同时平移 RoPE 位置、比较 ALiBi 斜率。
-- 分享链接：Attention 使用 v3 状态（兼容 v1、v2 链接，多头部分从默认示例开始），位置编码使用独立的 `#pos=` 状态；都校验版本、结构、范围和长度，坏链接恢复默认示例。
+- 先预测再验证：只改 V（单头）、只改一个头的 K（多头）、同时平移 RoPE 位置、比较 ALiBi 斜率、只改训练输入 x_j、改前缀后哪些缓存失效。
+- 分享链接：Attention 使用 v3 状态（兼容 v1、v2 链接，多头部分从默认示例开始），位置编码与训练缓存实验分别使用独立的 `#pos=`、`#inf=` 状态；都校验版本、结构、范围和长度，坏链接恢复默认示例。
 - 主题延迟加载、后台暂停、键盘控件、窄屏布局（窄屏顶部提供实验切换）与减少动态效果支持。
 
-**尚未实现：**训练、生成与缓存，KV 架构对照，MoE，FlashAttention。导航将这些主题明确标为未实现，没有空实验页面。
+**尚未实现：**KV 架构对照，MoE，FlashAttention。导航将这些主题明确标为未实现，没有空实验页面。
 
 ## 目录
 
@@ -68,7 +80,8 @@ npm run format           # 格式化项目源码
 src/
   features/attention/   Attention 实验：架构导读、单头、动手核对、多头
   features/position/    位置编码实验：计算链入口图与各步骤组件
-  math/                 纯数值计算及数学性质测试（attention、multihead、position）
+  features/inference/   训练、生成与缓存实验：缓存概念图与各步骤组件
+  math/                 纯数值计算及数学性质测试（attention、multihead、position、inference）
   components/           共享外壳、矩阵与公式视图
   state/                可分享状态、预设、版本校验与测试
   content/              步骤解释、实验目录与参考来源
@@ -89,7 +102,7 @@ docs/                   数值约定与 Cloudflare 准备说明
 
 ## 参考
 
-- [Transformer 架构：从直觉到实现](https://waylandz.com/llm-transformer-book/)：第 3 章为主架构图，第 6、9–12 章为 Attention 解释主线，第 5、14、25 章为位置编码。原书源文件见 [waylandzhang/llm-transformer-book](https://github.com/waylandzhang/llm-transformer-book)（MIT）。
+- [Transformer 架构：从直觉到实现](https://waylandz.com/llm-transformer-book/)：第 3 章为主架构图，第 6、9–12 章为 Attention 解释主线，第 5、14、25 章为位置编码，第 2、16、22 章为训练、生成与缓存。原书源文件见 [waylandzhang/llm-transformer-book](https://github.com/waylandzhang/llm-transformer-book)（MIT）。
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)：§3.2 Attention，§3.5 正弦位置编码。
 - [RoFormer（RoPE）](https://arxiv.org/abs/2104.09864)、[ALiBi](https://arxiv.org/abs/2108.12409)。
 

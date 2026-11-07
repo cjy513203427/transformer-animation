@@ -4,12 +4,15 @@ import './styles/app.css';
 
 const AttentionLab = lazy(() => import('./features/attention/AttentionLab'));
 const PositionLab = lazy(() => import('./features/position/PositionLab'));
+const InferenceLab = lazy(() => import('./features/inference/InferenceLab'));
 const path = window.location.pathname.replace(/\/+$/, '') || '/';
 const page =
   path === '/' || path === '/attention' ? (
     <AttentionLab />
   ) : path === '/position' ? (
     <PositionLab />
+  ) : path === '/inference-cache' ? (
+    <InferenceLab />
   ) : null;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -20,7 +23,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <main className="not-found">
         <h1>这个实验还不存在</h1>
         <p>
-          <a href="/attention">回到 Attention 计算台</a> · <a href="/position">位置编码</a>
+          <a href="/attention">回到 Attention 计算台</a> · <a href="/position">位置编码</a> ·{' '}
+          <a href="/inference-cache">训练、生成与缓存</a>
         </p>
       </main>
     )}

@@ -1,6 +1,7 @@
 import katex from 'katex';
 import { describe, expect, it } from 'vitest';
 import { steps } from './attention';
+import { inferenceMyths, inferenceSteps } from './inference';
 import { bookNotes, positionSteps } from './position';
 
 // Prose strings mark inline math as $...$. In an ordinary JS string "\sqrt" silently becomes
@@ -16,8 +17,14 @@ const proseStrings = [
   ...steps.flatMap((s) => [s.explanation, s.caution, s.shape, s.question]),
   ...positionSteps.flatMap((s) => [s.takeaway, s.prompt, s.title]),
   ...bookNotes,
+  ...inferenceSteps.flatMap((s) => [s.explanation, s.takeaway, s.prompt, s.title]),
+  ...inferenceMyths,
 ];
-const displayFormulas = [...steps.map((s) => s.formula), ...positionSteps.map((s) => s.formula)];
+const displayFormulas = [
+  ...steps.map((s) => s.formula),
+  ...positionSteps.map((s) => s.formula),
+  ...inferenceSteps.map((s) => s.formula),
+];
 
 describe('公式标记', () => {
   it('正文里的 $…$ 是合法 TeX，且没有因 JS 转义而丢掉反斜杠', () => {

@@ -224,7 +224,9 @@
   .pos-segment button,
   .mh-segment button,
   .mh-predictions button,
-  .numbers-context button {
+  .numbers-context button,
+  .inf-segment button,
+  .inf-predict button {
     background: linear-gradient(var(--key-top), var(--key-bottom));
     border: 1px solid var(--edge);
     border-radius: 4px;
@@ -242,7 +244,9 @@
   .lesson-tokens button:hover:not(:disabled),
   .pos-segment button:hover:not(:disabled),
   .mh-segment button:hover:not(:disabled),
-  .mh-predictions button:hover:not(:disabled) {
+  .mh-predictions button:hover:not(:disabled),
+  .inf-segment button:hover:not(:disabled),
+  .inf-predict button:hover:not(:disabled) {
     background: linear-gradient(#f1eee4, #d8d4c8);
     border-color: #7f7b6e;
   }
