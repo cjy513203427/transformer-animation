@@ -121,63 +121,6 @@
   fill: #59665c;
 }
 
-/* ---------- cache cells ---------- */
-.kv-cells {
-  display: grid;
-  gap: 10px;
-}
-.kv-cells-row {
-  display: grid;
-  gap: 4px;
-  font-size: 12px;
-  color: #424d46;
-}
-.kv-cells-row small {
-  margin-left: 8px;
-  font:
-    11px 'IBM Plex Mono',
-    Consolas,
-    monospace;
-  color: #59665c;
-}
-.kv-cells-track {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-}
-.kv-cell {
-  display: inline-grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid transparent;
-  border-radius: 2px;
-  font:
-    normal 10px 'IBM Plex Mono',
-    Consolas,
-    monospace;
-}
-.kv-cell-k {
-  background: #f8eddd;
-  border-color: #b98a5c;
-  color: #6f3a0e;
-}
-.kv-cell-v {
-  background: #f0e9f7;
-  border-color: #a48bbd;
-  color: #5d3d7d;
-}
-.kv-cell-latent {
-  background: #e2efcc;
-  border-color: #6f7d4f;
-  color: #1f2a14;
-}
-.kv-cell-rope {
-  background: repeating-linear-gradient(45deg, #ffffff, #ffffff 3px, #dfe3cc 3px, #dfe3cc 5px);
-  border-color: #6f7d4f;
-  color: #1f2a14;
-}
-
 /* ---------- flows ---------- */
 .kv-flows {
   display: grid;
@@ -307,4 +250,71 @@
   .kv-bars li {
     grid-template-columns: minmax(0, 1fr) 72px;
   }
+}
+
+/* ---------- cache blocks: [tokens, KV heads, d_k + d_v] per layer ---------- */
+.kv-blocks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+.kv-block {
+  margin: 0;
+  display: grid;
+  align-content: end;
+  gap: 2px;
+}
+.kv-block svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.kv-block figcaption {
+  display: grid;
+  gap: 1px;
+  font-size: 12px;
+  color: #424d46;
+}
+.kv-block figcaption strong {
+  font-size: 13px;
+  color: #303638;
+}
+.kv-block figcaption span:last-child {
+  font:
+    11px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+  color: #59665c;
+}
+.kv-blk {
+  stroke-width: 0.8;
+}
+.kv-blk-k {
+  fill: #f3dfc4;
+  stroke: #b98a5c;
+}
+.kv-blk-v {
+  fill: #e6dbf1;
+  stroke: #a48bbd;
+}
+.kv-blk-latent {
+  fill: #d5e6b9;
+  stroke: #6f7d4f;
+}
+.kv-blk-rope {
+  fill: #f4f5e8;
+  stroke: #6f7d4f;
+}
+.kv-blk-axis {
+  font:
+    10px Consolas,
+    'Microsoft YaHei',
+    monospace;
+  fill: #59665c;
+}
+.kv-blk-col {
+  font:
+    9px Consolas,
+    monospace;
+  fill: #59665c;
 }

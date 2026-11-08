@@ -30,6 +30,20 @@ export function splitHeads(matrix: Matrix, numHeads: number): Matrix[] {
   );
 }
 
+/**
+ * view(T, num_heads, d_key)：[T, d_model] → [T][num_heads][d_key]. Row t is cut into num_heads
+ * consecutive pieces; no number moves. Transposing the first two axes gives `splitHeads`.
+ */
+export function viewHeads(matrix: Matrix, numHeads: number): Matrix[] {
+  const [, columns] = checkGrid(matrix, '待变形的矩阵');
+  if (!Number.isInteger(numHeads) || numHeads < 1 || columns % numHeads !== 0)
+    throw new Error('d_model 必须能被 num_heads 整除。');
+  const dKey = columns / numHeads;
+  return matrix.map((row) =>
+    Array.from({ length: numHeads }, (_, h) => row.slice(h * dKey, (h + 1) * dKey)),
+  );
+}
+
 /** Concatenate：[num_heads][T][d_key] → [T, num_heads·d_key]，即转置回去再 view。 */
 export function mergeHeads(heads: Matrix[]): Matrix {
   if (!heads.length) throw new Error('至少需要一个头。');

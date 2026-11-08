@@ -1,8 +1,30 @@
 import type { ReactNode } from 'react';
 import { formatNumber as fmt } from '../../math/attention';
 import type { Frame, NumberLine } from '../../math/p1/shared';
+import { ChainDiagram, PlotDiagram, RankingDiagram, StripDiagram, textWidth } from './Charts';
 const vec = (x: number[]) => '[' + x.map((v) => fmt(v)).join(', ') + ']';
 const MAX_TICKS = 64;
+/** True when the frame carries a dedicated figure instead of the generic bar view. */
+export const hasMechanism = (f: Frame) =>
+  !!(
+    f.line ||
+    f.plot ||
+    f.ranking ||
+    f.strip ||
+    f.chain ||
+    f.points ||
+    f.connections ||
+    f.branch ||
+    f.tree
+  );
+function Captioned({ caption, children }: { caption: string; children: ReactNode }) {
+  return (
+    <>
+      {children}
+      {caption && <p className="p1-line-caption">{caption}</p>}
+    </>
+  );
+}
 
 function domain(values: number[]): [number, number] {
   const finite = values.filter(Number.isFinite);
@@ -16,8 +38,12 @@ function domain(values: number[]): [number, number] {
   return [low - pad, high + pad];
 }
 
-/** Points closer than a label's width share one label, so crowded values stay readable. */
-function labelClusters(positions: number[]) {
+/**
+ * Points closer than a label's width share one label, so crowded values stay readable. Neighbouring
+ * clusters alternate between two label rows, so half a label width (at least 14px) is enough.
+ */
+function labelClusters(positions: number[], names: string[]) {
+  const gap = Math.max(14, (Math.max(...names.map((n) => textWidth(n))) + 4) / 2);
   const order = positions
     .map((p, i) => ({ p, i }))
     .filter(({ p }) => Number.isFinite(p))
@@ -26,7 +52,7 @@ function labelClusters(positions: number[]) {
   let last = -Infinity;
   for (const { p, i } of order) {
     const current = clusters[clusters.length - 1];
-    if (current && p - last < 14) {
+    if (current && p - last < gap) {
       current.indices.push(i);
       current.x = (current.x * (current.indices.length - 1) + p) / current.indices.length;
     } else clusters.push({ indices: [i], x: p });
@@ -52,8 +78,9 @@ function NumberLineDiagram({ line }: { line: NumberLine }) {
     ...(line.markers ?? []).map((m) => m.value),
     ...(line.ticks ?? []),
   ]);
-  const domains = line.rows.map((r, i) =>
-    line.shared ? sharedDomain : domain([...r.values, ...extra(i)]),
+  const domains = line.rows.map(
+    (r, i) =>
+      line.domains?.[i] ?? (line.shared ? sharedDomain : domain([...r.values, ...extra(i)])),
   );
   const x = (row: number, value: number) => {
     const [low, high] = domains[row];
@@ -135,7 +162,10 @@ function NumberLineDiagram({ line }: { line: NumberLine }) {
                 )
               ) : null,
             )}
-            {labelClusters(row.values.map((v) => x(r, v))).map((cluster, k) => (
+            {labelClusters(
+              row.values.map((v) => x(r, v)),
+              line.names,
+            ).map((cluster, k) => (
               <text
                 key={cluster.indices.join()}
                 x={cluster.x}
@@ -160,14 +190,36 @@ function NumberLineDiagram({ line }: { line: NumberLine }) {
 }
 
 export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallback: ReactNode }) {
-  if (f.line) {
+  if (f.line)
     return (
-      <>
+      <Captioned caption={f.line.caption}>
         <NumberLineDiagram line={f.line} />
-        <p className="p1-line-caption">{f.line.caption}</p>
-      </>
+      </Captioned>
     );
-  }
+  if (f.plot)
+    return (
+      <Captioned caption={f.plot.caption}>
+        <PlotDiagram plot={f.plot} />
+      </Captioned>
+    );
+  if (f.ranking)
+    return (
+      <Captioned caption={f.ranking.caption}>
+        <RankingDiagram ranking={f.ranking} />
+      </Captioned>
+    );
+  if (f.strip)
+    return (
+      <Captioned caption={f.strip.caption}>
+        <StripDiagram strip={f.strip} />
+      </Captioned>
+    );
+  if (f.chain)
+    return (
+      <Captioned caption={f.chain.caption}>
+        <ChainDiagram chain={f.chain} />
+      </Captioned>
+    );
   if (f.points) {
     const { before, after } = f.points,
       extent = Math.max(1, ...before.flat().map(Math.abs), ...after.flat().map(Math.abs)),
@@ -400,51 +452,6 @@ export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallbac
         </text>
         <text x="15" y="369" className="p1-svg-small">
           绿色：当前 Beam-2 找到的完整路径；不保证一般情形全局最优
-        </text>
-      </svg>
-    );
-  }
-  if (f.scan) {
-    const s = f.scan;
-    return (
-      <svg
-        className="p1-svg"
-        viewBox="0 0 430 510"
-        role="img"
-        aria-label={`状态扫描，当前计算到t${s.cursor}，未来状态尚未显示`}
-      >
-        <title>上一状态与当前输入共同决定下一状态</title>
-        <text x="280" y="25" textAnchor="middle" className="p1-svg-title">
-          初始状态 {fmt(s.initial)}
-        </text>
-        {s.input.map((v, i) => {
-          const y = 70 + i * 105,
-            ready = i <= s.cursor;
-          return (
-            <g key={i} opacity={ready ? 1 : 0.4}>
-              <path d={`M280 ${i === 0 ? 35 : y - 49} V${y}`} className="p1-wire" />
-              <rect x="15" y={y} width="125" height="57" className="p1-input-node" />
-              <text x="77" y={y + 23} textAnchor="middle" className="p1-svg-small">
-                输入 x{i}
-              </text>
-              <text x="77" y={y + 44} textAnchor="middle" className="p1-svg-number">
-                {fmt(v)}
-              </text>
-              <path d={`M140 ${y + 28} H170`} className="p1-wire" />
-              <rect x="170" y={y} width="220" height="57" className="p1-output-node" />
-              <text x="280" y={y + 23} textAnchor="middle" className="p1-svg-title">
-                t{i} · {ready ? 'h = ' + fmt(s.states[i], 4) : '待计算'}
-              </text>
-              <text x="280" y={y + 44} textAnchor="middle" className="p1-svg-small">
-                {ready
-                  ? `保留 ${fmt(s.retention[i], 3)} · 注入 ${fmt(s.drive[i], 3)}`
-                  : '拖动时间步查看'}
-              </text>
-            </g>
-          );
-        })}
-        <text x="15" y="500" className="p1-svg-small">
-          每步：保留系数 × 上一状态 ＋ 输入注入
         </text>
       </svg>
     );

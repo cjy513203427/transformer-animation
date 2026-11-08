@@ -1,3 +1,4 @@
+import { Cuboid } from '../../components/Oblique';
 import { Tex } from '../../components/Tex';
 import {
   D_HEAD,
@@ -7,8 +8,12 @@ import {
   formatBytes,
   groupOf,
   kvCacheBytes,
+  kvCacheElements,
+  KV_OPTIONS,
   mlaCacheBytes,
+  mlaCacheElements,
   Q_HEADS,
+  TOKENS,
 } from '../../math/kv';
 import { kvHeadChoices, type KVState } from '../../state/kv';
 
@@ -104,42 +109,142 @@ function HeadMap({ kvHeads, head }: { kvHeads: number; head: number }) {
   );
 }
 
-/** One token's cache footprint in one layer: a cell per stored number. */
-function CacheCells() {
-  const rows: { name: string; cells: { text: string; kind: string }[] }[] = [
-    ...([4, 2, 1] as const).map((g) => ({
-      name: `${kindOf(g, Q_HEADS)}（${g} 组 K/V）`,
-      cells: Array.from({ length: g }, (_, h) => [
-        ...Array.from({ length: D_HEAD }, () => ({ text: `K${h}`, kind: 'k' })),
-        ...Array.from({ length: D_HEAD }, () => ({ text: `V${h}`, kind: 'v' })),
-      ]).flat(),
-    })),
+/** One design's cache in one layer, drawn from the same counts as the cache formula. */
+interface CacheDesign {
+  name: string;
+  sub: string;
+  rows: number;
+  columns: { kind: 'k' | 'v' | 'latent' | 'rope'; label: string }[];
+  elements: number;
+}
+function cacheDesigns(): CacheDesign[] {
+  const kv = (g: number): CacheDesign => ({
+    name: kindOf(g, Q_HEADS),
+    sub: `${g} 组 K/V`,
+    rows: g,
+    columns: [
+      ...Array.from({ length: D_HEAD }, () => ({ kind: 'k' as const, label: 'k' })),
+      ...Array.from({ length: D_HEAD }, () => ({ kind: 'v' as const, label: 'v' })),
+    ],
+    elements: kvCacheElements({
+      batch: 1,
+      layers: 1,
+      tokens: TOKENS,
+      kvHeads: g,
+      dK: D_HEAD,
+      dV: D_HEAD,
+      bytesPerElement: 1,
+    }),
+  });
+  return [
+    ...KV_OPTIONS.map(kv),
     {
-      name: 'MLA（latent + RoPE Key）',
-      cells: [
-        ...Array.from({ length: D_LATENT }, () => ({ text: 'c', kind: 'latent' })),
-        ...Array.from({ length: D_ROPE }, () => ({ text: 'kᴿ', kind: 'rope' })),
+      name: 'MLA',
+      sub: 'latent + RoPE Key',
+      rows: 1,
+      columns: [
+        ...Array.from({ length: D_LATENT }, () => ({ kind: 'latent' as const, label: 'c' })),
+        ...Array.from({ length: D_ROPE }, () => ({ kind: 'rope' as const, label: 'kᴿ' })),
       ],
+      elements: mlaCacheElements({
+        batch: 1,
+        layers: 1,
+        tokens: TOKENS,
+        latent: D_LATENT,
+        ropeDim: D_ROPE,
+        bytesPerElement: 1,
+      }),
     },
   ];
+}
+const BLOCK_CELL: [number, number] = [15, 15];
+const BLOCK_STEP: [number, number] = [8, 6];
+const BLOCK_LEFT = 34;
+const BLOCK_BOTTOM = 98;
+
+/** [tokens, KV heads, d_k + d_v] as a block of cells: rows are KV heads, depth is tokens. */
+function CacheBlock({ design }: { design: CacheDesign }) {
+  const cols = design.columns.length,
+    { rows } = design,
+    [cw, ch] = BLOCK_CELL,
+    [sx, sy] = BLOCK_STEP,
+    top = BLOCK_BOTTOM - rows * ch,
+    /** Each block keeps the same width and scale; only the empty space above it is cropped. */
+    viewTop = top - TOKENS * sy - 12,
+    perToken = rows * cols;
   return (
-    <div className="kv-cells" role="table" aria-label="一个 token 在一层里缓存的数">
-      {rows.map((row) => (
-        <div key={row.name} className="kv-cells-row" role="row">
-          <span role="rowheader">
-            {row.name}
-            <small>{row.cells.length} 个数</small>
-          </span>
-          <span className="kv-cells-track" role="cell">
-            {row.cells.map((cell, i) => (
-              <i key={i} className={`kv-cell kv-cell-${cell.kind}`}>
-                {cell.text}
-              </i>
-            ))}
-          </span>
-        </div>
-      ))}
-    </div>
+    <figure className="kv-block">
+      <svg
+        viewBox={`0 ${viewTop} 176 ${BLOCK_BOTTOM + 16 - viewTop}`}
+        role="img"
+        aria-label={`${design.name}：${TOKENS} 个 token × ${
+          design.name === 'MLA' ? '' : `${rows} 组 K/V × `
+        }${cols} 个数 = ${design.elements} 个数`}
+      >
+        <Cuboid
+          x={BLOCK_LEFT}
+          y={top}
+          cols={cols}
+          rows={rows}
+          depth={TOKENS}
+          cell={BLOCK_CELL}
+          step={BLOCK_STEP}
+          fill={(c) => `kv-blk kv-blk-${design.columns[c].kind}`}
+        />
+        {design.name !== 'MLA' && (
+          <text
+            x={BLOCK_LEFT - 5}
+            y={top + (rows * ch) / 2 + 4}
+            textAnchor="end"
+            className="kv-blk-axis"
+          >
+            {rows}组
+          </text>
+        )}
+        {design.columns.map((col, c) => (
+          <text
+            key={c}
+            x={BLOCK_LEFT + c * cw + cw / 2}
+            y={BLOCK_BOTTOM + 12}
+            textAnchor="middle"
+            className="kv-blk-col"
+          >
+            {col.label}
+          </text>
+        ))}
+        <text
+          x={BLOCK_LEFT + cols * cw + TOKENS * sx + 3}
+          y={top - TOKENS * sy + 6}
+          className="kv-blk-axis"
+        >
+          T={TOKENS}
+        </text>
+      </svg>
+      <figcaption>
+        <strong>{design.name}</strong>
+        <span>{design.sub}</span>
+        <span>
+          每 token {perToken} 个 × {TOKENS} = {design.elements}
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
+function CacheBlocks() {
+  return (
+    <>
+      <div className="kv-blocks" role="group" aria-label={`一层里 ${TOKENS} 个 token 的 KV 缓存块`}>
+        {cacheDesigns().map((design) => (
+          <CacheBlock key={design.name} design={design} />
+        ))}
+      </div>
+      <p className="exp-caption">
+        每个小方块是缓存里的一个数。块的正面是一个 token 的一片：行是 KV 头，列是 k、v 各 {D_HEAD}{' '}
+        维（MLA 没有 KV 头这一维，每片是 latent c 的 {D_LATENT} 维和 RoPE Key 的 {D_ROPE}{' '}
+        维）；往后每多一个 token 多一片。这是一层、一个请求的缓存，L 层、batch B 时再乘 L × B。
+      </p>
+    </>
   );
 }
 
@@ -209,8 +314,8 @@ export function KVDiagram({ state }: { state: KVState }) {
     title = 'Query 头不变，K/V 头分组共享';
     body = <HeadMap kvHeads={state.group.kvHeads} head={state.group.head} />;
   } else if (step === 2) {
-    title = '一个 token 在一层里要缓存多少个数';
-    body = <CacheCells />;
+    title = `一层里 ${TOKENS} 个 token 的缓存：一个小方块是一个数`;
+    body = <CacheBlocks />;
   } else if (step === 3) {
     const coupled = state.mla.coupled;
     title = 'RoPE 放在哪里，决定了能不能吸收';

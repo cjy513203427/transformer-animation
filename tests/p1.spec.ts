@@ -115,3 +115,41 @@ test('播放、参数编辑、坏链接与触摸键盘', async ({ page }, info) 
   await expect(page.locator('.lesson-progress')).toHaveText('3 / 6');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
 });
+test('专门的二维图随参数实时重算：Top-P 截断、PPO 裁剪、SSM 状态链', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/decoding');
+  await page.locator('.p1-steps button').nth(3).click();
+  const ranking = page.getByRole('img', { name: /^按概率排序/ });
+  await expect(ranking).toHaveAccessibleName(/c 0\.14 → 0\.14/);
+  const topP = page.getByRole('slider', { name: 'Top-P', exact: true });
+  await topP.focus();
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowLeft');
+  await expect(topP).toHaveValue('0.6');
+  await expect(ranking).toHaveAccessibleName(/a 0\.629 → 1，b 0\.231 → 删去，c 0\.14 → 删去/);
+  await page.locator('.p1-steps button').nth(4).click();
+  await expect(page.getByRole('img', { name: /选中 a$/ })).toBeVisible();
+
+  await page.goto('/preference');
+  await page.locator('.p1-steps button').nth(2).click();
+  const ppo = page.getByRole('img', { name: /^单项目标随概率比 ρ变化的图：PPO 目标、不裁剪 ρA/ });
+  await expect(ppo).toHaveAccessibleName(/A = 1 > 0/);
+  await page.getByRole('slider', { name: '单项 PPO 优势 A', exact: true }).focus();
+  await page.keyboard.press('Home');
+  await expect(ppo).toHaveAccessibleName(/A = -2 < 0/);
+  await page.locator('.p1-steps button').nth(3).click();
+  await expect(page.getByRole('img', { name: /^数轴：组内奖励 r，标准化优势 A/ })).toBeVisible();
+
+  await page.goto('/ssm-mamba');
+  await page.locator('.p1-steps button').nth(3).click();
+  const chain = page.getByRole('img', { name: /^输入相关：初始 1/ });
+  await expect(chain).not.toHaveAccessibleName(/待计算/);
+  await page.getByRole('slider', { name: '查看时间步 t', exact: true }).focus();
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await expect(chain).toHaveAccessibleName(/t1 保留 .*；t2 待计算；t3 待计算$/);
+  await page.locator('.p1-steps button').nth(5).click();
+  await expect(page.getByRole('img', { name: /^历史 A：初始 1/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  expect(errors).toEqual([]);
+});

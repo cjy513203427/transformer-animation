@@ -138,6 +138,99 @@
   stroke-width: 1;
   stroke-dasharray: 2 3;
 }
+/* Charts: curves differ by dash pattern and end label as well as colour. */
+.p1-grid {
+  stroke: #e3e8e2;
+  stroke-width: 1;
+}
+.p1-axis {
+  stroke: #8d998e;
+  stroke-width: 1;
+}
+.p1-curve {
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+.p1-curve-0 {
+  stroke: #3d6b22;
+}
+.p1-curve-1 {
+  stroke: #a85a17;
+}
+.p1-curve-2 {
+  stroke: #4b6aa8;
+}
+.p1-point {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.p1-point-0 {
+  fill: #3d6b22;
+}
+.p1-point-1 {
+  fill: #a85a17;
+}
+.p1-point-2 {
+  fill: #4b6aa8;
+}
+.p1-bar-before {
+  fill: #fff;
+  stroke: #6f7d70;
+  stroke-width: 1.4;
+}
+.p1-bar-after {
+  fill: #89ab59;
+  stroke: #5a7f37;
+  stroke-width: 1;
+}
+.p1-bar-dropped {
+  fill: #f1f2f0;
+  stroke: #b3b8b2;
+  stroke-width: 1.2;
+  stroke-dasharray: 3 2;
+}
+.p1-svg-dropped {
+  font:
+    11px Consolas,
+    monospace;
+  fill: #9a7a62;
+  text-decoration: line-through;
+}
+.p1-seg {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.p1-seg-0 {
+  fill: #dbe7cc;
+}
+.p1-seg-1 {
+  fill: #f2e2cf;
+}
+.p1-seg-2 {
+  fill: #dbe3f2;
+}
+.p1-seg-chosen {
+  stroke: #3d6b22;
+  stroke-width: 3;
+}
+.p1-u-line {
+  stroke: #303638;
+  stroke-width: 1.6;
+}
+.p1-u-head,
+.p1-arrow-head {
+  fill: #59665c;
+}
+.p1-future-node {
+  fill: #fafbfa;
+  stroke: #b7c3b5;
+  stroke-width: 1.3;
+  stroke-dasharray: 4 3;
+}
+.p1-node-current {
+  stroke-width: 2.6;
+}
 .p1-figure-title {
   margin: 0 0 6px;
   font-size: 13px;

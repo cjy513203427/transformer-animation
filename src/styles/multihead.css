@@ -422,3 +422,106 @@
     transition: none;
   }
 }
+
+/* ---------- 3D view of [T, num_heads, d_key] ---------- */
+.ht-panel {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid #dfe4e3;
+}
+.ht-title {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303638;
+}
+.ht-figure {
+  display: block;
+  /* Same cell scale as the flat diagram above; phones get a larger share of the width. */
+  width: var(--ht-width, 70%);
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ht-cell {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.ht-query {
+  fill: #dbd8d0;
+}
+.ht-output {
+  fill: #cadad5;
+}
+.ht-text {
+  font:
+    10px Consolas,
+    monospace;
+  pointer-events: none;
+}
+.ht-text-query {
+  fill: #3558a4;
+}
+.ht-text-output {
+  fill: #1f5d4c;
+}
+.ht-rail {
+  stroke: #b9b5ab;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.ht-band {
+  fill: #e6eedc;
+  stroke: #8fae76;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+.ht-band-on {
+  fill: #dcebc9;
+  stroke: #38751d;
+  stroke-width: 1.6;
+}
+.ht-frame {
+  fill: none;
+  stroke-width: 2;
+}
+.ht-overlay {
+  transition: opacity 0.35s ease;
+}
+.ht-label {
+  font:
+    11px 'Microsoft YaHei',
+    Consolas,
+    sans-serif;
+}
+.ht-muted {
+  fill: #5b5852;
+}
+.ht-axis,
+.ht-band-label {
+  font:
+    11px Consolas,
+    'Microsoft YaHei',
+    monospace;
+  fill: #6f6c65;
+}
+.ht-band-label-on {
+  fill: #38751d;
+  font-weight: 600;
+}
+.ht-caption {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #59665c;
+}
+@media (max-width: 700px) {
+  .ht-figure {
+    width: min(100%, calc(var(--ht-width, 70%) * 1.45));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ht-overlay {
+    transition: none;
+  }
+}

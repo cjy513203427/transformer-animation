@@ -11,6 +11,7 @@ import {
   rowBlock,
   scoreMultiplyAdds,
   splitHeads,
+  viewHeads,
   type MultiHeadWeights,
 } from './multihead';
 
@@ -166,5 +167,23 @@ describe('Multi-Head Attention 数学性质（float64，容差 1e-12）', () => 
     expect(scoreMultiplyAdds(16, 512, 4)).toBe(16 * 16 * 512);
     expect(attentionWeightCount(4)).toBe(64);
     expect(attentionWeightCount(768)).toBe(2_359_296);
+  });
+});
+
+describe('多头立体视图的数据', () => {
+  it('view 与转置：view[t][h][d] 就是 splitHeads[h][t][d]，没有数被搬到别的 token', () => {
+    for (const heads of HEAD_OPTIONS) {
+      const view = viewHeads(MH_X, heads),
+        split = splitHeads(MH_X, heads),
+        dKey = 4 / heads;
+      MH_X.forEach((row, t) => {
+        for (let h = 0; h < heads; h++)
+          for (let d = 0; d < dKey; d++) {
+            expect(view[t][h][d]).toBe(split[h][t][d]);
+            expect(view[t][h][d]).toBe(row[h * dKey + d]);
+          }
+      });
+    }
+    expect(() => viewHeads(MH_X, 3)).toThrow();
   });
 });

@@ -12,6 +12,13 @@ test('多头：切分步骤、头数变化、形状对照与预测验证', async
   await page.getByRole('button', { name: '下一步：切分多头 →', exact: true }).click();
   await expect(page.getByRole('table', { name: '一行 Q、K、V 的切分', exact: true })).toBeVisible();
   await expect(page.locator('.mh-shapes tr.current')).toContainText('[4,16,512] → [4,16,4,128]');
+  await expect(page.getByRole('img', { name: /^Q 形状 \[3, 2, 2\]：先按 token 取/ })).toBeVisible();
+  await page.getByRole('button', { name: '下一步：矩阵变形 →', exact: true }).click();
+  await expect(
+    page.getByRole('img', {
+      name: /^Q 形状 \[2, 3, 2\]：先按 head 取，head 1 是 3 个 token 各 2 维/,
+    }),
+  ).toBeVisible();
 
   const heads = page.getByRole('group', { name: '头数 num_heads', exact: true });
   await heads.getByRole('button', { name: '4', exact: true }).click();

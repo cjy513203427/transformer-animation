@@ -58,6 +58,12 @@ test('共享 KV 头与 MLA：预测打分次数、还原 K、解耦 RoPE、矩�
     page.getByRole('table', { name: '由 c_3 还原的各头 K、V', exact: true }).locator('tbody tr'),
   ).toHaveCount(4);
   await expect(page.locator('.exp-verdict.ok')).toContainText('MLA 存 3 + 2 = 5 个');
+  const blocks = page.getByRole('group', { name: '一层里 4 个 token 的 KV 缓存块', exact: true });
+  await expect(blocks.getByRole('img')).toHaveCount(4);
+  await expect(blocks).toContainText('每 token 16 个 × 4 = 64');
+  await expect(
+    blocks.getByRole('img', { name: 'MLA：4 个 token × 5 个数 = 20 个数', exact: true }),
+  ).toBeVisible();
 
   await page.getByRole('button', { name: '下一步：解耦 RoPE →', exact: true }).click();
   const scores = page.getByRole('table', { name: '精确分数与吸收后分数的对照', exact: true });

@@ -26,7 +26,7 @@ import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
 import '../../styles/p1.css';
 import '../../styles/editorial.css';
-import { MechanismDiagram } from './MechanismDiagram';
+import { hasMechanism, MechanismDiagram } from './MechanismDiagram';
 const errorText = (value: number) => (value === 0 ? '0' : value.toExponential(2));
 /** Name a flattened cell by its row and column labels instead of bare indices. */
 function cellLabel(t: Tensor, i: number) {
@@ -260,12 +260,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               ))}
             </div>
             <p className="exp-caption">
-              {current.points ||
-              current.connections ||
-              current.branch ||
-              current.tree ||
-              current.scan ||
-              current.line
+              {hasMechanism(current)
                 ? '图中位置、连接或节点对应本步实际计算。数值表保留完整坐标；切步直接重建，不把插值当成算法状态。'
                 : '柱长对应本步实际数值，横线表示零；不同形状的张量分别展开坐标，不是语义空间降维。切步直接重建数值。'}
             </p>

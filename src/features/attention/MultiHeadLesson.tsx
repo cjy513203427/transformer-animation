@@ -15,6 +15,7 @@ import {
 } from '../../math/multihead';
 import { HEAD_STEP_COUNT, type ExperimentState } from '../../state/experiment';
 import { HEAD_COLORS, MultiHeadDiagram } from './MultiHeadDiagram';
+import { HeadTensor } from './HeadTensor';
 import '../../styles/multihead.css';
 
 const book = 'https://waylandz.com/llm-transformer-book/';
@@ -245,6 +246,30 @@ export function MultiHeadLesson({
               <span className="mh-legend-changed" /> 干预后变化的格子
               <span className="mh-legend-mask" /> 被 Mask 的位置
             </p>
+            {(step === 1 || step === 2 || step === 4) && (
+              <figure className="ht-panel">
+                <figcaption className="ht-title">
+                  立体视图：{step === 4 ? 'A' : 'Q'} 的三条轴（token、head、d_key）
+                </figcaption>
+                <HeadTensor
+                  matrix={step === 4 ? result.concat : result.q}
+                  numHeads={numHeads}
+                  by={step === 2 ? 'head' : 'token'}
+                  query={query}
+                  name={step === 4 ? 'A' : 'Q'}
+                  tone={step === 4 ? 'output' : 'query'}
+                />
+                <p className="ht-caption">
+                  {numHeads === 1
+                    ? '只有 1 个头：head 轴长度为 1，切分、转置和拼接都不改变任何排列。换成 2 个或 4 个头再看。'
+                    : step === 1
+                      ? `立体地看 [3, ${numHeads}, ${dKey}]：每个 token 的 4 个数按顺序切成 ${numHeads} 段，沿 head 轴往后排开。虚线带是按第一条轴取出的一片 Q[t]，形状 [${numHeads}, ${dKey}]。数值一个也没变，K、V 同样处理。`
+                      : step === 2
+                        ? `和上一步比，格子一个也没动：转置只把“先按 token 取”改成“先按 head 取”。彩色框是一片 Q_h，形状 [3, ${dKey}]：3 个 token 都在，第 t 行仍是同一个 token。`
+                        : `反过来走一遍：各头的输出 A_h 沿 head 轴摆着，转置回“先按 token 取”（虚线带，每片 [${numHeads}, ${dKey}]），再把每片按顺序展平成 4 个数，就是拼接后的 A。`}
+                </p>
+              </figure>
+            )}
             <table className="mh-shapes" aria-label="本例与原书的形状对照">
               <thead>
                 <tr>

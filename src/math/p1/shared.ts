@@ -14,16 +14,12 @@ export interface Frame {
   points?: { before: Matrix; after: Matrix };
   connections?: Matrix;
   tree?: { root: number[]; conditional: Matrix; joint: Matrix; selected: string };
-  scan?: {
-    input: number[];
-    states: number[];
-    retention: number[];
-    drive: number[];
-    cursor: number;
-    initial: number;
-  };
   branch?: { base: Matrix; delta: Matrix; total: Matrix; baseLabel?: string; totalLabel?: string };
   line?: NumberLine;
+  plot?: Plot;
+  ranking?: Ranking;
+  strip?: Strip;
+  chain?: Chain;
 }
 /** Values drawn on horizontal number lines; the same index is the same coordinate in every row. */
 export interface NumberLine {
@@ -32,12 +28,74 @@ export interface NumberLine {
   names: string[];
   /** One scale for every row (to compare values), or one scale per row (to compare shapes). */
   shared: boolean;
+  /** Explicit [low, high] per row, overriding `shared`; e.g. to align a row with its affine image. */
+  domains?: ([number, number] | undefined)[];
   /** Representable grid values, e.g. quantization levels; drawn on every row. */
   ticks?: number[];
   /** Labelled reference values such as μ or a clipping bound, each on one row. */
   markers?: { row: number; value: number; label: string }[];
   caption: string;
 }
+/**
+ * An x–y chart. Curves are sampled from the same function the step computes, so the current
+ * point always lies on its curve; nothing on the chart is drawn by hand.
+ */
+export interface Plot {
+  x: Axis;
+  y: Axis;
+  /** Up to three curves, told apart by line style and an end label, not by colour alone. */
+  curves: { label: string; points: [number, number][] }[];
+  /** Values computed for the current input; `series` picks the marker shape. */
+  points: { label: string; x: number; y: number; series?: number }[];
+  /** Reference lines such as a threshold, a clipping bound or the current parameter. */
+  guides?: { axis: 'x' | 'y'; value: number; label: string }[];
+  caption: string;
+}
+export interface Axis {
+  label: string;
+  min: number;
+  max: number;
+}
+/** Candidates sorted by probability, before and after a filter that renormalizes. */
+export interface Ranking {
+  items: {
+    name: string;
+    before: number;
+    after: number;
+    kept: boolean;
+    /** Running sum of `before` in this order; drawn as a staircase when `threshold` is set. */
+    cumulative: number;
+  }[];
+  /** Top-P threshold on the cumulative sum. */
+  threshold?: number;
+  caption: string;
+}
+/** [0, 1) split into consecutive segments in token order; one uniform number picks a segment. */
+export interface Strip {
+  segments: { name: string; start: number; end: number }[];
+  u: number;
+  chosen: number;
+  caption: string;
+}
+/** A recurrence unrolled in time: every step keeps part of the old state and writes new input. */
+export interface Chain {
+  rows: {
+    label: string;
+    initial: number;
+    steps: { input: number; keep: number; drive: number; state: number }[];
+  }[];
+  /** Steps after this index are not computed yet; absent means every step is shown. */
+  cursor?: number;
+  /** Two rows whose final states are equal, e.g. colliding histories. */
+  collide?: boolean;
+  caption: string;
+}
+/** `count` evenly spaced samples of f on [from, to], both ends included. */
+export const sample = (from: number, to: number, count: number, f: (x: number) => number) =>
+  Array.from({ length: count }, (_, i): [number, number] => {
+    const x = from + ((to - from) * i) / (count - 1);
+    return [x, f(x)];
+  });
 export interface Check {
   label: string;
   error: number;

@@ -81,7 +81,7 @@ export default {
       formula: String.raw`h_t=\bar A_th_{t-1}+\bar B_tx_t`,
       explanation: (c) => {
         const states = c.values('已计算状态 h_t');
-        return `看第 ${fmt(c.metric('当前时间步（从0开始）'))} 步：上一状态 ${fmt(c.metric('上一状态'))} × 保留 ${fmt(c.metric('保留系数'))} + 写入 ${fmt(c.metric('输入注入'))} = ${fmt(states[states.length - 1])}。拖动“查看时间步 t”，左图逐步显示状态，未来的状态还没算出来。改动第 2 个输入，只会影响第 2 步及之后的状态。`;
+        return `看第 ${fmt(c.metric('当前时间步（从0开始）'))} 步：上一状态 ${fmt(c.metric('上一状态'))} × 保留 ${fmt(c.metric('保留系数'))} + 写入 ${fmt(c.metric('输入注入'))} = ${fmt(states[states.length - 1])}。拖动“查看时间步 t”，图中逐步显示状态，未来的状态还没算出来。改动第 2 个输入，只会影响第 2 步及之后的状态。`;
       },
       prompt: '如果改动第 2 个输入，之前的输出会被改变吗？',
       takeaway: '时间方向的依赖决定了哪些结果需要重算。',
