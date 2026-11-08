@@ -181,3 +181,49 @@ y_t = Σ_{e∈A_t} g[t,e] f_e(x_t)    Y: [T, D]
 **简化边界**：没有共享专家、容量限制、丢弃、重路由、辅助负载损失、反向传播与优化器更新，也没有 Attention、残差和归一化。本例只计算 MoE 子层，不把激活参数比例当作整个模型的计算量或加速比。原书第 30.2.3 节的语义专家命名仅可作为类比，本例用编号；第 30.2.5 节“Top-2 计算是 Top-1 两倍”仅对应固定专家结构下的专家部分，Router 的工作量并不翻倍。
 
 依据：[原书第 30 章](https://waylandz.com/llm-transformer-book/第30章-Mixture-of-Experts-稀疏激活的秘密/) 用于章节映射；[Shazeer et al., 2017](https://arxiv.org/html/1701.06538v1) §2–4；[Switch Transformers](https://arxiv.org/html/2101.03961v3) §2.1、§5.4；[GShard](https://arxiv.org/html/2006.16668v1) §3.1、§3.3.2；[Transformers 的 Mixtral 路由实现](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mixtral/modeling_mixtral.py)。2026-11-07 在线读取；说明和教学数值自行编写，没有复用论文或原书图文。
+
+## FlashAttention（原书第 21 章）
+
+单头教学配置，T = 4、d_k = d_v = 2，采用与 Attention 实验一致的行向量记法：
+
+```text
+Q、K: [T, d_k]，V: [T, d_v]
+S = Q Kᵀ / √d_k                    [T, T]，行是 Query、列是 Key
+P = softmax(S + M, axis=key)        [T, T]
+O = P V                            [T, d_v]
+```
+
+Q/K/V 是已经投影好的教学激活；本页省略投影、位置编码、batch、Dropout 和反向传播。因果 Mask 在 Softmax 之前屏蔽 j > i 的 Key，包含当前位置。固定递增预设让后续 Key 块出现更大的最大值；混合预设用可复现种子生成输入。ΔK 在投影后只修改 K[3,0]，Q 与 V 不变，用于观察最后一列的分数及每行归一化变化；它不表示参数训练。开启因果 Mask 时，t0–t2 不能读取 t3，因而这些输出保持不变。
+
+**逐行分块**：固定 Query i，把 Key/V 轴按 B ∈ {1, 2, 3, 4} 切成连续块。B = 3 时最后一块只有一个 Key。图形与数值都来自同一计算轨迹，切换块只是在查看可重建的算法状态，不对数值做动画插值。完成所有 Key 块后才得到完整行输出；中途的 a/l 只针对已处理的可见 Key。
+
+**Online Softmax**：每个 Query 保留标量 m、l 和 d_v 维行向量 a。初始 m = −∞、l = 0、a = 0。m 是已经处理的可见分数的最大值，l = Σ exp(s_j − m)，a = Σ exp(s_j − m) v_j。对新块 C，递推为：
+
+```text
+m_C = max_{j∈C} s_j
+m′ = max(m, m_C)
+α = exp(m − m′)
+e_j = exp(s_j − m′)                 屏蔽项 e_j = 0
+l′ = α l + Σ_{j∈C} e_j
+a′ = α a + Σ_{j∈C} e_j v_j
+O_i = a′ / l′                       完成所有块后
+```
+
+后续块产生更大 m′ 时，旧 l 与旧 a 必须乘同一 α，从旧指数坐标换到新坐标。单独对每块做 Softmax 再平均块输出，会丢失块之间的归一化权重，一般不等价。初始化后遇到第一个有效块时取 α = 0；全部屏蔽的块取 α = 1 并保持 m/l/a，不计算 −∞ − (−∞)。全屏蔽行的 Softmax 数学上没有定义；本实现延续共享 Attention 工具的教学边界约定，返回全零输出以避免 NaN。内置因果场景每行至少可见自身。
+
+**核对与精度**：完整基线先计算 S、P、O；在线路径只用分数块更新 m/l/a，最后逐行与基线比较。JavaScript 运算使用 float64，内部不舍入，显示时才舍入。改变分块大小改变求和次序，数学结果相同，浮点结果以绝对误差 1e-12 比较，不要求逐 bit 一致。教学页面为查看中间过程而保留基线矩阵与各块轨迹；页面本身的内存占用不是 FlashAttention kernel 的内存实现。
+
+**存储和 I/O 账本**：页面采用一个明确的逐 Query 行流式调度，固定每个元素 b = 4 字节作假想存储计算；这不代表 JavaScript 的真实内存布局或 GPU 精度。账本只估算所列中间量，不包含共同的 Q/K/V 输入、最终 O 输出、模型权重、KV 缓存、分配器或运行时开销。
+
+```text
+朴素完整基线的 S、P 元素数：             2T²
+逐行分块工作区元素数：                  B(d_k + d_v + 1) + d_k + 2d_v + 3
+朴素路径 S、P 各写一次、读一次：         4T² 个元素传输
+分块路径将完整 S、P 写到外部存储再读回：  0 个元素传输
+```
+
+分块工作区依次计 K/V 块、指数分数块、一个 Query、两个 d_v 维累积向量和三个标量槽位；这是便于教学的工作区约定，不是优化后的 kernel 分配公式。T = 4 的玩具下分块工作区未必更小，不能把这一点隐藏。选定中间量不落盘到 HBM 的理想计数也不是完整 HBM I/O：真实 kernel 还需要读 Q/K/V、写 O，加载次数取决于块调度、片上存储容量与硬件实现。页面不测量 CUDA kernel，不推断运行时间或加速倍数。
+
+完整稠密 Attention 的 Query–Key 配对规模仍为 T²；因果可见配对是 T(T+1)/2。FlashAttention 的关键在于分块和融合计算，避免保存完整中间矩阵并减少 HBM I/O，而非把标准完整 Attention 变成线性配对计算。额外中间存储与推理时跨 token 保存的 KV Cache 是不同的量。
+
+依据：[FlashAttention（NeurIPS 2022）](https://arxiv.org/html/2205.14135v2) §2.2、§3.1–3.2 的 Online Softmax、分块与 I/O 分析；[作者实现](https://github.com/Dao-AILab/flash-attention)；[原书第 21 章](https://waylandz.com/llm-transformer-book/第21章-Flash-Attention-内存优化原理/) 用于章节映射。2026-11-08 在线读取；图形、教学输入和逐行调度账本由本项目编写。

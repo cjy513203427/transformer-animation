@@ -13,6 +13,7 @@ const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
   '/inference-cache': lazy(() => import('./features/inference/InferenceLab')),
   '/kv-architectures': lazy(() => import('./features/kv/KVLab')),
   '/moe': lazy(() => import('./features/moe/MoELab')),
+  '/flash-attention': lazy(() => import('./features/flash/FlashLab')),
 };
 
 const path = window.location.pathname.replace(/\/+$/, '') || '/';

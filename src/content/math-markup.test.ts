@@ -4,6 +4,7 @@ import { steps } from './attention';
 import { inferenceMyths, inferenceSteps } from './inference';
 import { kvMyths, kvSteps } from './kv';
 import { moeMyths, moeSteps } from './moe';
+import { flashMyths, flashSteps } from './flash';
 import { bookNotes, positionSteps } from './position';
 
 // Prose strings mark inline math as $...$. In an ordinary JS string "\sqrt" silently becomes
@@ -25,6 +26,8 @@ const proseStrings = [
   ...kvMyths,
   ...moeSteps.flatMap((s) => [s.explanation, s.takeaway, s.prompt, s.title]),
   ...moeMyths,
+  ...flashSteps.flatMap((s) => [s.explanation, s.takeaway, s.prompt, s.title]),
+  ...flashMyths,
 ];
 const displayFormulas = [
   ...steps.map((s) => s.formula),
@@ -32,6 +35,7 @@ const displayFormulas = [
   ...inferenceSteps.map((s) => s.formula),
   ...kvSteps.map((s) => s.formula),
   ...moeSteps.map((s) => s.formula),
+  ...flashSteps.map((s) => s.formula),
 ];
 
 describe('公式标记', () => {

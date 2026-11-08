@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）、<http://127.0.0.1:5173/position>、<http://127.0.0.1:5173/inference-cache>、<http://127.0.0.1:5173/kv-architectures> 与 <http://127.0.0.1:5173/moe>。
+打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）、<http://127.0.0.1:5173/position>、<http://127.0.0.1:5173/inference-cache>、<http://127.0.0.1:5173/kv-architectures>、<http://127.0.0.1:5173/moe> 与 <http://127.0.0.1:5173/flash-attention>。
 
 ```powershell
 npm run check             # 类型检查、数值与状态测试、生产构建
@@ -89,6 +89,19 @@ npm run format           # 格式化项目源码
 
 有播放、暂停、回退、跳步、重置、速度、隐藏说明复述和 `#moe=` 分享恢复。省略共享专家、容量限制、丢弃、重路由、负载均衡损失和训练。
 
+### 06 FlashAttention（`/flash-attention`，第 21 章）
+
+同一份 Q、K、V，T = 4、d_k = d_v = 2，对照完整矩阵与逐块读取的计算路径：
+
+1. **全量基线**：完整分数矩阵 S、沿 Key 轴的 Softmax 权重 P，以及 O = PV，明确 Query 行与 Key 列。
+2. **分块读取**：切换块大小 1、2、3、4，观察同一 Query 依次读取哪些 K/V；块大小 3 包含不足一整块的尾块。
+3. **在线累积**：逐块核对最大值 m、归一化累积量 l 和未归一化加权向量 a，最后用 a/l 得到输出。
+4. **重缩放**：后续块带来更大的分数时，同时缩放旧 l 和 a。预设提供后块最大值更大的对照；修改最后一个 Key 的激活，观察因果 Mask 下哪些行受到影响。
+5. **等价核对**：先预测改变块大小是否改变输出，再执行并与朴素 Attention 比较，float64 容差 1e-12。
+6. **存储与 I/O**：区分配对计算、中间 S/P 存储、工作区与选定中间量的读写账本。浏览器演示不测量 GPU，也不推断加速倍数。
+
+有 Query 与块选择、因果/双向对照、可复现输入预设与种子、播放、暂停、回退、重置、隐藏说明复述和 `#flash=` 分享恢复。教学页面保留完整基线与轨迹便于核对，不以页面自身的内存占用模拟 CUDA kernel。
+
 ## 已实现的范围
 
 - Vite + TypeScript + React，KaTeX 排版，原生 SVG 与矩阵表格，无模型服务。
@@ -97,12 +110,13 @@ npm run format           # 格式化项目源码
 - `/inference-cache` 训练、生成与缓存：两层玩具解码器上的训练并行、无缓存基线、Prefill、Decode、缓存与重算对照，以及改动前缀或滑动窗口后哪些缓存失效。
 - `/kv-architectures` KV 架构对照：缓存字节账本、MHA/GQA/MQA 的 K/V 头共享与等价核对、MLA 的低秩压缩、解耦 RoPE 与矩阵吸收、真实规模对照。
 - `/moe` MoE 与专家并行：Router、Top-K 门控、两层专家 FFN、加权合并、负载与参数、跨设备激活通信。
+- `/flash-attention` FlashAttention：完整基线、分块读取、Online Softmax 的 m/l/a 累积与重缩放、逐行等价核对、中间存储与读写账本。
 - 播放、暂停、前进、后退、跳步、速度、从头看与恢复默认示例；修改参数会暂停播放并按新输入重算。
-- 先预测再验证：只改 V（单头）、只改一个头的 K（多头）、同时平移 RoPE 位置、比较 ALiBi 斜率、只改训练输入 x_j、改前缀后哪些缓存失效、KV 头数是否改变打分次数、不解耦 RoPE 时吸收在哪些位置正确。
-- 分享链接：Attention 使用 v3 状态（兼容 v1、v2 链接，多头部分从默认示例开始），其他实验分别使用独立的 `#pos=`、`#inf=`、`#kv=`、`#moe=` 状态；都校验版本、结构、范围和长度，坏链接恢复默认示例。
+- 先预测再验证：只改 V（单头）、只改一个头的 K（多头）、同时平移 RoPE 位置、比较 ALiBi 斜率、只改训练输入 x_j、改前缀后哪些缓存失效、KV 头数是否改变打分次数、不解耦 RoPE 时吸收在哪些位置正确、改变分块大小是否改变 Attention 输出。
+- 分享链接：Attention 使用 v3 状态（兼容 v1、v2 链接，多头部分从默认示例开始），其他实验分别使用独立的 `#pos=`、`#inf=`、`#kv=`、`#moe=`、`#flash=` 状态；都校验版本、结构、范围和长度，坏链接恢复默认示例。
 - 主题延迟加载、后台暂停、键盘控件、窄屏布局（窄屏顶部提供实验切换）与减少动态效果支持。
 
-**尚未实现：**FlashAttention。导航明确标为未实现，没有空实验页面。
+P0 的六个主题均有可计算的实验。P1 的归一化、LoRA、量化、解码策略等仍为后续候选；本次未增加这些主题。
 
 ## 目录
 
@@ -113,7 +127,8 @@ src/
   features/inference/   训练、生成与缓存实验：缓存概念图与各步骤组件
   features/kv/          KV 架构对照实验：缓存条形图、分组映射、计算路径与各步骤组件
   features/moe/         MoE 实验：路由、专家分支、负载与设备间通信
-  math/                 纯数值计算及数学性质测试（attention、multihead、position、inference、kv、moe）
+  features/flash/       FlashAttention 实验：分块轨迹、在线累积与存储账本
+  math/                 纯数值计算及数学性质测试（attention、multihead、position、inference、kv、moe、flash）
   components/           共享外壳、矩阵与公式视图
   state/                可分享状态、预设、版本校验与测试
   content/              步骤解释、实验目录与参考来源
@@ -137,5 +152,6 @@ docs/                   数值约定与 Cloudflare 准备说明
 - [Transformer 架构：从直觉到实现](https://waylandz.com/llm-transformer-book/)：第 3 章为主架构图，第 6、9–12 章为 Attention 解释主线，第 5、14、25 章为位置编码，第 2、16、22 章为训练、生成与缓存，第 22、23、30 章与 DeepSeek-V2 论文为 KV 架构对照。原书源文件见 [waylandzhang/llm-transformer-book](https://github.com/waylandzhang/llm-transformer-book)（MIT）。
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)：§3.2 Attention，§3.5 正弦位置编码。
 - [RoFormer（RoPE）](https://arxiv.org/abs/2104.09864)、[ALiBi](https://arxiv.org/abs/2108.12409)。
+- [FlashAttention（NeurIPS 2022）](https://arxiv.org/html/2205.14135v2)：分块、Online Softmax 与 HBM I/O；[作者实现](https://github.com/Dao-AILab/flash-attention)。
 
-来源核对：单头部分 2026-11-05；多头与位置编码部分 2026-11-06，对照原书 GitHub 源文件 commit 4a77788；这两次未在线复核论文。训练缓存、KV 架构与 MoE 部分于 2026-11-07 在线核对，具体主源和简化边界见各实验与数学说明。MoE 核对了原书第 30 章、Shazeer 2017、Switch、GShard 及 Transformers 的 Mixtral 路由实现。说明和图形自行编写，没有复制书中的文本或图片。
+来源核对：单头部分 2026-11-05；多头与位置编码部分 2026-11-06，对照原书 GitHub 源文件 commit 4a77788；这两次未在线复核论文。训练缓存、KV 架构与 MoE 部分于 2026-11-07 在线核对，具体主源和简化边界见各实验与数学说明。MoE 核对了原书第 30 章、Shazeer 2017、Switch、GShard 及 Transformers 的 Mixtral 路由实现。FlashAttention 于 2026-11-08 核对原书第 21 章、原论文 §2.2、§3.1–3.2 与作者仓库。说明和图形自行编写，没有复制书中的文本或图片。

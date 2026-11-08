@@ -92,7 +92,7 @@ export function AppShell({
             </div>
             <div className="site-footer-secondary">
               <span>{indicator}，不上传数据</span>
-              <span>待补充：{ROADMAP.join('、')}</span>
+              <span>{ROADMAP.length ? `待补充：${ROADMAP.join('、')}` : '六个核心实验已开放'}</span>
             </div>
           </footer>
         </main>
