@@ -80,7 +80,25 @@ export function lora(x: number[], p: Parameters): Computation {
         '底座冻结，A/B 可训练；示例所有运算使用 JS float64，账本假设 4B 适配器，不是真实 GPU dtype 或显存实测。',
       ),
     ].map((item, index) =>
-      index === 2 ? { ...item, branch: { base, delta, total: combined } } : item,
+      index === 2
+        ? { ...item, branch: { base, delta, total: combined } }
+        : index === 3
+          ? {
+              ...item,
+              branch: { base, delta, total: merged, totalLabel: '合并后 X(W₀ + ΔW)' },
+            }
+          : index === 4
+            ? {
+                ...item,
+                branch: {
+                  base: quantBase,
+                  delta,
+                  total: quantCombined,
+                  baseLabel: '量化底座 X·deq(W₀)',
+                  totalLabel: 'QLoRA 输出 Y',
+                },
+              }
+            : item,
     ),
     checks: [check('双支路与合并权重输出等价', flat(combined), flat(merged))],
     signature: flat(combined),

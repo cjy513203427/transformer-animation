@@ -1,13 +1,33 @@
+import { formatNumber as fmt } from '../../math/attention';
 import { preference } from '../../math/p1/preference';
-import { field, lesson, type TopicDefinition } from './types';
+import { BOOK } from '../book';
+import { field, lesson, vec, type TopicDefinition } from './types';
+const DPO = 'https://arxiv.org/html/2305.18290v3',
+  PPO = 'https://spinningup.openai.com/en/latest/algorithms/ppo.html',
+  R1 = 'https://arxiv.org/html/2501.12948v1';
 export default {
   id: 'preference',
   path: '/preference',
   title: '偏好学习：奖励怎样进入训练目标？',
   chapter: '第 29、31 章',
   intro:
-    '给同一 prompt 的四个回答打分，拆开偏好概率、DPO、PPO-Clip 与 GRPO 的组内优势。这里只核对公开目标，不运行训练。',
-  input: [0, 1, 2, 3],
+    '给同一个 prompt 的四个回答打分，拆开偏好概率、DPO、PPO 裁剪与 GRPO 的组内优势。这里只核对公开目标，不运行训练。',
+  question: '同一个问题：人的偏好怎样变成可以计算的训练目标',
+  headline: '偏好概率 → DPO → PPO 裁剪 → 组内优势 → GRPO 目标 → 平移与蒸馏。',
+  why: {
+    question: '模型已经会说话了，怎样让它更符合人的偏好？',
+    points: [
+      '原书 29.1 的说法：预训练让模型“会说话”，对齐让模型“说人话”。常见做法是让人比较两个回答哪个更好，再把这种偏好变成训练目标。',
+      'RLHF 先训练奖励模型给回答打分，再用 PPO 优化策略；DPO 直接用偏好对构造损失；DeepSeek-R1 用 GRPO：同一道题生成一组回答，用组内平均作基线，不再需要单独的 Critic 模型。本页只计算这些公开目标里的关键数字。',
+    ],
+    analogy: {
+      title: '比较几次作答，不请额外的老师（31.4.3）',
+      text: 'PPO 像让学生做一道题，再请另一位老师来评判；GRPO 像让学生把同一类题做好几遍，看哪几遍比平均水平好，不需要额外的“老师”（Critic 模型）。',
+    },
+    book: ['第 29.1 节 · 为什么需要对齐', BOOK.ch29],
+  },
+  input: [0.8, 0.3, 0.9, 0.5],
+  inputNames: ['回答 0 的奖励', '回答 1 的奖励', '回答 2 的奖励', '回答 3 的奖励'],
   fields: [
     field('policy', '当前回答0的 logit', 0.5, -2, 2, 0.25, [1, 4, 5]),
     field('beta', 'DPO β', 0.1, 0.05, 1, 0.05, [1]),
@@ -18,50 +38,75 @@ export default {
     field('shift', '奖励共同平移 c', 0, -3, 3, 0.25, [3, 5]),
   ],
   steps: [
-    lesson(
-      '偏好概率',
-      String.raw`P(y_w\succ y_l)=\sigma(r_w-r_l)`,
-      '同一 prompt 的候选回答组成比较。Bradley–Terry 依据奖励差构造偏好概率，奖励整体平移不会改变差。',
-      '同一对奖励都加 2，偏好概率会变吗？',
-      '偏好概率依赖差值，不依赖奖励绝对零点。',
-    ),
-    lesson(
-      'DPO',
-      String.raw`L=-\log\sigma\!\left(\beta\left[\log\frac{\pi_\theta(y_w)}{\pi_{ref}(y_w)}-\log\frac{\pi_\theta(y_l)}{\pi_{ref}(y_l)}\right]\right)`,
-      '固定回答0为偏好项、回答1为拒绝项，比较当前与参考策略的 log 概率比。用稳定 softplus 计算损失；偏好标签不会由本页奖励自动改写。',
-      '提高被偏好回答相对于参考策略的概率，损失如何变化？',
-      'DPO 从偏好对直接构造策略损失；这里没有另训奖励模型。',
-    ),
-    lesson(
-      'PPO-Clip',
-      String.raw`J=\min(\rho A,clip(\rho,1-\epsilon,1+\epsilon)A)`,
-      '单独编辑比率和优势，检查正负优势下 min 的方向。裁剪限制目标的激励，不保证策略比率实际永远落在区间内。',
-      'A 为负且比率低于下限时，哪一项被 min 选中？',
-      '不能把所有情况都简写成 clip(ρ)A。',
-    ),
-    lesson(
-      '组内优势',
-      String.raw`A_i=\frac{r_i-\bar r}{\sqrt{\frac1G\sum_j(r_j-\bar r)^2}}`,
-      'GRPO 的组是同一个 prompt 的多个回答。本例明确用总体标准差，零方差时优势约定为0；不是对不同 prompt 混合标准化。',
-      '奖励全部相同，为什么不能直接除以标准差？',
-      '组内中心化和尺度一起构成相对优势。',
-    ),
-    lesson(
-      'GRPO 约束',
-      String.raw`J=\frac1G\sum_i\left[\min(\rho_iA_i,clip(\rho_i)A_i)-\beta k_i\right]`,
-      '用旧策略构造比率，用参考策略构造 R1 形式的样本 KL 估计项。四个完整回答在本例各被简化成一个动作，省略逐 token 平均与优化过程。',
-      '优势都为0时，参考约束是否一定也为0？',
-      '相对奖励项与参考策略约束是两个独立贡献。',
-    ),
-    lesson(
-      '平移与蒸馏',
-      String.raw`k_i=\frac{\pi_{ref,i}}{\pi_{\theta,i}}-\log\frac{\pi_{ref,i}}{\pi_{\theta,i}}-1`,
-      '先预测共同平移奖励是否保持组优势。再查看玩具教师概率与学生概率的交叉熵，区分蒸馏监督和组奖励目标。',
-      '奖励平移、策略概率变化、教师目标变化分别影响哪条路径？',
-      '公开目标可计算；不能推断闭源模型的内部训练或隐藏推理。',
-    ),
+    lesson({
+      name: '偏好概率',
+      title: '两个回答谁更好：只看奖励差',
+      formula: String.raw`P(y_w\succ y_l)=\sigma(r_w-r_l)`,
+      explanation: (c) => {
+        const r = c.values('给定奖励 r');
+        return `Bradley–Terry 模型假设：回答 0 胜过回答 1 的概率只取决于两者的奖励差，P = σ(r₀ − r₁)。当前 r₀ = ${fmt(r[0])}、r₁ = ${fmt(r[1])}，P = ${fmt(c.metric('P(回答0 优于回答1)'))}。原书 29.3.2 的例子：r(A) = 5、r(B) = 3 时 P = σ(2) ≈ 0.88；两者相等时是 0.5。`;
+      },
+      prompt: '同一对奖励都加 2，偏好概率会变吗？',
+      takeaway: '偏好概率只看奖励差，不看奖励的绝对零点。',
+      book: ['第 29.3.2 节 · Bradley-Terry 模型', BOOK.ch29],
+    }),
+    lesson({
+      name: 'DPO',
+      title: 'DPO：不训练奖励模型，直接用偏好对算损失',
+      formula: String.raw`L=-\log\sigma\!\left(\beta\left[\log\frac{\pi_\theta(y_w)}{\pi_{ref}(y_w)}-\log\frac{\pi_\theta(y_l)}{\pi_{ref}(y_l)}\right]\right)`,
+      explanation: (c) =>
+        `固定回答 0 被偏好、回答 1 被拒绝。DPO 比较当前策略相对参考策略的 log 概率比：被偏好回答的比值越高、被拒绝回答的越低，损失越小。当前 β × log 比值差 = ${fmt(c.metric('β × log-ratio 差'))}，DPO loss = ${fmt(c.metric('DPO loss'))}。拖动“当前回答0的 logit”，看损失怎样变化。`,
+      prompt: '提高被偏好回答相对于参考策略的概率，损失怎样变化？',
+      takeaway: 'DPO 从偏好对直接构造策略损失，不单独训练奖励模型。',
+      book: ['第 29.5.2 节 · DPO 的核心思想', BOOK.ch29],
+      source: ['DPO 论文 Eq.7', DPO],
+    }),
+    lesson({
+      name: 'PPO-Clip',
+      title: 'PPO：一次更新不要走得太远',
+      formula: String.raw`J=\min(\rho A,clip(\rho,1-\epsilon,1+\epsilon)A)`,
+      explanation: (c) =>
+        `ρ 是新旧策略给同一个回答的概率之比，A 是这个回答比预期好多少（优势）。PPO 在“不裁剪”和“把 ρ 限制在 [1 − ε, 1 + ε]”两项里取较小的一个。当前 ρ = ${fmt(c.metric('概率比 ρ'))}、A = ${fmt(c.metric('优势 A'))}、ε = ${fmt(c.metric('裁剪宽度 ε'))}。A 为正时，ρ 超过 1 + ε 后再增大，目标也不再提高；A 为负时，ρ 低于 1 − ε 后再减小，目标同样不再提高。`,
+      prompt: 'A 为负且比率低于下限时，min 选中哪一项？',
+      takeaway: '裁剪限制的是目标给出的激励，不是强行截断 ρ；不能都简写成 clip(ρ)A。',
+      book: ['第 29.4.3 节 · PPO 优化的直觉', BOOK.ch29],
+      source: ['PPO 作者文档', PPO],
+    }),
+    lesson({
+      name: '组内优势',
+      title: 'GRPO：同一道题的几个回答，和组平均比',
+      formula: String.raw`A_i=\frac{r_i-\bar r}{\sqrt{\frac1G\sum_j(r_j-\bar r)^2}}`,
+      explanation: (c) =>
+        `GRPO 的“组”是同一个 prompt 的多个回答。先算组平均 ${fmt(c.metric('组均值'))}，每个回答减去平均，得到“比平均好多少”；DeepSeek-R1 论文还会除以组内标准差 ${fmt(c.metric('总体标准差（除以 G）'))}，得到 A = ${vec(c.values('标准化优势 A'))}。原书 31.4.3 的例子 [0.8, 0.3, 0.9, 0.5] 平均 0.625，书中只写了减平均这一步：+0.175、−0.325、+0.275、−0.125。分数全部相同时标准差为 0，本页约定优势为 0。`,
+      prompt: '奖励全部相同，为什么不能直接除以标准差？',
+      takeaway: '组内减平均、除以标准差，得到的是相对优势；不能混用不同 prompt 的回答。',
+      book: ['第 31.4.3 节 · GRPO 算法', BOOK.ch31],
+      source: ['DeepSeek-R1 §2.2.1', R1],
+    }),
+    lesson({
+      name: 'GRPO 约束',
+      title: '优势乘概率比，再扣掉离参考模型太远的部分',
+      formula: String.raw`J=\frac1G\sum_i\left[\min(\rho_iA_i,clip(\rho_i)A_i)-\beta k_i\right]`,
+      explanation: (c) =>
+        `每个回答的贡献 = PPO 式裁剪项 − β × KL 估计项；当前 β = ${fmt(c.metric('KL 系数'))}，简化目标 = ${fmt(c.metric('GRPO 简化目标（最大化）'))}。KL 项惩罚策略离参考模型太远，即使所有优势都是 0，它也可能不为 0。本例把每个完整回答当作一个动作，省略逐 token 平均和优化过程。`,
+      prompt: '优势都为 0 时，参考约束是否一定也为 0？',
+      takeaway: '相对奖励项与参考约束是两份独立的贡献。',
+      book: ['第 31.4.3 节 · GRPO 算法', BOOK.ch31],
+      source: ['DeepSeek-R1 §2.2.1', R1],
+    }),
+    lesson({
+      name: '平移与蒸馏',
+      title: '奖励整体平移不改优势；蒸馏是另一条路',
+      formula: String.raw`k_i=\frac{\pi_{ref,i}}{\pi_{\theta,i}}-\log\frac{\pi_{ref,i}}{\pi_{\theta,i}}-1`,
+      explanation: (c) =>
+        `先预测：所有奖励都加上同一个 c，组内优势会不会变？减平均这一步会把 c 抵消掉。表中另列一个玩具教师分布，它与学生分布的交叉熵是 ${fmt(c.metric('玩具蒸馏交叉熵'))}：蒸馏让学生模仿教师的输出（原书 31.7），和用组奖励优化是两种不同的训练信号。`,
+      prompt: '奖励平移、策略概率变化、教师目标变化分别影响哪条路径？',
+      takeaway: '公开目标可以计算；不能据此推断闭源模型的内部训练或隐藏推理。',
+      book: ['第 31.7.1 节 · 蒸馏的动机', BOOK.ch31],
+    }),
   ],
   examples: [
+    { name: '书中 31.4.3：[0.8, 0.3, 0.9, 0.5]', input: [0.8, 0.3, 0.9, 0.5], book: true },
     { name: '不同奖励', input: [0, 1, 2, 3] },
     { name: '零方差组', input: [2, 2, 2, 2] },
   ],
@@ -73,13 +118,19 @@ export default {
     label: 'GRPO 组内优势',
   },
   sources: [
-    { title: 'DPO Eq.7', url: 'https://arxiv.org/html/2305.18290v3' },
-    { title: 'PPO 作者文档', url: 'https://spinningup.openai.com/en/latest/algorithms/ppo.html' },
-    { title: 'DeepSeek-R1 §2.2.1', url: 'https://arxiv.org/html/2501.12948v1' },
+    { title: '原书第 29 章 · RLHF 与偏好学习', url: BOOK.ch29 },
+    { title: '原书第 31 章 · 推理模型革命', url: BOOK.ch31 },
+    { title: 'DPO Eq.7', url: DPO },
+    { title: 'PPO 作者文档', url: PPO },
+    { title: 'DeepSeek-R1 §2.2.1', url: R1 },
   ],
   limits: [
     '只计算给定样本目标，没有采样、critic、GAE、反向或优化器。',
     'R1 原文 std 未指定总体或样本分母；本页明确用总体标准差，不冒充精确训练代码。',
     'KL 样本估计项不等于单个回答上的完整分布 KL。蒸馏分布为教学构造，没有隐藏推理内容。',
+  ],
+  bookNotes: [
+    '原书 31.4.3 的 GRPO 优势只写了“减去组平均”；DeepSeek-R1 论文的公式还除以组内标准差。本页按论文计算，说明里同时列出书中只减平均的结果。',
+    '原书 31.4.3 的示意图写“生成 8 个回答”，但只列出 4 个分数；本页的组就是这 4 个回答，平均值与书中的 0.625 一致。',
   ],
 } satisfies TopicDefinition;

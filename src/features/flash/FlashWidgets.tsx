@@ -19,12 +19,14 @@ export function FlashInputs({ state, onChange }: FlashProps) {
     <div className="flash-inputs">
       <Segment
         label="输入预设"
-        options={['rising', 'mixed'] as const}
+        options={['rising', 'book', 'mixed'] as const}
         value={state.input.preset}
         onSelect={(preset) =>
           onChange({ ...state, input: { ...state.input, preset, keyDelta: 0, block: 0 } })
         }
-        render={(preset) => (preset === 'rising' ? '递增分数' : '混合输入')}
+        render={(preset) =>
+          preset === 'rising' ? '递增分数' : preset === 'book' ? '书中 21.4.4 一行分数' : '混合输入'
+        }
       />
       <div className="flash-input-row">
         <Segment
@@ -38,7 +40,7 @@ export function FlashInputs({ state, onChange }: FlashProps) {
           混合输入种子
           <input
             aria-label="混合输入种子"
-            disabled={state.input.preset === 'rising'}
+            disabled={state.input.preset !== 'mixed'}
             type="number"
             min={1}
             max={9999}

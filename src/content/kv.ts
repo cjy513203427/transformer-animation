@@ -1,3 +1,4 @@
+import type { WhyContent } from '../components/WhyIntro';
 import { BOOK_URL } from './topics';
 
 const CH22 = BOOK_URL + '第22章-KV-Cache-推理加速/';
@@ -12,8 +13,10 @@ export const kvSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
-  /** Label and full URL (a book chapter or a paper section). */
-  source: [string, string];
+  /** Paper section used to check the formula; absent when the book is the reference. */
+  source?: [string, string];
+  /** The book section that explains this step. */
+  book: [string, string];
 }[] = [
   {
     name: '缓存账本',
@@ -25,7 +28,7 @@ export const kvSteps: {
     prompt: 'KV 缓存的公式里有哪几个乘数？把 KV 头从 32 减到 8，缓存变成原来的多少？',
     formula:
       '\\text{bytes}=B\\times L\\times T\\times H_{KV}\\times\\left(d_k+d_v\\right)\\times b',
-    source: ['原书第 22.4 节 · 内存公式：关键是 n_kv_heads', CH22],
+    book: ['第 22.4.4 节 · KV Cache 内存计算公式', CH22],
   },
   {
     name: '共享 KV 头',
@@ -36,42 +39,46 @@ export const kvSteps: {
     prompt: 'KV 头从 4 减到 1，哪些量变小，哪些不变？同组的两个 Query 头，注意力权重一定相同吗？',
     formula:
       '\\text{head}_h=\\operatorname{softmax}\\!\\left(\\frac{Q_hK_{g(h)}^{\\top}}{\\sqrt{d}}+M\\right)V_{g(h)},\\qquad g(h)=\\left\\lfloor\\frac{h}{H/G}\\right\\rfloor',
-    source: ['原书第 23.4 节 · 一个实现覆盖 MHA、GQA 和 MQA', CH23],
+    book: ['第 23.4.2 节 · GQA 的数学表达', CH23],
+    source: ['GQA 论文 · Ainslie et al., 2023', 'https://arxiv.org/abs/2305.13245'],
   },
   {
     name: 'MLA 压缩',
     title: 'MLA：只缓存一个低维 latent，用时再还原各头的 K、V',
     explanation:
-      'MLA 不减少头数，而是把每个 token 的 K 和 V 一起压进一个低维向量 $c_t=h_tW_{DKV}$，缓存里只存它。需要时，每个头用自己的上投影还原：$k^C_{t,i}=c_tW_{UK}^{(i)}$，$v^C_{t,i}=c_tW_{UV}^{(i)}$。所以每个头仍有各自不同的 K、V，只是都由同一个 $c_t$ 算出。本例 4 个头、每头 2 维：MHA 每个 token 每层要存 16 个数，MLA 存 $d_c=3$ 个，加上下一步要讲的 RoPE Key，一共 5 个。',
+      'GQA、MQA 靠“几个头共用一份 K、V”省缓存；MLA 换了个思路：头数不减，而是把每个 token 的 K 和 V 一起压成一个很短的向量 $c_t$（latent），缓存里只存它。要用时，每个头再用自己的矩阵把 $c_t$ 展开成自己的 K 和 V。所以各头的 K、V 仍然不同，只是都从同一个 $c_t$ 算出来。本例 4 个头、每头 2 维：MHA 每个 token 每层存 16 个数，MLA 只存 $c_t$ 的 3 个数，再加下一步要讲的 2 维位置 Key，一共 5 个。',
     takeaway: 'MLA 缓存联合压缩后的 latent，每个头的 K、V 由它还原；头数不变。',
     prompt:
       'MLA 的缓存里存的是什么？每个头的 K、V 从哪里来？它和 MQA 的“所有头共享一组 K、V”有什么不同？',
     formula:
       'c_t=h_tW_{DKV},\\qquad k^{C}_{t,i}=c_tW_{UK}^{(i)},\\qquad v^{C}_{t,i}=c_tW_{UV}^{(i)}',
     source: ['DeepSeek-V2 论文 §2.1.2 · Low-Rank Key-Value Joint Compression', DEEPSEEK_V2],
+    book: ['第 30.4.3 节 · Multi-head Latent Attention', CH30],
   },
   {
     name: '解耦 RoPE',
     title: '为什么 RoPE 要单独走一支？',
     explanation:
-      '推理时希望不还原 K，直接拿 Query 和缓存里的 $c_j$ 打分：$q\\,(c_jW_{UK})^{\\top}=(q\\,W_{UK}^{\\top})\\,c_j^{\\top}$，也就是把 $W_{UK}$ 并进 Query 一侧。如果 RoPE 直接加在还原出的 K 上，夹在 $q$ 和 $c_j$ 之间的就变成 $R_tR_j^{\\top}W_{UK}^{\\top}$，它随距离 $t-j$ 变化，没有一个固定矩阵能吸收它。DeepSeek-V2 把位置信息放进另一支：每个头有一个带 RoPE 的 $q^R$，所有头共享一个带 RoPE 的 $k^R_t$，这个 $k^R_t$ 也要缓存。',
+      'MLA 想在推理时省掉“把 $c$ 展开成 K”这一步：打分时直接拿 Query 去配缓存里的 $c_j$，把展开用的矩阵 $W_{UK}$ 提前并到 Query 一侧（下一步细讲）。可 RoPE 要按位置旋转 K，旋转角度随两个位置的距离变化；如果把 RoPE 直接加在展开出的 K 上，夹在 Query 和 $c_j$ 之间的矩阵就会随位置而变（$R_tR_j^{\\top}W_{UK}^{\\top}$），没法提前合并。DeepSeek-V2 的办法是让位置信息单独走一条小支路：每个头另有一小段带 RoPE 的 Query $q^R$，所有头共用一小段带 RoPE 的 Key $k^R_t$，这段 Key 也要放进缓存。',
     takeaway: 'RoPE 夹在中间会破坏矩阵吸收，所以位置信息单独走一支；共享的 RoPE Key 也要进缓存。',
     prompt:
       '如果把 RoPE 直接加在由 latent 还原出的 K 上，同一个吸收矩阵在哪些位置还能算对？解耦之后缓存里多了什么？',
     formula:
       'q_{t,i}=\\left[q^{C}_{t,i};\\,q^{R}_{t,i}\\right],\\quad k_{j,i}=\\left[k^{C}_{j,i};\\,k^{R}_{j}\\right],\\quad k^{R}_j=\\operatorname{RoPE}_j\\!\\left(h_jW_{KR}\\right)',
     source: ['DeepSeek-V2 论文 §2.1.3 · Decoupled Rotary Position Embedding', DEEPSEEK_V2],
+    book: ['第 30.4.3 节 · MLA（书中未讲解耦 RoPE，本步按论文）', CH30],
   },
   {
     name: '矩阵吸收',
     title: '矩阵吸收：推理时不必还原 K 和 V',
     explanation:
-      '利用矩阵乘法的结合律，把还原 K 的 $W_{UK}^{(i)}$ 并进 Query 投影，得到 $\\tilde W_Q^{(i)}=W_{QC}^{(i)}{W_{UK}^{(i)}}^{\\top}$；把还原 V 的 $W_{UV}^{(i)}$ 并进输出投影，得到 $\\tilde W_O^{(i)}=W_{UV}^{(i)}W_O^{(i)}$。这样打分直接用缓存里的 $c_j$ 和 $k^R_j$，加权求和也停在 latent 空间。结果与先还原 K、V 的展开路径一致，只是计算顺序不同。',
+      '矩阵乘法可以换结合顺序：先把 $c_j$ 展开成 K 再和 Query 点积，等于先把展开矩阵 $W_{UK}^{(i)}$ 并进 Query 投影，再直接和 $c_j$ 点积。V 那一侧同理，把展开 V 的 $W_{UV}^{(i)}$ 并进输出投影 $W_O$。这样推理时只读缓存里的 $c_j$ 和 $k^R_j$，不必还原每个头的 K、V。表中两条路径的结果一致，只是计算顺序不同；代价是并入后的内容 Query 变成 $d_c$ 维。',
     takeaway: '吸收不改变结果，改变的是计算顺序：推理时只读缓存里的 latent 与 RoPE Key。',
     prompt: '吸收之后，内容 Query 的维度变成多少？为什么 RoPE 那一支不能一起吸收？',
     formula:
       'q^{C}_{t,i}\\,{k^{C}_{j,i}}^{\\top}=\\Big(h_tW_{QC}^{(i)}{W_{UK}^{(i)}}^{\\top}\\Big)c_j^{\\top},\\qquad \\Big(\\sum_j p_j\\,c_jW_{UV}^{(i)}\\Big)W_O^{(i)}=\\Big(\\sum_j p_j\\,c_j\\Big)W_{UV}^{(i)}W_O^{(i)}',
     source: ['DeepSeek-V2 论文 §2.1.2（推理时的矩阵吸收）', DEEPSEEK_V2],
+    book: ['第 30.4.3 节 · MLA（书中未讲矩阵吸收，本步按论文）', CH30],
   },
   {
     name: '对照',
@@ -83,8 +90,27 @@ export const kvSteps: {
       'MLA 的缓存为什么不能只算 latent？同样的头数和头维，MHA、GQA-8、MQA、MLA 每个 token 各存多少？',
     formula:
       '\\text{每 token 每层：}\\ \\text{MHA}\\ 2Hd_h,\\quad\\text{GQA}\\ 2Gd_h,\\quad\\text{MQA}\\ 2d_h,\\quad\\text{MLA}\\ d_c+d_h^R',
-    source: ['原书第 23.6 节 · 真实模型怎样选择', CH23],
+    book: ['第 23.6 节 · 主流模型的选择', CH23],
+    source: ['DeepSeek-V2 论文 §3.1.2 与表 1', DEEPSEEK_V2],
   },
+];
+
+export const kvWhy: WhyContent = {
+  question: '为什么要在意 KV 缓存的大小？',
+  points: [
+    'KV 缓存让 Decode 不必重算历史，但它要为每一层、每个历史 token 保留 K 和 V（原书 22.4）。上下文越长、同时服务的请求越多，缓存就越大，常常比模型权重更早占满显存。',
+    '缩小它有两条路：MQA、GQA 让多个 Query 头共用一份 K、V，减少要存的 KV 头数（原书第 23 章）；DeepSeek 的 MLA 头数不减，而是把 K、V 压成一个短向量再存（原书 30.4.3）。本页从同一个缓存公式出发，逐步算清它们各存多少个数。',
+  ],
+  analogy: {
+    title: '老师的分身与笔记本（23.3.2）',
+    text: 'MHA 像老师有 8 个分身，每个分身各带一本笔记本记录学生（独立的 K、V）；MQA 是 8 个分身共用一本笔记本，各自仍可以提不同的问题（独立的 Q）；GQA 介于两者之间，几个分身共用一本。',
+  },
+  book: ['第 23.1 节 · 为什么需要改进 MHA', CH23],
+};
+
+/** Where the page deliberately differs from the book's wording, with the reason. */
+export const kvBookNotes = [
+  '原书 30.4.3 只讲到“先压缩、再解压”，没有讲解耦 RoPE 和矩阵吸收，也没有把位置 Key 计入缓存。本页这两步按 DeepSeek-V2 论文 §2.1.2–2.1.3 补充，并把位置 Key 算进缓存大小。',
 ];
 
 export const kvSources = [

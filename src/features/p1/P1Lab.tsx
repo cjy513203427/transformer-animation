@@ -3,6 +3,7 @@ import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
 import { Prediction, PredictionResult } from '../../components/Controls';
 import { Rich } from '../../components/Tex';
+import { StepSources, WhyIntro } from '../../components/WhyIntro';
 import { formatNumber as fmt } from '../../math/attention';
 import {
   error,
@@ -11,7 +12,14 @@ import {
   type Frame,
   type Tensor,
 } from '../../math/p1/shared';
-import { verifiedDate, type Field, type TopicDefinition } from '../../content/p1/types';
+import {
+  explain,
+  inputRange,
+  lessonContext,
+  verifiedDate,
+  type Field,
+  type TopicDefinition,
+} from '../../content/p1/types';
 import { initialLabState, restoreLabState, serializeLabState, type LabState } from '../../state/p1';
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
@@ -20,6 +28,14 @@ import '../../styles/p1.css';
 import '../../styles/editorial.css';
 import { MechanismDiagram } from './MechanismDiagram';
 const errorText = (value: number) => (value === 0 ? '0' : value.toExponential(2));
+/** Name a flattened cell by its row and column labels instead of bare indices. */
+function cellLabel(t: Tensor, i: number) {
+  const width = t.values[0].length,
+    row = Math.floor(i / width),
+    column = t.columns?.[i % width] ?? `d${i % width}`;
+  if (t.rows) return `${t.rows[row]} · ${column}`;
+  return t.values.length > 1 ? `行${row} · ${column}` : column;
+}
 const cellText = (value: number) =>
   value !== 0 && Math.abs(value) < 1e-5 ? value.toExponential(2) : fmt(value, 5);
 export default function P1Lab({ topic }: { topic: TopicDefinition }) {
@@ -35,7 +51,9 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
     );
   const result = topic.compute(state.input, state.config, state.seed),
     step = topic.steps[state.step],
-    current = result.frames[state.step];
+    current = result.frames[state.step],
+    context = lessonContext(state.input, state.config, current),
+    [low, high] = inputRange(topic);
   function edit(next: LabState, preserve = false) {
     setPlaying(false);
     setState(next);
@@ -122,11 +140,12 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           <input readOnly value={manual} onFocus={(e) => e.target.select()} />
         </label>
       )}
+      <WhyIntro why={topic.why} />
       <section className="lesson-panel p1-panel" aria-label={`${topic.id} 逐步实验`}>
         <div className="lesson-panel-heading">
           <div>
-            <span className="lesson-eyebrow">修改输入 → 核对每步 → 隐藏说明复述</span>
-            <h2>{current.title}</h2>
+            <span className="lesson-eyebrow">{topic.question}</span>
+            <h2>{topic.headline}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {topic.steps.length}
@@ -150,6 +169,8 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
             {topic.examples.map((example) => (
               <button
                 key={example.name}
+                className={example.book ? 'p1-book-preset' : undefined}
+                title={example.book ? '数字取自原书，可与书中手算结果对照' : undefined}
                 onClick={() => {
                   const initial = initialLabState(topic);
                   edit({
@@ -189,17 +210,17 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
             <div className="p1-vector-editor">
               {state.input.map((value, i) => (
                 <label key={i}>
-                  x{i}
+                  {topic.inputNames?.[i] ?? `x${i}`}
                   <input
                     aria-label={`输入 x${i}`}
                     type="number"
-                    min={-8}
-                    max={8}
+                    min={low}
+                    max={high}
                     step={0.25}
                     value={value}
                     onChange={(e) => {
                       const v = e.target.valueAsNumber;
-                      if (Number.isFinite(v) && v >= -8 && v <= 8)
+                      if (Number.isFinite(v) && v >= low && v <= high)
                         edit({ ...state, input: state.input.map((old, j) => (i === j ? v : old)) });
                     }}
                   />
@@ -207,7 +228,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               ))}
             </div>
             <p className="exp-caption">
-              范围 −8 到 8，默认步长
+              范围 {fmt(low)} 到 {fmt(high)}，默认步长
               0.25，允许输入小数；二维矩阵按行展平。小范围便于核对，不代表真实模型激活范围。
             </p>
           </details>
@@ -228,6 +249,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
         </div>
         <div className="lesson-columns p1-columns">
           <div className="diagram-panel">
+            <p className="p1-figure-title">图：{current.title}</p>
             <MechanismDiagram frame={current} fallback={<VectorDiagram frame={current} />} />
             <div className="p1-metrics">
               {current.metrics.map(([label, value]) => (
@@ -242,7 +264,8 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               current.connections ||
               current.branch ||
               current.tree ||
-              current.scan
+              current.scan ||
+              current.line
                 ? '图中位置、连接或节点对应本步实际计算。数值表保留完整坐标；切步直接重建，不把插值当成算法状态。'
                 : '柱长对应本步实际数值，横线表示零；不同形状的张量分别展开坐标，不是语义空间降维。切步直接重建数值。'}
             </p>
@@ -261,15 +284,17 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
                 {state.view.explanations ? '隐藏说明' : '显示说明'}
               </button>
             </div>
-            <h3>{step.name}</h3>
+            <h3>{step.title}</h3>
             {state.view.explanations ? (
               <p className="lesson-explanation">
-                <Rich text={step.explanation} />
+                <Rich text={explain(step.explanation, context)} />
               </p>
             ) : (
               <div className="lesson-recall">
                 <strong>先自己说一遍</strong>
-                <p>{step.prompt}</p>
+                <p>
+                  <Rich text={step.prompt} />
+                </p>
               </div>
             )}
             <div className="exp-widget">
@@ -289,12 +314,17 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
             )}
             <div className="lesson-takeaway">
               <strong>这一步，记住一句话</strong>
-              <p>{state.view.explanations ? step.takeaway : '先自己复述，再显示说明核对。'}</p>
+              <p>
+                <Rich
+                  text={state.view.explanations ? step.takeaway : '先自己复述，再显示说明核对。'}
+                />
+              </p>
             </div>
             <details className="lesson-formula">
               <summary>需要时再看公式</summary>
               <Formula expression={step.formula} />
             </details>
+            <StepSources book={step.book} source={step.source} />
           </div>
         </div>
         <div className="lesson-controls">
@@ -377,7 +407,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
       <section className="recall-card">
         <div>
           <span className="section-kicker">离开之前 · 试着复述</span>
-          <h2>把这六步连成一条计算链。</h2>
+          <h2>把这 {topic.steps.length} 步连成一条计算链。</h2>
           <p>
             {topic.steps.map((s) => s.name).join(' → ')}。改变哪个输入会影响什么？哪些结论有条件？
           </p>
@@ -398,7 +428,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           <div className="recall-answer">
             {topic.steps.map((s) => (
               <p key={s.name}>
-                {s.name}：{s.takeaway}
+                {s.name}：<Rich text={s.takeaway} />
               </p>
             ))}
           </div>
@@ -420,6 +450,18 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               <li key={s}>{s}</li>
             ))}
           </ul>
+          {topic.bookNotes && (
+            <>
+              <strong className="exp-notes-title">与原书说法的对照</strong>
+              <ul>
+                {topic.bookNotes.map((note) => (
+                  <li key={note}>
+                    <Rich text={note} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
           <ul>
             {topic.sources.map((s) => (
               <li key={s.url}>
@@ -496,7 +538,7 @@ function TensorTable({ tensor: t }: { tensor: Tensor }) {
         <tbody>
           {t.values.map((row, i) => (
             <tr key={i}>
-              <th scope="row">{t.rows?.[i] ?? `r${i}`}</th>
+              <th scope="row">{t.rows?.[i] ?? (t.values.length > 1 ? `行 ${i}` : '值')}</th>
               {row.map((v, j) => (
                 <td key={j}>{cellText(v)}</td>
               ))}
@@ -537,7 +579,7 @@ function VectorDiagram({ frame: f }: { frame: Frame }) {
               return (
                 <g key={i}>
                   <text x="12" y={offset + 26 + i * 22} className="p1-svg-small">
-                    {Math.floor(i / t.values[0].length)},{i % t.values[0].length}
+                    {cellLabel(t, i)}
                   </text>
                   <line
                     x1="210"

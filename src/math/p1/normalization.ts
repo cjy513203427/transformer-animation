@@ -6,6 +6,7 @@ import {
   sum,
   tensor,
   type Computation,
+  type NumberLine,
   type Parameters,
 } from './shared';
 export function normalize(x: number[], eps: number) {
@@ -41,6 +42,51 @@ export function normalization(x: number[], p: Parameters): Computation {
   const changed = x.map((v) => v + p.shift),
     n2 = normalize(changed, p.eps),
     shiftedProb = softmax(scores.map((s) => (s === -Infinity ? s : s + p.shift / p.temperature)));
+  const names = x.map((_, i) => 'd' + i),
+    sd = Math.sqrt(n.variance);
+  const lines: (NumberLine | undefined)[] = [
+    {
+      rows: [
+        { label: '原 x', values: x },
+        { label: 'x − μ', values: n.centered },
+      ],
+      names,
+      shared: true,
+      markers: [
+        { row: 0, value: n.mu, label: 'μ' },
+        { row: 1, value: 0, label: '0' },
+      ],
+      caption: '同一把尺：减去 μ 只是整体平移，点之间的距离不变',
+    },
+    {
+      rows: [
+        { label: 'x − μ', values: n.centered },
+        { label: 'z', values: n.ln },
+      ],
+      names,
+      shared: false,
+      markers: [
+        { row: 0, value: -sd, label: '−σ' },
+        { row: 0, value: sd, label: '+σ' },
+        { row: 1, value: -1, label: '−1' },
+        { row: 1, value: 1, label: '+1' },
+      ],
+      caption: '各行各用一把尺：除以 σ 后，原来的 ±σ 落到 ±1 附近，点的相对位置不变',
+    },
+    {
+      rows: [
+        { label: '原 x', values: x },
+        { label: 'RMSNorm r', values: n.rms },
+      ],
+      names,
+      shared: false,
+      markers: [
+        { row: 0, value: 0, label: '0' },
+        { row: 1, value: 0, label: '0' },
+      ],
+      caption: '各行各用一把尺：RMSNorm 不平移，只按同一个分母缩放，0 的位置不动',
+    },
+  ];
   return {
     frames: [
       frame(
@@ -108,7 +154,7 @@ export function normalization(x: number[], p: Parameters): Computation {
         [['平移 c', p.shift]],
         '比较固定 ε、温度与 Mask，使用仿射之前的归一化结果。退化输入可能让 RMS 也恰好不变。',
       ),
-    ],
+    ].map((item, index) => (lines[index] ? { ...item, line: lines[index] } : item)),
     checks: [
       check('LN 平移不变', n.ln, n2.ln),
       check('Softmax 平移不变', prob, shiftedProb),

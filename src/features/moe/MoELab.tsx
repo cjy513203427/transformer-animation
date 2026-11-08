@@ -2,8 +2,16 @@
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
 import { Rich } from '../../components/Tex';
+import { StepSources, WhyIntro } from '../../components/WhyIntro';
 import { computeMoE } from '../../math/moe';
-import { moeMyths, moeSources, moeSteps, moeVerifiedDate } from '../../content/moe';
+import {
+  moeBookNotes,
+  moeMyths,
+  moeSources,
+  moeSteps,
+  moeVerifiedDate,
+  moeWhy,
+} from '../../content/moe';
 import {
   initialMoEState,
   MOE_STEP_COUNT,
@@ -137,6 +145,7 @@ export default function MoELab() {
         </label>
       )}
 
+      <WhyIntro why={moeWhy} />
       <section className="lesson-panel moe-panel" aria-label="MoE 逐步实验">
         <div className="lesson-panel-heading">
           <div>
@@ -207,9 +216,7 @@ export default function MoELab() {
               <summary>需要时再看公式</summary>
               <Formula expression={step.formula} />
             </details>
-            <a className="lesson-source" href={step.source[1]} target="_blank" rel="noreferrer">
-              对应来源：{step.source[0]} ↗
-            </a>
+            <StepSources book={step.book} source={step.source} />
           </div>
         </div>
         <div className="lesson-controls">
@@ -325,6 +332,14 @@ export default function MoELab() {
             带宽与延迟，不是 GPU 运行时间或显存实测。内部使用 float64，展示时才舍入，等价容差为
             1e-12。
           </p>
+          <strong className="exp-notes-title">与原书说法的对照</strong>
+          <ul>
+            {moeBookNotes.map((note) => (
+              <li key={note}>
+                <Rich text={note} />
+              </li>
+            ))}
+          </ul>
           <strong className="exp-notes-title">常见误区</strong>
           <ul>
             {moeMyths.map((myth) => (

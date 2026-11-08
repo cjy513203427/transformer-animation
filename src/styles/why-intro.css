@@ -1,0 +1,101 @@
+/* The problem-first opening each chapter of the book starts with. Collapsible, never a hero. */
+:root {
+  .why-intro {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin: 0 0 28px;
+    padding: 4px 0 18px;
+  }
+  .why-intro > summary {
+    cursor: pointer;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    padding: 14px 0 6px;
+    list-style: none;
+  }
+  .why-intro > summary::-webkit-details-marker {
+    display: none;
+  }
+  /* A flex summary loses the native disclosure triangle; say what a click does instead. */
+  .why-intro > summary::after {
+    content: '收起 ▴';
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .why-intro:not([open]) > summary::after {
+    content: '展开 ▾';
+  }
+  .why-kicker {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--teal);
+  }
+  .why-intro > summary strong {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .why-intro:not([open]) {
+    padding-bottom: 6px;
+  }
+  .why-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .why-text p {
+    margin: 8px 0;
+    font-size: 15px;
+    line-height: 1.85;
+    color: #3b4245;
+    max-width: 46em;
+  }
+  .why-text .lesson-source {
+    margin-top: 6px;
+  }
+  .why-analogy {
+    background: var(--surface, #f6f8f7);
+    padding: 14px 18px;
+    margin-top: 8px;
+  }
+  .why-analogy span {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #53613f;
+  }
+  .why-analogy p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #3f4a3a;
+  }
+  .step-sources {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 19px;
+  }
+  .step-sources .lesson-source {
+    margin-top: 0;
+  }
+}
+@media (max-width: 760px) {
+  :root {
+    .why-body {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+    .why-intro > summary strong {
+      font-size: 17px;
+    }
+    .why-text p {
+      font-size: 14px;
+    }
+  }
+}

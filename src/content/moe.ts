@@ -1,4 +1,5 @@
 ﻿import { BOOK_URL } from './topics';
+import type { WhyContent } from '../components/WhyIntro';
 
 const CH30 = BOOK_URL + '第30章-Mixture-of-Experts-稀疏激活的秘密/';
 const SPARSE_MOE = 'https://arxiv.org/html/1701.06538v1';
@@ -17,7 +18,10 @@ export const moeSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
-  source: [string, string];
+  /** Paper or official code used to check the formula; absent when the book is the reference. */
+  source?: [string, string];
+  /** The book section that explains this step. */
+  book: [string, string];
 }[] = [
   {
     name: '路由打分',
@@ -28,6 +32,7 @@ export const moeSteps: {
     prompt: '这一行有几个分数？Softmax 沿哪个轴？只改 t1 的输入，t0 的路由会变吗？',
     formula: String.raw`Z=XW_R\in\mathbb{R}^{T\times E},\qquad p_{t,e}=\frac{\exp(z_{t,e}-m_t)}{\sum_j\exp(z_{t,j}-m_t)},\quad m_t=\max_j z_{t,j}`,
     source: ['Switch Transformers §2.1 · Router 分数与概率', SWITCH],
+    book: ['第 30.2.3 节 · Router（路由器）的作用', CH30],
   },
   {
     name: 'Top-K 门控',
@@ -38,6 +43,7 @@ export const moeSteps: {
     prompt: '只保留两个专家，原概率的和一定是 1 吗？为什么本例 Top-1 的门值恒为 1？',
     formula: String.raw`A_t=\operatorname{TopK}(p_t,K),\qquad g_{t,e}=\begin{cases}p_{t,e}/\sum_{j\in A_t}p_{t,j},&e\in A_t\\0,&e\notin A_t\end{cases}`,
     source: ['Transformers · MixtralTopKRouter 的选中后归一化', MIXTRAL_CODE],
+    book: ['第 30.2.5 节 · Top-K 选择机制', CH30],
   },
   {
     name: '专家计算',
@@ -48,6 +54,7 @@ export const moeSteps: {
     prompt: '每个专家的两块权重是什么形状？只把 E0 的输出乘以 2，路由概率为什么不变？',
     formula: String.raw`f_e(x_t)=\operatorname{ReLU}(x_tW_{1,e})W_{2,e},\qquad [1,2]\,[2,3]\to[1,3]\,[3,2]\to[1,2]`,
     source: ['Shazeer et al. §2、§3.2 · 独立的前馈专家', SPARSE_MOE],
+    book: ['第 30.2.4 节 · Expert（专家）网络', CH30],
   },
   {
     name: '加权合并',
@@ -58,6 +65,7 @@ export const moeSteps: {
     prompt: 't1 被两个专家处理，会产生两个输出 token 吗？返回顺序改变后怎样恢复正确结果？',
     formula: String.raw`y_t=\sum_{e\in A_t}g_{t,e}f_e(x_t)\in\mathbb{R}^{1\times D},\qquad Y\in\mathbb{R}^{T\times D}`,
     source: ['GShard §3.1 · Dispatch 与 Combine', GSHARD],
+    book: ['第 30.2.2 节 · MoE 层的内部结构', CH30],
   },
   {
     name: '负载与参数',
@@ -67,7 +75,7 @@ export const moeSteps: {
     takeaway: '总参数决定要保存多少权重；激活参数和任务数描述本次计算，负载描述任务分布。',
     prompt: 'K 从 1 变成 2，哪些参数账单不变？任务集中在一个专家，会自动变得更快吗？',
     formula: String.raw`N_{\mathrm{all}}=DE+E(2DF),\quad N_{\mathrm{active/token}}=DE+K(2DF),\quad \sum_e n_e=TK`,
-    source: ['原书第 30.2 节 · 专家、路由与负载', CH30],
+    book: ['第 30.2.6 节 · 负载均衡问题', CH30],
   },
   {
     name: '专家并行',
@@ -78,7 +86,27 @@ export const moeSteps: {
     prompt: '同一个 token 选到本地和远端两个专家，各需要传什么？为什么箭头数量不能表示实际耗时？',
     formula: String.raw`B_{\mathrm{dispatch}}=RDb,\qquad B_{\mathrm{return}}=RDb,\qquad B_{\mathrm{total}}=2RDb`,
     source: ['Switch Transformers §5.4 · Expert Parallelism', SWITCH],
+    book: ['第 30.5.3 节 · 通信开销', CH30],
   },
+];
+
+export const moeWhy: WhyContent = {
+  question: '为什么要准备很多个专家，却每次只用其中几个？',
+  points: [
+    '原书 30.1.1 的例子：Mixtral 8x7B 总参数约 46.7B，但每个 token 只激活约 12.9B。MoE 把一个大的 FFN 换成多个“专家”FFN，再由路由器给每个 token 挑出少数几个来算。',
+    '这样总参数可以很大，每个 token 的计算量却只随被选中的专家增长。代价是：全部专家的权重仍要存着，任务可能集中到少数专家，跨设备时还要来回搬运激活。本页用 4 个 token、4 个专家逐步手算这些账。',
+  ],
+  analogy: {
+    title: '分诊台与专科会诊（30.1.3）',
+    text: '全科医生要用全部知识看每个病人；专家会诊先经过分诊台（Router），按症状把病人分给最相关的两个专科（Top-2）。科室只是比喻：本页的专家只用 E0–E3 编号，没有预先分配的语义职责。',
+  },
+  book: ['第 30.1 节 · MoE 的核心思想', CH30],
+};
+
+/** Where the page deliberately differs from the book's wording, with the reason. */
+export const moeBookNotes = [
+  '原书 30.1.3 用“心内科、骨科”等科室比喻专家；真实专家的分工来自训练，不是人为指定。本页只用 E0–E3 编号。',
+  '原书 30.2.5 讨论 Top-1、Top-2 的取舍，没有给出门值的归一化规则；本页明确采用“Softmax → Top-K → 在选中集合内重新归一化”，与 Transformers 的 Mixtral 路由实现一致。',
 ];
 
 export const moeSources = [

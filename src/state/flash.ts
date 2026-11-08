@@ -52,7 +52,7 @@ export function validateFlashState(value: unknown): FlashState | null {
   if (
     !int(config.blockSize, 1, 4) ||
     typeof config.causal !== 'boolean' ||
-    (input.preset !== 'rising' && input.preset !== 'mixed') ||
+    (input.preset !== 'rising' && input.preset !== 'book' && input.preset !== 'mixed') ||
     !int(input.query, 0, 3) ||
     !quarter(input.keyDelta, -2, 2) ||
     !int(input.block, 0, Math.ceil(4 / config.blockSize) - 1)

@@ -1,3 +1,4 @@
+import type { WhyContent } from '../components/WhyIntro';
 import { BOOK_URL } from './topics';
 
 const CH21 = BOOK_URL + '第21章-Flash-Attention-内存优化原理/';
@@ -15,6 +16,8 @@ export const flashSteps: {
   prompt: string;
   formula: string;
   source: [string, string];
+  /** The book section that explains this step. */
+  book: [string, string];
 }[] = [
   {
     name: '全量基线',
@@ -25,6 +28,7 @@ export const flashSteps: {
     prompt: '一行 Query 对应几个分数？Softmax 沿哪个轴？因果 Mask 在归一化之前还是之后？',
     formula: String.raw`S=QK^\top/\sqrt{d_k}\in\mathbb{R}^{T\times T},\quad P=\operatorname{softmax}(S+M,\mathrm{axis=key}),\quad O=PV\in\mathbb{R}^{T\times d_v}`,
     source: ['FlashAttention §2.2 · 朴素 Attention', PAPER],
+    book: ['第 21.2.1 节 · PyTorch 标准实现的问题', CH21],
   },
   {
     name: '分块读取',
@@ -35,6 +39,7 @@ export const flashSteps: {
     prompt: 'B 从 2 改成 3，最后一块有几行？每个块各自的概率和都是 1，能直接拼成整行 P 吗？',
     formula: String.raw`q_t\in\mathbb{R}^{1\times d_k},\quad K_b\in\mathbb{R}^{B\times d_k},\quad V_b\in\mathbb{R}^{B\times d_v},\quad s_b=q_tK_b^\top/\sqrt{d_k}+M_{t,b}`,
     source: ['FlashAttention §3.1 · Tiling', PAPER],
+    book: ['第 21.3.1 节 · 分块策略的直觉', CH21],
   },
   {
     name: '在线累积',
@@ -45,16 +50,18 @@ export const flashSteps: {
     prompt: '为什么只记一个已经归一化的输出还不够？还没读取的 Key 能提前出现在当前分母中吗？',
     formula: String.raw`m'=\max(m,\max_j s_{b,j}),\quad \alpha=e^{m-m'},\quad r_j=e^{s_{b,j}-m'},\quad l'=\alpha l+\sum_jr_j,\quad a'=\alpha a+\sum_jr_jv_j,\quad o'=a'/l'`,
     source: ['FlashAttention §3.1 · 分块归一化统计量', PAPER],
+    book: ['第 21.4.2 节 · Online Softmax 的核心技巧', CH21],
   },
   {
     name: '重缩放',
     title: '后面的分数更大，旧累积量怎样接上？',
     explanation:
-      '递增分数示例让后面的块带来更大的最大值。此时 m 增大，旧指数要乘小于 1 的 α，换到新尺度；l 和 a 必须同时乘。先预测，再修改最后一个 Key 的第一维并执行，观察最大值和重缩放系数。Q、V 固定，这次改变只从 K 进入打分支路。',
+      '递增分数示例让后面的块带来更大的最大值。此时 m 增大，旧指数要乘小于 1 的 α，换到新尺度；l 和 a 必须同时乘。原书 21.4.4 的例子正好相反：最大值 3.01 在第一块，第二块不用换尺度，α = 1；选“书中 21.4.4 一行分数”预设可以对照。先预测，再修改最后一个 Key 的第一维并执行，观察最大值和重缩放系数。Q、V 固定，这次改变只从 K 进入打分支路。',
     takeaway: '换尺度时，分母 l 与分子 a 一起缩放，才能保留旧 Key 的正确相对贡献。',
     prompt: '如果只缩放 l，不缩放 a，会发生什么？新块分数都更小时，α 应该是多少？',
     formula: String.raw`m'>m\Longrightarrow 0\le\alpha=e^{m-m'}<1,\qquad l_{\mathrm{old,new\ scale}}=\alpha l,\quad a_{\mathrm{old,new\ scale}}=\alpha a`,
     source: ['FlashAttention §3.1 · 统一最大值后的重缩放', PAPER],
+    book: ['第 21.4.3 节 · 为什么需要跟踪最大值', CH21],
   },
   {
     name: '等价核对',
@@ -65,6 +72,7 @@ export const flashSteps: {
     prompt: '切块为什么不改变最终输出？因果 Mask 下，一个块没有任何有效 Key 时应该怎样更新？',
     formula: String.raw`O_{t,:}=a_t/l_t\quad(l_t>0),\qquad \max_{t,d}\left|O^{\mathrm{online}}_{t,d}-O^{\mathrm{full}}_{t,d}\right|\le10^{-12}`,
     source: ['FlashAttention §3.1 与官方实现 · Exact Attention', OFFICIAL],
+    book: ['第 21.4.4 节 · 手算示例', CH21],
   },
   {
     name: '存储与 I/O',
@@ -76,7 +84,28 @@ export const flashSteps: {
       'S、P 不再写回，是否意味着 HBM 总读写为零？FlashAttention 会自动减少 Decode 的历史 KV 缓存吗？',
     formula: String.raw`N_{S,P}=2T^2,\quad N_{\mathrm{transfer},S,P}=4T^2\to0,\qquad \mathrm{work}=\Theta(T^2(d_k+d_v))`,
     source: ['FlashAttention §2.2、§3.2 · 中间矩阵与 I/O 分析', PAPER],
+    book: ['第 21.5.2 节 · IO 复杂度分析', CH21],
   },
+];
+
+export const flashWhy: WhyContent = {
+  question: '为什么需要 FlashAttention？',
+  points: [
+    '原书 21.1 从一个现象讲起：GPU 算力很强，序列一长，Attention 却变慢，甚至显存不够。瓶颈常常不在乘法，而在内存搬运。',
+    '标准实现要先算出完整的 N × N 分数矩阵 S，写回显存（HBM），再读出来做 Softmax、再写回、再读出来乘 V。N = 4096 时，一个头的 S 用 FP16 就约 32MB。FlashAttention 把 Q、K、V 分块搬进片上的高速内存（SRAM），一块一块算完，不把完整的 S、P 写回 HBM，结果仍与标准 Attention 相同。',
+    '本页用 4 个位置手算这件事：怎样分块，怎样在只看到一部分 Key 时维护 Softmax，最后与完整计算核对。',
+  ],
+  analogy: {
+    title: '书桌与书架（21.1.3）',
+    text: '片上 SRAM 像书桌：放不了几本书，但取用极快；显存 HBM 像书架：能放很多书，但每次都要起身去拿。FlashAttention 尽量在书桌上把一块活干完，少往书架跑。',
+  },
+  book: ['第 21.1 节 · 为什么需要 Flash Attention', CH21],
+};
+
+/** Where the page deliberately differs from the book's wording, with the reason. */
+export const flashBookNotes = [
+  '原书 21.4.4 用 f、l 记录指数与总和；本页用 m（已见最大值）、l（指数和）、a（未除以 l 的 Value 加权和），多出的 a 用来得到 Attention 输出，而不只是一行 Softmax。',
+  '原书 21.4.4 手算得到 50.25%，与直接计算的 50.28% 的差别来自中间值四舍五入；本页保留完整精度，两条路径在 1e-12 内一致。',
 ];
 
 export const flashSources = [
@@ -88,7 +117,8 @@ export const flashSources = [
 export const flashMyths = [
   '本页是单头前向的教学计算，T = 4、d_k = d_v = 2，忽略 batch，禁用 Dropout；Q、K、V 是已有激活，不是训练参数或真实模型语义。',
   '本例固定 Query 块为一行，沿 Key 轴顺序扫描；真实 kernel 会同时处理多行 Query，并考虑片上空间和并行调度。',
-  '递增分数预设固定，混合分数预设使用可复现种子；只改最后一个 K 的第一维不直接改 Q 或 V。',
+  '递增分数与书中 21.4.4 预设固定，混合输入预设使用可复现种子；只改最后一个 K 的第一维不直接改 Q 或 V。',
+  '书中 21.4.4 预设令每行 q = [√2, 0]、K 的第一列为 [3.01, 0.09, 2.48, 1.95]，缩放后每行的分数就是书中那一行；V 沿用递增分数的教学数值。',
   '初始 m 为负无穷，l = 0，a 为零向量；首个有效块的 α 约定为 0。全屏蔽块不改变状态；无有效 Key 的整行约定返回零向量。',
   '分块临时空间按 B(d_k+d_v+1)+d_k+2d_v+3 个标量估算：K/V 块、指数块、一个 Query、两份向量累积量与三个标量统计量；不含输入输出、可视化轨迹与运行时开销。小例子不保证该数一定更小。',
   '账本假设每元素 4 字节，实际数值计算使用 JavaScript float64；它是理想化调度计数，既不是浏览器分配量，也不是 GPU 实测显存或完整 HBM 流量。',

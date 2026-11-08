@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
 import { Rich } from '../../components/Tex';
-import { kvMyths, kvSources, kvSteps } from '../../content/kv';
+import { StepSources, WhyIntro } from '../../components/WhyIntro';
+import { kvBookNotes, kvMyths, kvSources, kvSteps, kvWhy } from '../../content/kv';
 import {
   initialKVState,
   KV_STEP_COUNT,
@@ -149,6 +150,7 @@ export default function KVLab() {
         </label>
       )}
 
+      <WhyIntro why={kvWhy} />
       <section className="lesson-panel kv-panel" aria-label="KV 架构逐步实验">
         <div className="lesson-panel-heading">
           <div>
@@ -213,9 +215,7 @@ export default function KVLab() {
               <summary>需要时再看公式</summary>
               <Formula expression={step.formula} />
             </details>
-            <a className="lesson-source" href={step.source[1]} target="_blank" rel="noreferrer">
-              对应来源：{step.source[0]} ↗
-            </a>
+            <StepSources book={step.book} source={step.source} />
           </div>
         </div>
         <div className="lesson-controls">
@@ -330,6 +330,14 @@ export default function KVLab() {
             23 章与第 22 章的例子已由公式逐字节核对。DeepSeek-V2 的层数、头数、头维、d_c 与 d_h^R
             取自论文 §3.1.2 与表 1 说明（d_c = 4 d_h，d_h^R = d_h / 2）。
           </p>
+          <strong className="exp-notes-title">与原书说法的对照</strong>
+          <ul>
+            {kvBookNotes.map((note) => (
+              <li key={note}>
+                <Rich text={note} />
+              </li>
+            ))}
+          </ul>
           <strong className="exp-notes-title">常见误区</strong>
           <ul>
             {kvMyths.map((myth) => (

@@ -1,4 +1,4 @@
-import type { TopicDefinition } from '../content/p1/types';
+import { inputRange, type TopicDefinition } from '../content/p1/types';
 import type { Parameters } from '../math/p1/shared';
 export interface LabState {
   version: 1;
@@ -25,6 +25,7 @@ const record = (v: unknown): v is Record<string, unknown> =>
 const finite = (v: unknown, min: number, max: number): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
 export function validateLabState(topic: TopicDefinition, value: unknown): LabState | null {
+  const [low, high] = inputRange(topic);
   if (
     !record(value) ||
     value.version !== 1 ||
@@ -35,7 +36,7 @@ export function validateLabState(topic: TopicDefinition, value: unknown): LabSta
     !Number.isInteger(value.seed) ||
     !Array.isArray(value.input) ||
     value.input.length !== topic.input.length ||
-    !value.input.every((v) => finite(v, -8, 8)) ||
+    !value.input.every((v) => finite(v, low, high)) ||
     !record(value.config) ||
     !record(value.view) ||
     typeof value.view.explanations !== 'boolean' ||

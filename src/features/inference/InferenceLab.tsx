@@ -449,7 +449,8 @@ export default function InferenceLab() {
           <p>
             工作量只统计 Attention 的 K/V 投影与 Q·K 打分，用来说明哪些计算被跳过，不代表真实 GPU
             上的耗时。 缓存本身占用显存：第 22 章用 Llama 2 7B 手算了每个 token
-            的缓存字节数；字节公式与 MHA、GQA、MLA 的对照会在“KV 架构对照”实验中展开（尚未实现）。
+            的缓存字节数；字节公式与 MHA、GQA、MLA 的对照见{' '}
+            <a href="/kv-architectures">KV 架构对照</a>实验。
           </p>
           <strong className="exp-notes-title">常见误区</strong>
           <ul>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BOOK_SCORE_ROW,
   computeFlash,
   flashLedger,
   makeFlashInputs,
@@ -44,7 +45,7 @@ function expectClose(actual: Matrix, expected: Matrix) {
 describe('分块 Attention 与完整参考计算', () => {
   it('不同分块、末块不足长度、因果边界与多种输入均等价', () => {
     for (const seed of [1, 42, 9999])
-      for (const preset of ['rising', 'mixed'] as const)
+      for (const preset of ['rising', 'book', 'mixed'] as const)
         for (const causal of [true, false])
           for (const blockSize of [1, 2, 3, 4] as const)
             for (const keyDelta of [-2, 0, 2]) {
@@ -198,6 +199,23 @@ describe('可复现输入与教学存储账本', () => {
     expect(makeFlashInputs('mixed', 42)).toEqual(makeFlashInputs('mixed', 42));
     expect(makeFlashInputs('mixed', 42)).not.toEqual(makeFlashInputs('mixed', 43));
     expect(makeFlashInputs('rising', 1)).toEqual(makeFlashInputs('rising', 9999));
+    expect(makeFlashInputs('book', 1)).toEqual(makeFlashInputs('book', 9999));
+  });
+
+  it('书中 21.4.4 预设：t3 的分数就是书中那一行，第二块最大值不变（α = 1）', () => {
+    const result = computeFlash({
+      seed: 42,
+      config: { causal: true, blockSize: 2 },
+      input: { preset: 'book', query: 3, keyDelta: 0, block: 0 },
+    });
+    const [first, second] = result.rows[3];
+    [...first.scores, ...second.scores].forEach((s, i) =>
+      expect(s).toBeCloseTo(BOOK_SCORE_ROW[i], 12),
+    );
+    expect(second.m).toBe(first.m);
+    expect(second.alpha).toBe(1);
+    // softmax(3.01) over the book row: 50.28%, as printed in §6.3.4 and §21.4.4.
+    expect(result.reference.probabilities[3][0]).toBeCloseTo(0.5028, 4);
   });
 
   it('分块改变临时空间，不改变完整配对规模；账本只统计指定中间量', () => {

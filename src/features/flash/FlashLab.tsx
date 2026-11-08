@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
 import { Rich } from '../../components/Tex';
+import { StepSources, WhyIntro } from '../../components/WhyIntro';
 import { computeFlash } from '../../math/flash';
-import { flashMyths, flashSources, flashSteps, flashVerifiedDate } from '../../content/flash';
+import {
+  flashBookNotes,
+  flashMyths,
+  flashSources,
+  flashSteps,
+  flashVerifiedDate,
+  flashWhy,
+} from '../../content/flash';
 import {
   initialFlashState,
   FLASH_STEP_COUNT,
@@ -153,6 +161,7 @@ export default function FlashLab() {
           <input readOnly value={manualLink} onFocus={(event) => event.target.select()} />
         </label>
       )}
+      <WhyIntro why={flashWhy} />
 
       <section className="lesson-panel flash-panel" aria-label="FlashAttention 逐步实验">
         <div className="lesson-panel-heading">
@@ -224,9 +233,7 @@ export default function FlashLab() {
               <summary>需要时再看公式</summary>
               <Formula expression={step.formula} />
             </details>
-            <a className="lesson-source" href={step.source[1]} target="_blank" rel="noreferrer">
-              对应来源：{step.source[0]} ↗
-            </a>
+            <StepSources book={step.book} source={step.source} />
           </div>
         </div>
         <div className="lesson-controls">
@@ -330,7 +337,8 @@ export default function FlashLab() {
             教学配置：单头、忽略 batch，Q、K、V 都是 [4, 2]
             的行向量矩阵。固定教学激活不代表语义；采用标准缩放点积 Attention，可切换因果 Mask，不含
             Dropout。最后一个 K 的第一维可做 −2 到 2
-            的激活干预。“递增分数”展示后续块提高最大值，“混合输入”由种子确定。
+            的激活干预。“递增分数”展示后续块提高最大值；“书中 21.4.4
+            一行分数”复现原书手算的那一行，最大值在第一块；“混合输入”由种子确定。
           </p>
           <p>
             内部使用 JavaScript float64，展示时才舍入，等价容差
@@ -338,6 +346,14 @@ export default function FlashLab() {
             kernel。账本假设每元素 4 B，只统计指定教学调度的临时状态与 S / P
             中间载荷，不含完整输入输出、KV 缓存、实际分配器开销或硬件耗时。
           </p>
+          <strong className="exp-notes-title">与原书说法的对照</strong>
+          <ul>
+            {flashBookNotes.map((note) => (
+              <li key={note}>
+                <Rich text={note} />
+              </li>
+            ))}
+          </ul>
           <strong className="exp-notes-title">常见误区</strong>
           <ul>
             {flashMyths.map((myth) => (

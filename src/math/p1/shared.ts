@@ -22,7 +22,21 @@ export interface Frame {
     cursor: number;
     initial: number;
   };
-  branch?: { base: Matrix; delta: Matrix; total: Matrix };
+  branch?: { base: Matrix; delta: Matrix; total: Matrix; baseLabel?: string; totalLabel?: string };
+  line?: NumberLine;
+}
+/** Values drawn on horizontal number lines; the same index is the same coordinate in every row. */
+export interface NumberLine {
+  rows: { label: string; values: number[] }[];
+  /** Coordinate names shown next to the points. */
+  names: string[];
+  /** One scale for every row (to compare values), or one scale per row (to compare shapes). */
+  shared: boolean;
+  /** Representable grid values, e.g. quantization levels; drawn on every row. */
+  ticks?: number[];
+  /** Labelled reference values such as μ or a clipping bound, each on one row. */
+  markers?: { row: number; value: number; label: string }[];
+  caption: string;
 }
 export interface Check {
   label: string;

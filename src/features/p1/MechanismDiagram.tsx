@@ -1,8 +1,173 @@
 import type { ReactNode } from 'react';
 import { formatNumber as fmt } from '../../math/attention';
-import type { Frame } from '../../math/p1/shared';
+import type { Frame, NumberLine } from '../../math/p1/shared';
 const vec = (x: number[]) => '[' + x.map((v) => fmt(v)).join(', ') + ']';
+const MAX_TICKS = 64;
+
+function domain(values: number[]): [number, number] {
+  const finite = values.filter(Number.isFinite);
+  let low = Math.min(0, ...finite),
+    high = Math.max(0, ...finite);
+  if (high - low < 1e-12) {
+    low -= 1;
+    high += 1;
+  }
+  const pad = (high - low) * 0.06;
+  return [low - pad, high + pad];
+}
+
+/** Points closer than a label's width share one label, so crowded values stay readable. */
+function labelClusters(positions: number[]) {
+  const order = positions
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => Number.isFinite(p))
+    .sort((a, b) => a.p - b.p);
+  const clusters: { indices: number[]; x: number }[] = [];
+  let last = -Infinity;
+  for (const { p, i } of order) {
+    const current = clusters[clusters.length - 1];
+    if (current && p - last < 14) {
+      current.indices.push(i);
+      current.x = (current.x * (current.indices.length - 1) + p) / current.indices.length;
+    } else clusters.push({ indices: [i], x: p });
+    last = p;
+  }
+  for (const c of clusters) c.indices.sort((a, b) => a - b);
+  return clusters;
+}
+
+/** Horizontal number lines: the same coordinate keeps its name and is linked across rows. */
+function NumberLineDiagram({ line }: { line: NumberLine }) {
+  const left = 26,
+    right = 404,
+    rowHeight = 104,
+    top = 18,
+    height = top + line.rows.length * rowHeight + 6;
+  const extra = (row: number) => [
+    ...(line.markers ?? []).filter((m) => m.row === row).map((m) => m.value),
+    ...(line.ticks ?? []),
+  ];
+  const sharedDomain = domain([
+    ...line.rows.flatMap((r) => r.values),
+    ...(line.markers ?? []).map((m) => m.value),
+    ...(line.ticks ?? []),
+  ]);
+  const domains = line.rows.map((r, i) =>
+    line.shared ? sharedDomain : domain([...r.values, ...extra(i)]),
+  );
+  const x = (row: number, value: number) => {
+    const [low, high] = domains[row];
+    return left + ((value - low) / (high - low)) * (right - left);
+  };
+  const axisY = (row: number) => top + row * rowHeight + 52;
+  const drawTicks = line.ticks && line.ticks.length <= MAX_TICKS;
+  return (
+    <svg
+      className="p1-svg"
+      viewBox={`0 0 430 ${height}`}
+      role="img"
+      aria-label={`数轴：${line.rows.map((r) => r.label).join('，')}。${line.caption}`}
+    >
+      <title>点的位置对应本步实际数值；同名的点是同一个坐标</title>
+      {line.rows.slice(1).map((_, k) =>
+        line.rows[k].values.map((v, i) => {
+          const next = line.rows[k + 1].values[i];
+          if (!Number.isFinite(v) || !Number.isFinite(next)) return null;
+          return (
+            <line
+              key={`${k}-${i}`}
+              x1={x(k, v)}
+              y1={axisY(k) + 7}
+              x2={x(k + 1, next)}
+              y2={axisY(k + 1) - 7}
+              className="p1-link"
+            />
+          );
+        }),
+      )}
+      {line.rows.map((row, r) => {
+        const y = axisY(r),
+          [low, high] = domains[r];
+        return (
+          <g key={row.label}>
+            <text x={left - 14} y={y - 34} className="p1-svg-title">
+              {row.label}
+            </text>
+            {line.ticks && !drawTicks && r === 0 && (
+              <text x={right} y={y - 34} textAnchor="end" className="p1-svg-small">
+                格点 {line.ticks.length} 个，过密未画出
+              </text>
+            )}
+            <line x1={left} x2={right} y1={y} y2={y} className="p1-wire" />
+            {drawTicks &&
+              line.ticks!.map((t) => (
+                <line key={t} x1={x(r, t)} x2={x(r, t)} y1={y - 5} y2={y + 5} className="p1-tick" />
+              ))}
+            {(line.markers ?? [])
+              .filter((m) => m.row === r)
+              .map((m) => (
+                <g key={m.label + m.value}>
+                  <line
+                    x1={x(r, m.value)}
+                    x2={x(r, m.value)}
+                    y1={y - 17}
+                    y2={y + 17}
+                    className="p1-marker"
+                  />
+                  <text x={x(r, m.value)} y={y - 21} textAnchor="middle" className="p1-svg-small">
+                    {m.label}
+                  </text>
+                </g>
+              ))}
+            {row.values.map((v, i) =>
+              Number.isFinite(v) ? (
+                r === 0 ? (
+                  <circle key={i} cx={x(r, v)} cy={y} r="5" className="p1-input-node" />
+                ) : (
+                  <rect
+                    key={i}
+                    x={x(r, v) - 5}
+                    y={y - 5}
+                    width="10"
+                    height="10"
+                    className="p1-output-node"
+                  />
+                )
+              ) : null,
+            )}
+            {labelClusters(row.values.map((v) => x(r, v))).map((cluster, k) => (
+              <text
+                key={cluster.indices.join()}
+                x={cluster.x}
+                y={y + (k % 2 ? 31 : 19)}
+                textAnchor="middle"
+                className="p1-svg-small"
+              >
+                {cluster.indices.map((i) => line.names[i]).join(',')}
+              </text>
+            ))}
+            <text x={left} y={y + 45} className="p1-svg-small">
+              {fmt(low, 2)}
+            </text>
+            <text x={right} y={y + 45} textAnchor="end" className="p1-svg-small">
+              {fmt(high, 2)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallback: ReactNode }) {
+  if (f.line) {
+    return (
+      <>
+        <NumberLineDiagram line={f.line} />
+        <p className="p1-line-caption">{f.line.caption}</p>
+      </>
+    );
+  }
   if (f.points) {
     const { before, after } = f.points,
       extent = Math.max(1, ...before.flat().map(Math.abs), ...after.flat().map(Math.abs)),
@@ -106,7 +271,7 @@ export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallbac
     );
   }
   if (f.branch) {
-    const { base, delta, total } = f.branch;
+    const { base, delta, total, baseLabel = '冻结底座 XW₀', totalLabel = '当前输出 Y' } = f.branch;
     return (
       <svg
         className="p1-svg"
@@ -120,7 +285,7 @@ export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallbac
         </text>
         <path d="M215 35 V50 H110 V75 M215 50 H320 V75" className="p1-wire" />
         {[
-          { x: 15, label: '冻结底座 XW₀', values: base },
+          { x: 15, label: baseLabel, values: base },
           { x: 230, label: '低秩更新 (α/r)XAB', values: delta },
         ].map((item) => (
           <g key={item.x}>
@@ -147,7 +312,7 @@ export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallbac
         </text>
         <rect x="95" y="240" width="240" height="100" className="p1-output-node" />
         <text x="215" y="265" textAnchor="middle" className="p1-svg-title">
-          当前输出 Y
+          {totalLabel}
         </text>
         {total.map((row, i) => (
           <text key={i} x="215" y={292 + i * 22} textAnchor="middle" className="p1-svg-number">

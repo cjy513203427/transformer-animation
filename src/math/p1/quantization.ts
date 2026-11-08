@@ -1,4 +1,13 @@
-import { check, dot, frame, mean, tensor, type Computation, type Parameters } from './shared';
+import {
+  check,
+  dot,
+  frame,
+  mean,
+  tensor,
+  type Computation,
+  type NumberLine,
+  type Parameters,
+} from './shared';
 export function quantize(x: number[], bits: number, groupSize: number, cap: number) {
   const qmax = 2 ** (bits - 1) - 1,
     q: number[] = [],
@@ -37,13 +46,83 @@ export function quantization(x: number[], p: Parameters): Computation {
   const activation = [1, -1, 0.5, 0, 1, -0.5, 2, -1];
   const fullOutput = dot(activation, x),
     quantOutput = dot(activation, q.restored);
+  // One group has one grid; several groups have different grids, so none is drawn for them.
+  const single = q.scales.length === 1,
+    extent = Math.min(p.cap, Math.max(...x.map(Math.abs))),
+    ticks = !single
+      ? undefined
+      : extent === 0
+        ? [0]
+        : Array.from({ length: 2 * q.qmax + 1 }, (_, k) => (k - q.qmax) * q.scales[0]),
+    bounds = (row: number) =>
+      single && extent > 0
+        ? [
+            { row, value: -extent, label: '−边界' },
+            { row, value: extent, label: '+边界' },
+          ]
+        : [],
+    names = x.map((_, i) => String(i)),
+    gridNote = single
+      ? '短竖线是能表示的全部格点'
+      : `${q.scales.length} 组各有自己的格点间距，图中不画格点`;
+  const lines: (NumberLine | undefined)[] = [
+    {
+      rows: [{ label: '原 x', values: x }],
+      names,
+      shared: true,
+      ticks,
+      markers: bounds(0),
+      caption: `${gridNote}；每个数只能落到其中一个格点上`,
+    },
+    {
+      rows: [
+        { label: '裁剪后 x', values: q.clipped },
+        { label: '还原 x̂', values: q.restored },
+      ],
+      names,
+      shared: true,
+      ticks,
+      caption: `${gridNote}；连线从原位置指向最近的格点`,
+    },
+    {
+      rows: [
+        { label: '原 x', values: x },
+        { label: '还原 x̂', values: q.restored },
+      ],
+      names,
+      shared: true,
+      ticks,
+      markers: bounds(0),
+      caption: `${gridNote}；虚线是校准边界，超出的数被压到边界上`,
+    },
+    {
+      rows: [
+        { label: '原 x', values: x },
+        { label: '全向量一组', values: global.restored },
+        { label: '当前分组', values: q.restored },
+      ],
+      names,
+      shared: true,
+      caption: '同一把尺：比较一组共用尺度与分组各用尺度，小数值离原位置有多远',
+    },
+    {
+      rows: [
+        { label: '原 x', values: x },
+        { label: '还原 x̂', values: q.restored },
+      ],
+      names,
+      shared: true,
+      ticks,
+      caption: `${gridNote}；连线越斜，这一项的误差越大`,
+    },
+  ];
   return {
     frames: [
       frame(
         '对称整数格点：共享尺度与零点 0',
         [tensor('原 x', x), tensor('每组 scale', q.scales)],
         [
-          ['有效整数边界', `±${q.qmax}`],
+          ['整数范围 ±qmax', q.qmax],
           ['位数', p.bits],
         ],
         '采用 [−qmax, qmax]，有一个补码编码未使用；不是所有量化格式的通用规则。',
@@ -55,7 +134,7 @@ export function quantization(x: number[], p: Parameters): Computation {
           tensor('整数 q', q.q),
           tensor('还原 x̂ = q × scale', q.restored),
         ],
-        [],
+        [['第 0 组 scale', q.scales[0]]],
         '本例半整数采用远离零的舍入规则；不同实现的 ties-to-even 可能得到不同结果。',
       ),
       frame(
@@ -99,7 +178,7 @@ export function quantization(x: number[], p: Parameters): Computation {
         ],
         '将当前八个数看作线性层一行权重，用固定激活 u 核对输出误差。账本假设整数紧密打包、每组一个 4B scale，不含对齐和格式头；JS 未实际位打包。GGUF 是格式，非单一量化算法。',
       ),
-    ],
+    ].map((item, index) => (lines[index] ? { ...item, line: lines[index] } : item)),
     checks: [
       check(
         '整数在有效编码范围内',

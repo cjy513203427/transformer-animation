@@ -10,7 +10,7 @@ export interface FlashConfig {
 }
 
 export interface FlashInput {
-  preset: 'rising' | 'mixed';
+  preset: 'rising' | 'book' | 'mixed';
   query: number;
   keyDelta: number;
   block: number;
@@ -174,7 +174,23 @@ export function flashLedger(
   };
 }
 
+/** The score row of the book's §21.4.4 hand calculation (and §6.3.4 Softmax example). */
+export const BOOK_SCORE_ROW = [3.01, 0.09, 2.48, 1.95];
+
 export function makeFlashInputs(preset: FlashInput['preset'], seed: number) {
+  if (preset === 'book') {
+    // q = [√2, 0] makes q·k / √d_k equal to the first coordinate of k for every row.
+    return {
+      q: Array.from({ length: FLASH_TOKENS }, () => [Math.SQRT2, 0]),
+      k: BOOK_SCORE_ROW.map((score) => [score, 0]),
+      v: [
+        [1, 0],
+        [0, 2],
+        [2, 1],
+        [-1, 3],
+      ],
+    };
+  }
   if (preset === 'rising') {
     return {
       q: [
