@@ -1,5 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { BOOK_URL, ROADMAP, TOPICS, type TopicId } from '../content/topics';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { BOOK_URL, ROADMAP, TOPICS, TOPIC_GROUPS, type TopicId } from '../content/topics';
 import '../styles/shell.css';
 
 export function AppShell({
@@ -15,24 +15,27 @@ export function AppShell({
   title: string;
   children: ReactNode;
 }) {
-  const navigationRef = useRef<HTMLElement>(null);
+  const [directoryOpen, setDirectoryOpen] = useState(false);
+  const directoryButton = useRef<HTMLButtonElement>(null);
+  const activeIndex = TOPICS.findIndex((topic) => topic.id === active);
+  const current = TOPICS[activeIndex],
+    previous = TOPICS[activeIndex - 1],
+    next = TOPICS[activeIndex + 1];
+  const groupIndex = TOPIC_GROUPS.findIndex((group) => group.id === current.group);
   useEffect(() => {
     document.title = `${title} · LLM 原理实验室`;
   }, [title]);
   useEffect(() => {
-    const navigation = navigationRef.current;
-    if (!navigation || navigation.scrollWidth <= navigation.clientWidth) return;
-    const current = navigation.querySelector('[aria-current="page"]');
-    if (!current) return;
-    const viewport = navigation.getBoundingClientRect();
-    const item = current.getBoundingClientRect();
-    // Scroll this strip only: scrollIntoView would also move the article itself.
-    if (item.left < viewport.left + 12) {
-      navigation.scrollLeft += item.left - viewport.left - 12;
-    } else if (item.right > viewport.right - 12) {
-      navigation.scrollLeft += item.right - viewport.right + 12;
-    }
-  }, [active]);
+    if (!directoryOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDirectoryOpen(false);
+        directoryButton.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [directoryOpen]);
   return (
     <div className="app-shell lesson-shell editorial-shell">
       <a
@@ -62,27 +65,147 @@ export function AppShell({
             阅读原书 <span aria-hidden="true">↗</span>
           </a>
         </div>
-        <div className="topic-navigation-wrap">
-          <nav ref={navigationRef} className="topic-navigation" aria-label="实验目录">
-            {TOPICS.map((topic) => (
-              <a
-                key={topic.id}
-                href={topic.href}
-                aria-current={topic.id === active ? 'page' : undefined}
+        <div className="course-navigation">
+          <div className="course-toolbar">
+            <div className="course-location">
+              <span>
+                学习顺序 · 阶段 {groupIndex + 1} / {TOPIC_GROUPS.length} ·{' '}
+                {TOPIC_GROUPS[groupIndex].title}
+              </span>
+              <strong>
+                <span className="course-position">
+                  {current.number} / {TOPICS.length}
+                </span>
+                {current.title}
+              </strong>
+            </div>
+            <div className="course-actions">
+              <div className="course-arrows" aria-label="相邻实验">
+                {previous ? (
+                  <a href={previous.href} aria-label={`上一实验：${previous.title}`}>
+                    ← <span>上一实验</span>
+                  </a>
+                ) : (
+                  <span className="course-arrow-disabled" aria-disabled="true">
+                    ← <span>上一实验</span>
+                  </span>
+                )}
+                {next ? (
+                  <a href={next.href} aria-label={`下一实验：${next.title}`}>
+                    <span>下一实验</span> →
+                  </a>
+                ) : (
+                  <span className="course-arrow-disabled" aria-disabled="true">
+                    <span>下一实验</span> →
+                  </span>
+                )}
+              </div>
+              <button
+                ref={directoryButton}
+                className="course-directory-toggle"
+                aria-expanded={directoryOpen}
+                aria-controls="course-directory"
+                onClick={() => setDirectoryOpen((open) => !open)}
               >
-                {topic.title}
-              </a>
-            ))}
+                学习目录 <span aria-hidden="true">{directoryOpen ? '−' : '＋'}</span>
+              </button>
+            </div>
+          </div>
+          <nav
+            id="course-directory"
+            className="course-directory"
+            aria-label="实验目录"
+            hidden={!directoryOpen}
+          >
+            {TOPIC_GROUPS.map((group, index) => {
+              const topics = TOPICS.filter((topic) => topic.group === group.id);
+              return (
+                <section
+                  key={group.id}
+                  className="course-group"
+                  aria-labelledby={`group-${group.id}`}
+                >
+                  <h2 id={`group-${group.id}`}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    {group.title}
+                  </h2>
+                  <p>{group.description}</p>
+                  <ol start={Number(topics[0].number)}>
+                    {topics.map((topic) => (
+                      <li key={topic.id}>
+                        <a
+                          href={topic.href}
+                          aria-label={topic.title}
+                          aria-current={topic.id === active ? 'page' : undefined}
+                          onClick={(event) => {
+                            if (topic.id === active) {
+                              event.preventDefault();
+                              setDirectoryOpen(false);
+                              directoryButton.current?.focus();
+                            }
+                          }}
+                        >
+                          <span className="course-item-number" aria-hidden="true">
+                            {topic.number}
+                          </span>
+                          <span>
+                            <strong>{topic.title}</strong>
+                            <small>{topic.subtitle}</small>
+                          </span>
+                          {topic.id === active && (
+                            <span className="course-current-mark" aria-hidden="true">
+                              当前
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              );
+            })}
+            <p className="course-directory-note">
+              编号表示建议学习顺序，与原书章节编号不同；可按顺序学习，也可直接跳到需要的实验。
+            </p>
           </nav>
-          <span className="topic-navigation-hint" aria-hidden="true">
-            左右滑动查看实验 →
-          </span>
         </div>
       </header>
 
       <div className="main-shell">
         <main id="main" className="main-content" tabIndex={-1} aria-label={crumb}>
           {children}
+          <nav className="course-pagination" aria-label="按顺序继续学习">
+            {previous ? (
+              <a href={previous.href} aria-label={`上一实验：${previous.title}`}>
+                <span>← 上一实验</span>
+                <strong>
+                  {previous.number} · {previous.title}
+                </strong>
+                <small>{previous.subtitle}</small>
+              </a>
+            ) : (
+              <div className="course-boundary">
+                <span>学习起点</span>
+                <strong>从这里拆开计算过程</strong>
+                <small>可用顶部学习目录跳到其他实验</small>
+              </div>
+            )}
+            {next ? (
+              <a href={next.href} className="course-next" aria-label={`下一实验：${next.title}`}>
+                <span>下一实验 →</span>
+                <strong>
+                  {next.number} · {next.title}
+                </strong>
+                <small>{next.subtitle}</small>
+              </a>
+            ) : (
+              <div className="course-boundary">
+                <span>学习路径末尾</span>
+                <strong>回到目录选择需要复习的机制</strong>
+                <small>编号表示位置，不记录完成状态</small>
+              </div>
+            )}
+          </nav>
           <footer className="site-footer">
             <div className="site-footer-primary">
               <span>LLM 原理实验室</span>
@@ -92,7 +215,9 @@ export function AppShell({
             </div>
             <div className="site-footer-secondary">
               <span>{indicator}，不上传数据</span>
-              <span>{ROADMAP.length ? `待补充：${ROADMAP.join('、')}` : '六个核心实验已开放'}</span>
+              <span>
+                {TOPICS.length} 个实验已开放{ROADMAP.length ? `；后续：${ROADMAP.join('、')}` : ''}
+              </span>
             </div>
           </footer>
         </main>

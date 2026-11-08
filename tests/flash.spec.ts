@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { goToExperiment } from './helpers/navigation';
 import { initialFlashState, serializeFlashState } from '../src/state/flash';
 
 const scene = (page: Page, index: number) => page.locator('.flash-steps button').nth(index);
@@ -162,9 +163,9 @@ test('分享恢复全部参数，坏链接回退，待执行预测不进入链�
   await page.goto('/flash-attention#flash=%7Bbroken');
   await expect(page.getByRole('status').first()).toContainText('分享链接无效');
   await expect(page.locator('.lesson-progress')).toHaveText('1 / 6');
-  await page.getByRole('link', { name: 'MoE 与专家并行', exact: true }).click();
+  await goToExperiment(page, 'MoE 与专家并行');
   await expect(page).toHaveURL(/\/moe$/);
-  await page.getByRole('link', { name: 'FlashAttention', exact: true }).click();
+  await goToExperiment(page, 'FlashAttention');
   await expect(page).toHaveURL(/\/flash-attention$/);
 });
 

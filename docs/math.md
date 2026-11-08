@@ -227,3 +227,75 @@ O_i = a′ / l′                       完成所有块后
 完整稠密 Attention 的 Query–Key 配对规模仍为 T²；因果可见配对是 T(T+1)/2。FlashAttention 的关键在于分块和融合计算，避免保存完整中间矩阵并减少 HBM I/O，而非把标准完整 Attention 变成线性配对计算。额外中间存储与推理时跨 token 保存的 KV Cache 是不同的量。
 
 依据：[FlashAttention（NeurIPS 2022）](https://arxiv.org/html/2205.14135v2) §2.2、§3.1–3.2 的 Online Softmax、分块与 I/O 分析；[作者实现](https://github.com/Dao-AILab/flash-attention)；[原书第 21 章](https://waylandz.com/llm-transformer-book/第21章-Flash-Attention-内存优化原理/) 用于章节映射。2026-11-08 在线读取；图形、教学输入和逐行调度账本由本项目编写。
+
+## P1 八组机制实验
+
+以下实现均为行向量、浏览器 float64 的前向计算或给定样本的标量目标，不运行模型训练。每组六步的所有张量、图形与预测结果都消费同一纯数值模块。`#lab=` v1 状态按主题白名单校验输入长度、有限数值、参数范围/步长、版本和链接长度；不保存待执行预测或私人笔记。
+
+### LayerNorm、RMSNorm、Softmax
+
+四维隐藏向量沿特征轴统计：μ=mean(x)，σ²=mean((x−μ)²)，方差分母 D，不使用 D−1。LayerNorm 核心 z=(x−μ)/√(σ²+ε)，RMS 核心 r=x/√(mean(x²)+ε)。仿射 y_LN=γ⊙z+β，y_RMS=γ⊙r；仅第0维参数可编辑，其他 γ=1、β=0。参数在前向中不更新。
+
+ε 始终正并在根号内，因此常量向量的 z=0，非退化 z 的方差是 σ²/(σ²+ε)，不强行声称等于1。共同平移对固定ε的LN和Softmax不改变结果，对RMS一般会改变；正倍缩放在固定ε下也不能普遍声称完全不变。Softmax 将同一组数字重新解释为候选分数，先除正温度，再加Mask、减最大值、指数归一化。全部屏蔽不构成合法概率分布，本工具显式返回零向量并标记。
+
+依据：[LayerNorm §3](https://arxiv.org/html/1607.06450v1)、[RMSNorm §4](https://arxiv.org/html/1910.07467v1)、[PyTorch LayerNorm](https://docs.pytorch.org/docs/2.15/generated/torch.nn.LayerNorm.html)、[Softmax](https://docs.pytorch.org/docs/2.15/generated/torch.nn.Softmax.html)。
+
+### FFN、残差与 Dropout
+
+X:[4,2]，W1:[2,3]，W2:[3,2]，F=ReLU(XW1)W2，Y=X+Dropout(F)。逐token共享权重，无跨token读取，省略偏置。关闭ReLU后与 X(W1W2) 核对。残差Jacobian按输入行、输出列展示 I+J_F；零点ReLU导数约定0，测试有限差分避开零点，且不宣称恒等支路保证总梯度永不消失。
+
+训练使用 m∼Bernoulli(1−p)，D(F)=m⊙F/(1−p)，本例 p≤0.75；推理为恒等。固定种子重现掩码只为教学，真实训练通常每次前向重采样。二维点图显示同一token变换前后的真实二维坐标，形状不同的中间向量不伪装成二维语义图。
+
+依据：[Transformer §3.3、§5.4](https://arxiv.org/html/1706.03762v7)、[PyTorch Dropout](https://docs.pytorch.org/docs/2.15/generated/torch.nn.Dropout.html)。
+
+### LoRA、QLoRA 与量化
+
+LoRA行向量：Y=XW0+(α/r)XAB，A:[D,r]、B:[r,K]，ΔW=(α/r)AB；与 X(W0+ΔW) 核对。冻结W0，只讨论A/B的训练资格，没有优化器；可训练参数 r(D+K)。rank约束更新，不是底座压缩，二维例子r=2没有参数节省。α=0恢复底座，常见零B初始化也使更新为0。
+
+真实QLoRA采用NF4底座存储、通常BF16计算及适配器训练，并包含双重量化和分页优化器。本页用均匀4bit底座与float64计算演示两支路的数据流，没有复现NF4或完整QLoRA训练；各精度角色与假想存储字节数分别标明。
+
+量化独立实验输入8个数。每组 qmax=2^(bits−1)−1，extent=min(cap,max|x_group|)，scale=extent/qmax，zero_point=0；全零组scale=1。先裁剪到±extent，再以“半格远离零”舍入到整数，最后还原 q×scale。范围±qmax留下一个补码编码未使用，不能推广到所有格式。无裁剪时误差至多约半格，裁剪可能使误差更大。
+
+理论紧密打包载荷 ceil(N×bits/8)，每组一个4B scale，忽略对齐、头与其他元数据；JS数组未真的压成该大小。除重建MSE外，固定激活 u=[1,−1,0.5,0,1,−0.5,2,−1]，把输入看成一行权重，比较 u·x 与 u·x̂ 的线性输出误差。GGUF是格式，不是单一算法。
+
+依据：[LoRA §4.1](https://arxiv.org/html/2106.09685v2)、[QLoRA §3、附录E](https://arxiv.org/html/2305.14314v1)、[PyTorch fake quantize](https://docs.pytorch.org/docs/2.15/generated/torch.fake_quantize_per_tensor_affine.html)、[GGUF官方格式](https://github.com/ggml-org/ggml/blob/master/docs/gguf.md)。
+
+### 解码策略
+
+词表a/b/c。先softmax(logits/τ)，再Top-K（按概率降序、token ID破并列、恰好K项），归一化后Top-P：保留首次使累计质量达到阈值的token，再归一化。这个顺序明确，不冒充所有库组合。某些库用阈值保留Top-K并列项，数量可能超过K，本例不同。
+
+按token ID排列概率区间，固定LCG种子得到u∈[0,1)，用严格累计概率>u选token。两步树第一步用当前温度分布，不做K/P，条件行为 [[0.4,0.3,0.3],[0.9,0.05,0.05],[0.5,0.25,0.25]]。默认第一步[0.5,0.3,0.2]时Greedy=aa，联合0.2；Beam-2=ba，联合0.27，穷举九路径核对。固定长度2，无EOS或长度惩罚，不推广为Beam必得全局最优。
+
+依据：[Nucleus Sampling](https://arxiv.org/abs/1904.09751)、[Transformers实现](https://github.com/huggingface/transformers/blob/main/src/transformers/generation/logits_process.py)、[官方生成策略](https://huggingface.co/docs/transformers/main/en/generation_strategies)。
+
+### 偏好学习、PPO、DPO 与 GRPO
+
+输入是同一prompt的四个给定回答奖励。Bradley–Terry概率sigmoid(r0−r1)。DPO偏好标签固定回答0胜过回答1，不随奖励编辑自动反转；当前完整回答概率由softmax([policy,0,−0.5,0])构造，参考均匀，DPO loss=softplus(−β[(logπw−logπref,w)−(logπl−logπref,l)])。真实回答的log概率为逐token条件log概率之和。
+
+单项PPO最大化 min(ρA,clip(ρ,1−ε,1+ε)A)，正负优势都按min处理；不把目标clipping误画成策略比率被强制约束。省略critic、GAE与优化器。
+
+GRPO按总体标准差√mean((r−mean(r))²)标准化同prompt组奖励；R1原文std未指定总体/样本分母，本页明确采用总体约定，零方差优势设0。旧策略softmax([0.5,0,−0.5,0])，比率π/πold；R1样本参考项 k=πref/π−log(πref/π)−1。简化目标 mean(min(ρA,clip(ρ)A)−βKL×k)。把完整回答简化为一个动作，省略逐token平均。k不是单个回答上的完整分布KL，零优势仍可能有参考约束。奖励共同平移优势不变。蒸馏仅用奖励Softmax作玩具教师，计算交叉熵，不涉及闭源训练细节或隐藏推理。
+
+依据：[DPO Eq.7](https://arxiv.org/html/2305.18290v3)、[PPO作者说明](https://spinningup.openai.com/en/latest/algorithms/ppo.html)、[R1 §2.2.1](https://arxiv.org/html/2501.12948v1)。
+
+### Sparse、Linear 与 Infini-attention
+
+四token、二维激活，Q取输入，K交换两维，V取输入。稀疏窗口包含自身，max(0,t−w+1)≤j≤t；本页仍执行稠密数值，不宣称Mask自动带来算术节省。
+
+核特征φ(x)=ELU(x)+1，逐元素x≥0时x+1，否则exp(x)。线性因果递推：S_t=S_prev+φ(k_t)^T v_t，z_t=z_prev+φ(k_t)，o_t=φ(q_t)S_t/(φ(q_t)z_t^T)。与显式核权重φ(q)·φ(k)的归一化基线比较；不是标准Softmax Attention的等价变形。状态共2×2+2=6标量，不含可视化轨迹。
+
+Infini每段2token：先从上一段M,z读取A_mem，再计算当前段因果Softmax A_local，合并 sigmoid(β)A_mem+(1−sigmoid(β))A_local。初始零分母返回零。Linear更新 M+=φ(K)^TV；Delta更新 M+=φ(K)^T(V−Vhat_old)，整段Vhat都从同一旧M/z读取，不能逐token写后再读。两者z均累加φ(K)行和。
+
+碰撞例子使用两行相同Key，V历史 [[1,0],[0,1]] 与 [[0.5,0.5],[0.5,0.5]] 得到相同S/z；证明本例压缩有损，不声称整个架构任务质量排序。
+
+依据：[Longformer](https://arxiv.org/html/2004.05150v2)、[Linear Attention Eq.7–12](https://arxiv.org/html/2006.16236v3)、[Infini Eq.3–6](https://arxiv.org/html/2404.07143v1)。
+
+### SSM 与 Mamba
+
+标量ZOH：Abar_t=exp(Δ_t A)，Bbar_t=expm1(Δ_t A)/A×B_t，A=0时取极限Δ_t B_t。h_t=Abar_t h_prev+Bbar_t x_t，y_t=C_t h_t。固定模式Δ_t=Δ、B=C=1；选择性模式Δ_t=Δ×softplus(0.5x_t)、B_t=1+0.25x_t、C_t=1−0.1x_t，A固定。投影是自编教学设定，不是训练后Mamba参数。
+
+先展示固定递推，再展示输入相关参数。时间步控件显示到当前步的状态；未来状态不伪装成已执行。固定A<0时Δ越大，旧状态系数越小，旧信息衰减更快；同时Bbar也变化，不能推断输出必然更小。修正原书32.3.4“小Δ快速遗忘”的相反表述。A=0时旧状态保留系数恒1。
+
+固定参数的两步历史 [1,0] 与 [2,−λ]，λ=exp(ΔA)，在相同初始状态下得到相同最终状态；展示固定状态的碰撞。与因果Attention并列只对照历史访问机制，不判等、不排序。省略Mamba卷积、门控与扩展投影，未复现完整模型或GPU扫描性能。
+
+依据：[Mamba Eq.1–4、Algorithm2](https://arxiv.org/html/2312.00752v2)。上述P1来源于2026-11-08在线核对，图文和教学数值自行编写。

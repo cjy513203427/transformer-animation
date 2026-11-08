@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { goToExperiment } from './helpers/navigation';
 import { initialKVState, serializeKVState } from '../src/state/kv';
 
 test('缓存账本：原书例子、改 KV 头数与输入参数', async ({ page }) => {
@@ -122,14 +123,8 @@ test('分享链接恢复、坏链接回退、键盘与目录导航', async ({ pa
   await expect(page.getByRole('status').first()).toContainText('分享链接无效');
   await expect(page.locator('.kv-panel .lesson-progress')).toHaveText('1 / 6');
 
-  await page
-    .getByRole('link', { name: /训练、生成与缓存/ })
-    .first()
-    .click();
+  await goToExperiment(page, '训练、生成与缓存');
   await expect(page).toHaveURL(/\/inference-cache$/);
-  await page
-    .getByRole('link', { name: /KV 架构对照/ })
-    .first()
-    .click();
+  await goToExperiment(page, 'KV 架构对照');
   await expect(page).toHaveURL(/\/kv-architectures$/);
 });

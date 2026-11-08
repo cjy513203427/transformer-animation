@@ -14,6 +14,14 @@ const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
   '/kv-architectures': lazy(() => import('./features/kv/KVLab')),
   '/moe': lazy(() => import('./features/moe/MoELab')),
   '/flash-attention': lazy(() => import('./features/flash/FlashLab')),
+  '/normalization': lazy(() => import('./features/p1/NormalizationLab')),
+  '/ffn-residual': lazy(() => import('./features/p1/FFNLab')),
+  '/lora': lazy(() => import('./features/p1/LoRALab')),
+  '/quantization': lazy(() => import('./features/p1/QuantizationLab')),
+  '/decoding': lazy(() => import('./features/p1/DecodingLab')),
+  '/preference': lazy(() => import('./features/p1/PreferenceLab')),
+  '/attention-variants': lazy(() => import('./features/p1/MemoryLab')),
+  '/ssm-mamba': lazy(() => import('./features/p1/SSMLab')),
 };
 
 const path = window.location.pathname.replace(/\/+$/, '') || '/';

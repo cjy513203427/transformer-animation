@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { goToExperiment } from './helpers/navigation';
 import { initialPositionState, serializePositionState } from '../src/state/position';
 
 test('位置编码：位置盲、正弦表与书中数值、相加、位置播放', async ({ page }) => {
@@ -108,10 +109,10 @@ test('位置编码链接恢复、坏链接回退与目录导航', async ({ page,
     fullPage: false,
     scale: 'css',
   });
-  await page.getByRole('link', { name: /跟图理解 Attention/ }).click();
+  await goToExperiment(page, '跟图理解 Attention');
   await expect(
     page.getByRole('heading', { name: 'Attention：信息怎样在词之间流动' }),
   ).toBeVisible();
-  await page.getByRole('link', { name: /位置编码/ }).click();
+  await goToExperiment(page, '位置编码');
   await expect(page.getByRole('heading', { name: '位置编码：顺序从哪里进入计算' })).toBeVisible();
 });

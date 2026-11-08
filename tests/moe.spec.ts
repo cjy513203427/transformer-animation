@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { goToExperiment } from './helpers/navigation';
 import { initialMoEState, serializeMoEState } from '../src/state/moe';
 
 test('路由、Top-K、专家干预与按 token 合并形成完整计算链', async ({ page }, testInfo) => {
@@ -128,15 +129,9 @@ test('分享恢复、坏链接、回退、播放暂停与改输入暂停', async
   await page.goto('/moe#moe=%7Bbroken');
   await expect(page.getByRole('status').first()).toContainText('分享链接无效');
   await expect(page.locator('.lesson-progress')).toHaveText('1 / 6');
-  await page
-    .getByRole('link', { name: /KV 架构对照/ })
-    .first()
-    .click();
+  await goToExperiment(page, 'KV 架构对照');
   await expect(page).toHaveURL(/\/kv-architectures$/);
-  await page
-    .getByRole('link', { name: /MoE 与专家并行/ })
-    .first()
-    .click();
+  await goToExperiment(page, 'MoE 与专家并行');
   await expect(page).toHaveURL(/\/moe$/);
 });
 

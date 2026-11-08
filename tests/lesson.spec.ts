@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openDirectory } from './helpers/navigation';
 import { initialState, serializeState } from '../src/state/experiment';
 
 test('按书的架构定位模块，再进入分支图逐步解释', async ({ page }, testInfo) => {
@@ -86,21 +87,17 @@ test('导读可回退、播放、暂停并通过链接恢复当前层次', async
   ).toBeVisible();
 });
 
-test('当前实验入口在窄屏可见，键盘跳到正文保留分享状态', async ({ page }) => {
+test('当前学习位置保持可见，展开目录不横向滚动，跳到正文保留分享状态', async ({ page }) => {
   await page.goto('/moe');
-  const navigation = page.getByRole('navigation', { name: '实验目录', exact: true });
-  await expect(navigation.locator('[aria-current="page"]')).toHaveText('MoE 与专家并行');
-  await expect
-    .poll(() =>
-      navigation.evaluate((nav) => {
-        const active = nav.querySelector('[aria-current="page"]');
-        if (!active) return false;
-        const navBounds = nav.getBoundingClientRect();
-        const activeBounds = active.getBoundingClientRect();
-        return activeBounds.left >= navBounds.left - 1 && activeBounds.right <= navBounds.right + 1;
-      }),
-    )
-    .toBe(true);
+  const toggle = page.getByRole('button', { name: '学习目录', exact: true });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('.course-location')).toContainText('MoE 与专家并行');
+  const initialScroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+  const navigation = await openDirectory(page);
+  await expect(navigation.locator('[aria-current="page"]')).toHaveAccessibleName('MoE 与专家并行');
+  expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(initialScroll);
+  await page.keyboard.press('Escape');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
     false,
   );

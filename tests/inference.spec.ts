@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { goToExperiment } from './helpers/navigation';
 import { initialInferenceState, serializeInferenceState } from '../src/state/inference';
 
 test('训练并行：反事实只改输入，之前的行逐位不变', async ({ page }) => {
@@ -131,14 +132,8 @@ test('分享链接恢复、坏链接回退与目录导航', async ({ page }) => 
   await expect(page.getByRole('status').first()).toContainText('分享链接无效');
   await expect(page.locator('.inf-panel .lesson-progress')).toHaveText('1 / 6');
 
-  await page
-    .getByRole('link', { name: /位置编码/ })
-    .first()
-    .click();
+  await goToExperiment(page, '位置编码');
   await expect(page).toHaveURL(/\/position$/);
-  await page
-    .getByRole('link', { name: /训练、生成与缓存/ })
-    .first()
-    .click();
+  await goToExperiment(page, '训练、生成与缓存');
   await expect(page).toHaveURL(/\/inference-cache$/);
 });
