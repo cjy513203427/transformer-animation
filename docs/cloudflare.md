@@ -1,33 +1,49 @@
-# Cloudflare 本地准备
+# Cloudflare 部署
 
 目标为 Workers Static Assets，所有教学计算在浏览器执行，无 Worker 请求处理代码、账号系统或数据库。
 
-## 配置
+## 发布方式：推送 main 自动部署
 
-- `cloudflare.config.ts`：Worker 名称、兼容日期与 SPA 路由行为。
-- `vite.config.ts`：仅 `--mode cloudflare` 加载 Cloudflare Vite 插件，生成纯静态 Build Output；普通开发和 `npm run build` 使用原生 Vite。
-- `cf` 与 Cloudflare Vite 插件采用当前官方 beta 版本，锁文件固定解析版本。配置 API 仍可能变化，升级时需重新核对。
-- Node 推荐 24.22+（24.x）；当前 CLI 声明支持 `^22.23.0 || ^24.22.0 || ^26.12.0`。较旧 Node 可能能运行前端，但不属于该 CLI 支持范围。
+仓库已在 Cloudflare 控制台通过 Workers Builds 连接到 Worker `transformer-animation`。每次推送到 `main`，Cloudflare 会：
+
+1. `npm clean-install`
+2. 执行部署命令 `npx wrangler deploy`（控制台默认值，未改动）
+3. wrangler 读取 [`wrangler.jsonc`](../wrangler.jsonc)，先运行 `build.command`，即 `npm run check`（类型检查、单元测试、Vite 构建），任一步失败则不部署
+4. 上传 `dist/` 中的静态资源
+
+`wrangler.jsonc` 中的 `name` 必须与控制台里连接的 Worker 名称一致，否则 Workers Builds 会报错。
+
+本地检查部署配置（会构建，但不上传、不需要登录）：
+
+```powershell
+npx wrangler deploy --dry-run
+```
+
+## 访问范围
+
+- 公开：`workers_dev: true`，地址为 `transformer-animation.<账号子域>.workers.dev`，任何持有链接的人都可访问。
+- `preview_urls: false`：不生成版本预览 URL。
+- 没有自定义域名或路由。
+- 改为私人访问时，在控制台 Worker → Settings → Domains & Routes → workers.dev 启用 Cloudflare Access；若以后添加自定义域名或预览 URL，也要分别加上相同的保护。
+
+## `cf` CLI 构建（暂不用于发布）
+
+- `cloudflare.config.ts`：供新的 `cf` CLI 使用，名称与 URL 设置需和 `wrangler.jsonc` 保持一致。
+- `vite.config.ts`：仅 `--mode cloudflare` 加载 Cloudflare Vite 插件，生成 `.cloudflare/output/v0/`；普通开发、`npm run build` 和 wrangler 部署都使用原生 Vite，输出 `dist/`。
+- `cf` 与 Cloudflare Vite 插件采用官方 beta 版本，配置 API 仍可能变化。
 
 ```powershell
 npm run build:cloudflare
 ```
 
-该脚本先进行类型检查，再执行 `cf build --mode cloudflare`，构建输出位于 `.cloudflare/output/v0/`。它不上传资源，也不需要 Cloudflare 凭据。常规 Vite 产物是 `dist/`。
-
-## 发布边界
-
-本次仅准备代码和本地构建，不登录账号、不创建云资源、不发布、不设置域名或身份策略。
-
-配置中 `workersDev: false`、`previewUrls: false`，没有自定义域名或路由。这是尚未选择访问范围的初始状态，不等于已配置身份保护。真正发布前，要确定公开/私人/指定成员范围，并对生产、预览和自定义域名中的所有实际入口设置相应策略。私人共享可按 Cloudflare Access 的当前文档保护入口。
-
-没有加入部署脚本或 CI 自动部署。CI 只执行检查和本地构建。获准发布后再按当时官方 CLI 文档执行，并核验真实 URL 与访问行为。
+GitHub Actions（`.github/workflows/check.yml`）只做检查和构建，不部署。
 
 ## 官方参考
 
 - [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)
-- [Cloudflare CLI 构建与发布](https://developers.cloudflare.com/cf/projects/)
-- [cloudflare.config.ts](https://developers.cloudflare.com/cf/projects/cloudflare-config/)
+- [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/)
+- [Wrangler 配置](https://developers.cloudflare.com/workers/wrangler/configuration/)
 - [workers.dev 路由与访问范围](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
+- [Cloudflare CLI 构建与发布](https://developers.cloudflare.com/cf/projects/)
 
-核对日期：2026-11-05。
+核对日期：2026-11-09。

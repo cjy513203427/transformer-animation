@@ -23,6 +23,8 @@ npm run build:cloudflare  # 生成并校验 Cloudflare Build Output，不发布
 npm run format           # 格式化项目源码
 ```
 
+推送到 `main` 后由 Cloudflare Workers Builds 自动检查并部署（公开 workers.dev），配置见 `wrangler.jsonc`；本地可用 `npx wrangler deploy --dry-run` 检查。
+
 浏览器测试默认使用已安装的 Google Chrome。若环境没有 Chrome，可先运行 `npx playwright install chrome`。CI 包含该安装步骤。移动测试为 Chrome 触摸/窄屏模拟，并启用 reduced-motion，不代表真实 iOS Safari 测试。
 
 ## 学习入口
@@ -171,7 +173,7 @@ src/
   content/              步骤解释、实验目录与参考来源
   styles/               视觉规则与响应式布局
 tests/                  Playwright 浏览器交互测试
-docs/                   数值约定与 Cloudflare 准备说明
+docs/                   数值约定与 Cloudflare 部署说明
 ```
 
 ## 数值与状态约定
@@ -182,7 +184,7 @@ docs/                   数值约定与 Cloudflare 准备说明
 
 普通浏览器分享链接只能在相应站点可访问时使用；本地 `127.0.0.1` 链接需要接收者也运行此项目，不等于已发布网站。当前不收集笔记、进度或个人数据，不接入分析服务。
 
-更多内容见 [数学说明](docs/math.md) 与 [Cloudflare 准备](docs/cloudflare.md)。
+更多内容见 [数学说明](docs/math.md) 与 [Cloudflare 部署](docs/cloudflare.md)。
 
 ## 参考
 

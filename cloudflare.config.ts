@@ -1,12 +1,13 @@
 import { defineConfig } from 'cf/config';
 
-// Local preparation only. Choose identity/access policy before enabling an entry point.
+// Local `cf build` only. Production deploys use wrangler.jsonc via Workers Builds;
+// keep the name and URL settings here in sync with that file.
 export default defineConfig({
   worker: {
-    name: 'llm-mechanism-lab',
+    name: 'transformer-animation',
     compatibilityDate: '2026-11-05',
     assets: { notFoundHandling: 'single-page-application' },
-    workersDev: false,
+    workersDev: true,
     previewUrls: false,
   },
 });

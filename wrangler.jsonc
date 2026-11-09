@@ -1,0 +1,16 @@
+// Workers Builds deploys this file on every push to main (`npx wrangler deploy`).
+// `name` must match the Worker connected to the repository in the Cloudflare dashboard.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "transformer-animation",
+  "compatibility_date": "2026-11-05",
+  // Typecheck, unit tests and a plain Vite build; a failure stops the deploy.
+  "build": { "command": "npm run check" },
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+  },
+  // Public on <name>.<account subdomain>.workers.dev; version preview URLs stay off.
+  "workers_dev": true,
+  "preview_urls": false,
+}
