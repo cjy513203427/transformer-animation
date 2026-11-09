@@ -10,6 +10,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "build:deploy": "tsc --noEmit && vitest run && vite build --mode deploy",
     "build:cloudflare": "tsc --noEmit && cf build --mode cloudflare",
     "format": "prettier --write src tests *.config.ts *.json index.html README.md docs .github",
     "typecheck": "tsc --noEmit",
