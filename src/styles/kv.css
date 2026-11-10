@@ -1,0 +1,320 @@
+/* KV 架构对照：条形图、头分组映射、缓存格子与计算路径。状态都有文字标注。 */
+.kv-steps {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.kv-columns {
+  grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1.15fr);
+}
+.kv-diagram-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- bars ---------- */
+.kv-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.kv-bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  grid-template-areas:
+    'name value'
+    'track track';
+  gap: 4px 8px;
+  font-size: 12px;
+  color: #424d46;
+}
+.kv-bar-name {
+  grid-area: name;
+}
+.kv-bar-name small {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid #4f7e2d;
+  border-radius: 2px;
+  color: #345b19;
+  font-size: 10px;
+}
+.kv-bar-value {
+  grid-area: value;
+  text-align: right;
+  font:
+    600 12px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.kv-bar-track {
+  grid-area: track;
+  display: flex;
+  height: 14px;
+  background: #e7ece7;
+  border: 1px solid #d0dacf;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.kv-bar-part {
+  display: block;
+  height: 100%;
+}
+.kv-bar-part-0 {
+  background: #6f7d4f;
+}
+.kv-bar-part-1 {
+  background: repeating-linear-gradient(45deg, #e2efcc, #e2efcc 3px, #9fac7a 3px, #9fac7a 5px);
+}
+.kv-bar-current .kv-bar-part-0 {
+  background: #4f7e2d;
+}
+.kv-bar-current .kv-bar-name {
+  font-weight: 700;
+  color: #252a27;
+}
+
+/* ---------- head map ---------- */
+.kv-headmap {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+}
+.kv-wire {
+  stroke: #d0dacf;
+  stroke-width: 1.6;
+}
+.kv-wire-on {
+  stroke: #4f7e2d;
+  stroke-width: 3;
+}
+.kv-node rect {
+  stroke-width: 1.4;
+}
+.kv-node text {
+  font:
+    600 13px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.kv-q rect {
+  fill: #e4ebfa;
+  stroke: #3558a4;
+}
+.kv-q text {
+  fill: #2c4a8f;
+}
+.kv-kv rect {
+  fill: #f8eddd;
+  stroke: #8d4b13;
+}
+.kv-kv text {
+  fill: #6f3a0e;
+}
+.kv-node-on rect {
+  stroke: #4f7e2d;
+  stroke-width: 3;
+}
+.kv-axis {
+  font-size: 11px;
+  fill: #59665c;
+}
+
+/* ---------- flows ---------- */
+.kv-flows {
+  display: grid;
+  gap: 12px;
+}
+.kv-flow {
+  padding: 12px 14px;
+  border: 1px solid #d0dacf;
+  border-radius: 4px;
+  background: #f6f8f5;
+  opacity: 0.75;
+}
+.kv-flow-on {
+  opacity: 1;
+  border: 2px solid #4f7e2d;
+  background: #ffffff;
+}
+.kv-flow > strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.kv-flow > strong small {
+  margin-left: 8px;
+  font-size: 10px;
+  color: #345b19;
+}
+.kv-flow ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.kv-flow-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 6px 8px;
+  border: 1px solid #dee5df;
+  border-radius: 3px;
+  background: #ffffff;
+  font-size: 12px;
+}
+.kv-flow-step span {
+  color: #424d46;
+}
+.kv-flow-cache {
+  border-color: #6f7d4f;
+  background: #e3e8d6;
+}
+.kv-flow-warn {
+  border-color: #b5502a;
+  background: #f6e2d6;
+}
+.kv-flow p {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #424d46;
+}
+
+/* ---------- widgets ---------- */
+.kv-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px 12px;
+}
+.kv-field {
+  display: grid;
+  gap: 3px;
+  font-size: 11px;
+  color: #59665c;
+}
+.kv-field input {
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid #bdc9c0;
+  border-radius: 3px;
+  background: #ffffff;
+  font:
+    13px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+  color: #252a27;
+}
+.kv-result {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 3px solid #252a27;
+  border-radius: 4px;
+  background: #e2efcc;
+  color: #1f2a14;
+  font-size: 12px;
+  overflow-x: auto;
+}
+.kv-result strong {
+  font:
+    700 20px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.kv-col-on {
+  font-weight: 700;
+  background: #f6e2d6;
+}
+.kv-row-pick {
+  padding: 2px 8px;
+  font-size: 12px;
+}
+.kv-costs {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 700px) {
+  .kv-steps button {
+    font-size: 9px;
+    padding: 11px 1px;
+  }
+  .kv-bars li {
+    grid-template-columns: minmax(0, 1fr) 72px;
+  }
+}
+
+/* ---------- cache blocks: [tokens, KV heads, d_k + d_v] per layer ---------- */
+.kv-blocks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+.kv-block {
+  margin: 0;
+  display: grid;
+  align-content: end;
+  gap: 2px;
+}
+.kv-block svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.kv-block figcaption {
+  display: grid;
+  gap: 1px;
+  font-size: 12px;
+  color: #424d46;
+}
+.kv-block figcaption strong {
+  font-size: 13px;
+  color: #303638;
+}
+.kv-block figcaption span:last-child {
+  font:
+    11px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+  color: #59665c;
+}
+.kv-blk {
+  stroke-width: 0.8;
+}
+.kv-blk-k {
+  fill: #f3dfc4;
+  stroke: #b98a5c;
+}
+.kv-blk-v {
+  fill: #e6dbf1;
+  stroke: #a48bbd;
+}
+.kv-blk-latent {
+  fill: #d5e6b9;
+  stroke: #6f7d4f;
+}
+.kv-blk-rope {
+  fill: #f4f5e8;
+  stroke: #6f7d4f;
+}
+.kv-blk-axis {
+  font:
+    10px Consolas,
+    'Microsoft YaHei',
+    monospace;
+  fill: #59665c;
+}
+.kv-blk-col {
+  font:
+    9px Consolas,
+    monospace;
+  fill: #59665c;
+}

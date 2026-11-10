@@ -1,10 +1,11 @@
 import { defineConfig } from 'cf/config';
 
-// Public workers.dev deployment authorized by the owner; version previews stay disabled.
+// Local `cf build` only. Production deploys use wrangler.jsonc via Workers Builds;
+// keep the name and URL settings here in sync with that file.
 export default defineConfig({
   accountId: '022d0703f819b09d7c97afd1fdcd191d',
   worker: {
-    name: 'llm-mechanism-lab',
+    name: 'transformer-animation',
     compatibilityDate: '2026-11-05',
     assets: { notFoundHandling: 'single-page-application' },
     workersDev: true,

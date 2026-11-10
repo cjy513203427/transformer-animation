@@ -1,8 +1,8 @@
 .diagram-panel {
   min-width: 0;
   padding: 20px 18px;
-  background: #f8fafc;
-  border-right: 1px solid #e0e8ef;
+  background: #f6f8f7;
+  border-right: 1px solid #e0e6e1;
 }
 .diagram-caption {
   display: flex;
@@ -13,11 +13,11 @@
 .diagram-caption strong {
   font-size: 13px;
   font-weight: 500;
-  color: #526d82;
+  color: #5a564e;
 }
 .diagram-caption span {
   font-size: 10px;
-  color: #8298a8;
+  color: #65625a;
 }
 .diagram-panel svg {
   display: block;
@@ -26,7 +26,7 @@
 }
 .diagram-wire {
   fill: none;
-  stroke: #9aaebb;
+  stroke: #817c73;
   stroke-width: 1.7;
 }
 .diagram-wire.q-wire {
@@ -40,7 +40,7 @@
   stroke-width: 2;
 }
 .diagram-wire.main-wire {
-  stroke: #64a5ad;
+  stroke: #657251;
 }
 .diagram-wire.lit {
   stroke-width: 3;
@@ -48,28 +48,28 @@
 .diagram-node {
   cursor: pointer;
   outline: none;
-  --node-color: #627c90;
-  --node-fill: #fff;
+  --node-color: #605d56;
+  --node-fill: #ffffff;
 }
 .diagram-query {
   --node-color: #4267c7;
-  --node-fill: #edf2ff;
+  --node-fill: #e4ebfa;
 }
 .diagram-key {
   --node-color: #a85a17;
-  --node-fill: #fbf3e8;
+  --node-fill: #f8eddd;
 }
 .diagram-value {
   --node-color: #865dad;
-  --node-fill: #f4eef9;
+  --node-fill: #f0e9f7;
 }
 .diagram-probability {
-  --node-color: #087e8b;
-  --node-fill: #eaf7f7;
+  --node-color: #38751d;
+  --node-fill: #edf5e5;
 }
 .diagram-node rect {
   fill: var(--node-fill);
-  stroke: #cbd7e2;
+  stroke: #cbd5cc;
   stroke-width: 1.3;
 }
 .diagram-node.active rect {
@@ -85,7 +85,7 @@
 }
 .diagram-node .diagram-node-sub {
   font-size: 11px;
-  fill: #7d8fa1;
+  fill: #6a6761;
 }
 .diagram-node:focus-visible rect {
   stroke: #163bad;
@@ -108,34 +108,43 @@
 }
 .diagram-multihead {
   padding: 14px 15px;
-  border: 1px dashed #c6d7e2;
+  border: 1px dashed #b6b2a7;
   border-radius: 7px;
-  background: white;
+  background: #ffffff;
 }
 .diagram-multihead strong {
   font-size: 11px;
   font-weight: 500;
-  color: #657f93;
+  color: #615e57;
 }
 .diagram-multihead p {
   font-size: 12px;
-  color: #718899;
+  color: #67736b;
   line-height: 1.9;
   margin: 7px 0;
 }
 .diagram-multihead em {
   font-style: normal;
-  color: #087e8b;
-  background: #edf7f7;
+  color: #38751d;
+  background: #eef6e7;
 }
 .diagram-multihead small {
   font-size: 10px;
-  color: #92a2af;
+  color: #67736b;
+}
+.diagram-heads-link {
+  display: block;
+  margin-top: 9px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #38751d;
+  border-color: #a5b490;
+  background: #dbe3d1;
 }
 @media (max-width: 700px) {
   .diagram-panel {
     border-right: 0;
-    border-bottom: 1px solid #e0e8ef;
+    border-bottom: 1px solid #e0e6e1;
     padding: 18px 8px;
   }
   .diagram-caption {
@@ -150,4 +159,33 @@
   .diagram-caption strong {
     font-size: 12px;
   }
+}
+
+/* Typeset math inside SVG diagrams (foreignObject); text colour follows the surrounding node. */
+.svg-tex {
+  white-space: nowrap;
+  font-family: 'Microsoft YaHei', sans-serif;
+  color: #514d45;
+}
+.svg-tex .katex {
+  font-size: 1.05em;
+}
+.diagram-node .svg-tex {
+  color: var(--node-color);
+}
+.pp-query .svg-tex {
+  color: #3558a4;
+}
+.pp-key .svg-tex {
+  color: #8d4b13;
+}
+.pp-value .svg-tex {
+  color: #6f4a92;
+}
+.pp-insert .svg-tex {
+  color: #67736b;
+}
+.pp-insert.active .svg-tex {
+  color: var(--insert);
+  font-weight: 600;
 }

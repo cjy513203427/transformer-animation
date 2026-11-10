@@ -1,0 +1,289 @@
+/* MoE keeps the shared tensor roles; active routes are also labelled in text. */
+.moe-inputs {
+  padding: 16px 26px;
+  border-bottom: 1px solid #d0dacf;
+  display: grid;
+  gap: 12px;
+  background: #f6f8f5;
+}
+.moe-input-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+.moe-input-row .moe-field {
+  max-width: 105px;
+}
+.moe-ledger span {
+  font-size: 11px;
+  color: #59665c;
+}
+.moe-ledger strong {
+  color: #1f2a14;
+  font:
+    600 17px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.moe-steps {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.moe-columns {
+  grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1.15fr);
+}
+.moe-diagram-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.moe-svg {
+  width: 100%;
+  height: auto;
+}
+.moe-svg-label {
+  fill: #59665c;
+  font:
+    11px 'Microsoft YaHei',
+    sans-serif;
+}
+.moe-node rect {
+  stroke: #bdc9c0;
+  stroke-width: 1.3;
+}
+.moe-node text {
+  font:
+    600 13px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+  fill: #252a27;
+}
+.moe-node .moe-svg-number {
+  font-size: 11px;
+  font-weight: 400;
+}
+.moe-token rect {
+  fill: #e4ebfa;
+  stroke: #3558a4;
+}
+.moe-expert rect {
+  fill: #f0e9f7;
+  stroke: #865dad;
+}
+.moe-probability rect,
+.moe-output rect {
+  fill: #e2efcc;
+  stroke: #6f7d4f;
+}
+.moe-node-on rect {
+  stroke: #4f7e2d;
+  stroke-width: 3;
+}
+.moe-node-pending {
+  opacity: 0.4;
+}
+.moe-wire {
+  fill: none;
+  stroke: #9f9a8d;
+  stroke-width: 1.5;
+}
+.moe-wire-muted {
+  opacity: 0.28;
+}
+.moe-wire-on {
+  stroke: #4f7e2d;
+  stroke-width: 2.6;
+}
+.moe-return {
+  stroke-dasharray: 5 3;
+}
+.moe-arrow-head {
+  fill: none;
+  stroke: #4f7e2d;
+  stroke-width: 2.6;
+}
+.moe-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid #bdc9c0;
+  border-radius: 4px;
+  background: #ffffff;
+  font-size: 12px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.moe-readout strong {
+  color: #252a27;
+  font-weight: 600;
+}
+.moe-readout span {
+  color: #59665c;
+}
+.moe-load-diagram,
+.moe-parallel-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.moe-load-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+.moe-load-bars li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 4px 10px;
+  font:
+    12px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.moe-load-bars small {
+  grid-column: 2 / 4;
+  font-size: 11px;
+  color: #59665c;
+}
+.moe-load-bars strong {
+  font-size: 12px;
+  text-align: right;
+}
+.moe-load-track {
+  height: 15px;
+  border: 1px solid #d0dacf;
+  border-radius: 2px;
+  background: #e7ece7;
+  overflow: hidden;
+}
+.moe-load-track i {
+  display: block;
+  height: 100%;
+  background: #6f7d4f;
+}
+.moe-device {
+  fill: #ffffff;
+  stroke: #bdc9c0;
+  stroke-width: 1.4;
+}
+.moe-device-title {
+  fill: #252a27;
+  font:
+    600 13px 'Microsoft YaHei',
+    sans-serif;
+}
+.moe-packet-list {
+  margin: 0;
+  padding-left: 1.3em;
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1.9;
+  color: #59665c;
+}
+.moe-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 9px 12px;
+}
+.moe-field {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+  color: #59665c;
+}
+.moe-field input {
+  min-width: 0;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #bdc9c0;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #252a27;
+  font:
+    13px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.moe-ledger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0;
+}
+.moe-ledger > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 12px;
+  border: 1px solid #bdc9c0;
+  border-radius: 4px;
+  background: #f6f8f5;
+}
+.moe-ledger dt {
+  font-size: 11px;
+  color: #59665c;
+}
+.moe-ledger dd {
+  margin: 0;
+  color: #1f2a14;
+  font:
+    600 17px 'IBM Plex Mono',
+    Consolas,
+    monospace;
+}
+.moe-ledger small {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #59665c;
+}
+.moe-equation {
+  padding: 10px 12px;
+  border-left: 3px solid #6f7d4f;
+  background: #e3e8d6;
+  font-size: 12px;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+.moe-scope {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #59665c;
+}
+@media (max-width: 900px) {
+  .moe-columns {
+    grid-template-columns: 1fr;
+  }
+  .moe-columns > .diagram-panel {
+    border-right: 0;
+    border-bottom: 1px solid #e0e6e1;
+  }
+}
+@media (max-width: 700px) {
+  .moe-steps button {
+    font-size: 9px;
+    padding: 11px 1px;
+  }
+  .moe-diagram-panel {
+    padding: 0 7px;
+    gap: 12px;
+  }
+  .moe-readout {
+    padding: 10px;
+    font-size: 11px;
+  }
+  .moe-ledger {
+    gap: 7px;
+  }
+  .moe-ledger > div {
+    padding: 9px;
+  }
+  .moe-ledger dd {
+    font-size: 15px;
+  }
+}

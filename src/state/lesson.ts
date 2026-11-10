@@ -1,4 +1,4 @@
-export const LESSON_MODES = ['overview', 'guide', 'numbers'] as const;
+export const LESSON_MODES = ['overview', 'guide', 'numbers', 'heads'] as const;
 export type LessonMode = (typeof LESSON_MODES)[number];
 export const ARCHITECTURE_NODES = [
   'text',

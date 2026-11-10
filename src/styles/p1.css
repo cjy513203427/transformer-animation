@@ -1,0 +1,307 @@
+.p1-inputs {
+  padding: 16px 22px;
+  display: grid;
+  gap: 14px;
+  background: #f6f8f5;
+  border-bottom: 1px solid #d0dacf;
+  margin-bottom: 20px;
+}
+.p1-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.p1-presets button {
+  padding: 6px 10px;
+}
+.p1-presets label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.p1-presets input {
+  max-width: 75px;
+  padding: 4px;
+}
+.p1-edit-input summary {
+  font-size: 12px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.p1-vector-editor {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.p1-vector-editor label {
+  display: grid;
+  font-size: 11px;
+  gap: 4px;
+}
+.p1-vector-editor input {
+  min-width: 0;
+  width: 100%;
+  padding: 6px 8px;
+}
+.p1-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+}
+.p1-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+}
+.p1-field input {
+  width: 125px;
+}
+.p1-field output {
+  min-width: 35px;
+}
+.p1-field select {
+  padding: 5px;
+  max-width: 100%;
+}
+.p1-columns {
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);
+}
+.p1-svg {
+  width: 100%;
+  height: auto;
+}
+.p1-svg-title {
+  font:
+    600 13px 'Microsoft YaHei',
+    sans-serif;
+  fill: #303638;
+}
+.p1-svg-small {
+  font:
+    11px Consolas,
+    monospace;
+  fill: #59665c;
+}
+/* Figure notes sit below the drawing as HTML so longer translations can wrap. */
+.p1-svg-note {
+  margin: 4px 0 0;
+  color: #59665c;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.p1-svg-number {
+  font:
+    12px Consolas,
+    monospace;
+  fill: #303638;
+}
+.p1-bar-input {
+  fill: #8fa6d5;
+}
+.p1-bar-output {
+  fill: #89ab59;
+}
+.p1-input-node {
+  fill: #edf2fb;
+  stroke: #8fa6d5;
+  stroke-width: 1.5;
+}
+.p1-key-node {
+  fill: #f5e6d5;
+  stroke: #a85a17;
+  stroke-width: 1.5;
+}
+.p1-output-node {
+  fill: #e7f0dc;
+  stroke: #668a44;
+  stroke-width: 1.5;
+}
+.p1-wire {
+  fill: none;
+  stroke: #9ba89a;
+  stroke-width: 1.3;
+}
+.p1-wire-on {
+  fill: none;
+  stroke: #527d2c;
+  stroke-width: 2.8;
+}
+.p1-tick {
+  stroke: #6f7d70;
+  stroke-width: 1;
+}
+.p1-marker {
+  stroke: #a85a17;
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+.p1-link {
+  stroke: #b7c3b5;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+/* Charts: curves differ by dash pattern and end label as well as colour. */
+.p1-grid {
+  stroke: #e3e8e2;
+  stroke-width: 1;
+}
+.p1-axis {
+  stroke: #8d998e;
+  stroke-width: 1;
+}
+.p1-curve {
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+.p1-curve-0 {
+  stroke: #3d6b22;
+}
+.p1-curve-1 {
+  stroke: #a85a17;
+}
+.p1-curve-2 {
+  stroke: #4b6aa8;
+}
+.p1-point {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.p1-point-0 {
+  fill: #3d6b22;
+}
+.p1-point-1 {
+  fill: #a85a17;
+}
+.p1-point-2 {
+  fill: #4b6aa8;
+}
+.p1-bar-before {
+  fill: #fff;
+  stroke: #6f7d70;
+  stroke-width: 1.4;
+}
+.p1-bar-after {
+  fill: #89ab59;
+  stroke: #5a7f37;
+  stroke-width: 1;
+}
+.p1-bar-dropped {
+  fill: #f1f2f0;
+  stroke: #b3b8b2;
+  stroke-width: 1.2;
+  stroke-dasharray: 3 2;
+}
+.p1-svg-dropped {
+  font:
+    11px Consolas,
+    monospace;
+  fill: #9a7a62;
+  text-decoration: line-through;
+}
+.p1-seg {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.p1-seg-0 {
+  fill: #dbe7cc;
+}
+.p1-seg-1 {
+  fill: #f2e2cf;
+}
+.p1-seg-2 {
+  fill: #dbe3f2;
+}
+.p1-seg-chosen {
+  stroke: #3d6b22;
+  stroke-width: 3;
+}
+.p1-u-line {
+  stroke: #303638;
+  stroke-width: 1.6;
+}
+.p1-u-head,
+.p1-arrow-head {
+  fill: #59665c;
+}
+.p1-future-node {
+  fill: #fafbfa;
+  stroke: #b7c3b5;
+  stroke-width: 1.3;
+  stroke-dasharray: 4 3;
+}
+.p1-node-current {
+  stroke-width: 2.6;
+}
+.p1-figure-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303638;
+}
+.p1-line-caption {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #59665c;
+}
+.p1-presets .p1-book-preset {
+  border-color: #9fbe89;
+  background: #f2f7ec;
+}
+.p1-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 15px 0;
+}
+.p1-metrics div {
+  padding: 10px;
+  border: 1px solid #d0dacf;
+  background: white;
+  display: grid;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+.p1-metrics span {
+  font-size: 11px;
+  color: #59665c;
+}
+.p1-metrics strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.p1-checks {
+  margin-top: 24px;
+}
+.p1-checks .exp-verdict {
+  margin-top: 8px;
+}
+.p1-panel .exp-predict button[aria-pressed='true'] {
+  background: #e8f0df;
+  border-color: #668a44;
+  box-shadow: inset 0 -2px #668a44;
+}
+@media (max-width: 900px) {
+  .p1-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .p1-inputs {
+    padding: 14px;
+  }
+  .p1-vector-editor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .p1-metrics {
+    gap: 7px;
+  }
+  .p1-presets button {
+    min-height: 40px;
+  }
+}

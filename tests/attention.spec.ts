@@ -3,8 +3,10 @@ import { initialState, serializeState } from '../src/state/experiment';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/attention');
-  await expect(page.getByRole('heading', { name: '从架构图，读懂 Attention' })).toBeVisible();
-  await page.getByRole('button', { name: /03 动手核对/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Attention：信息怎样在词之间流动' }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: '动手核对', exact: true }).click();
 });
 
 test('播放、暂停、回退、跳步、重置与条件变化', async ({ page }) => {
@@ -78,11 +80,13 @@ test('链接恢复、坏链接回退、输入重算、复述和窄屏', async ({
   );
   expect(overflow).toBe(false);
   if (testInfo.project.name === 'mobile') {
-    await page.getByRole('button', { name: /02 拆开 Attention/ }).click();
+    await page.getByRole('button', { name: '拆开 Attention', exact: true }).click();
     await expect(page.getByText(/已遵循减少动态效果偏好/)).toBeVisible();
   }
   await page.goto('/attention');
-  await expect(page.getByRole('heading', { name: '从架构图，读懂 Attention' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Attention：信息怎样在词之间流动' }),
+  ).toBeVisible();
   await page.screenshot({
     path: `test-results/${testInfo.project.name}-attention.png`,
     fullPage: false,

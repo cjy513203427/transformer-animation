@@ -1,0 +1,131 @@
+/* Persistent interaction cues work on touch screens as well as with a pointer. */
+:root {
+  .figure-interaction-hint {
+    margin: 11px 0 4px;
+    color: #38682a;
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .architecture-node rect,
+  .architecture-node circle {
+    stroke: #869982;
+    stroke-width: 1.6;
+  }
+
+  .architecture-node.selected rect,
+  .architecture-node.selected circle {
+    stroke: #38751d;
+    stroke-width: 3;
+  }
+
+  .architecture-node:hover rect,
+  .architecture-node:hover circle {
+    stroke: #38751d;
+    stroke-width: 2.3;
+    fill: #eef6e7;
+  }
+
+  .architecture-node:focus-visible rect,
+  .architecture-node:focus-visible circle {
+    stroke: #2c4db8;
+    stroke-width: 4;
+  }
+
+  .diagram-node rect {
+    stroke: color-mix(in srgb, var(--node-color) 62%, white);
+    stroke-width: 1.6;
+  }
+
+  .diagram-node.active rect {
+    stroke: var(--node-color);
+    stroke-width: 3;
+  }
+
+  .diagram-node:hover rect {
+    stroke: var(--node-color);
+    stroke-width: 2.3;
+  }
+
+  .diagram-node:focus-visible rect {
+    stroke: #2c4db8;
+    stroke-width: 4;
+  }
+
+  .matrix-wrap .matrix-heading {
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .matrix-wrap .matrix-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 3px 8px;
+  }
+
+  .matrix-wrap .matrix-meta small {
+    font-family: inherit;
+    font-size: 10px;
+    color: #69736d;
+    line-height: 1.8;
+    white-space: nowrap;
+  }
+
+  .matrix-selectable .matrix-meta small {
+    color: #38682a;
+    font-weight: 600;
+  }
+
+  .matrix-interaction-hint {
+    margin: 0 0 8px;
+    color: #38682a;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .matrix-selectable button.matrix-cell {
+    min-height: 40px;
+    cursor: pointer;
+    border: 1px solid color-mix(in srgb, var(--tone) 48%, white);
+  }
+
+  .matrix-selectable button.matrix-cell:hover {
+    border-color: var(--tone);
+    box-shadow: inset 0 0 0 1px var(--tone);
+  }
+
+  .matrix-selectable button.matrix-cell.selected-cell {
+    border-color: var(--tone);
+    outline: 2px solid var(--tone);
+    outline-offset: 1px;
+    font-weight: 700;
+  }
+
+  .matrix-selectable button.matrix-cell:focus-visible {
+    outline: 3px solid #2c4db8;
+    outline-offset: 2px;
+  }
+
+  .matrix-readonly span.matrix-cell {
+    cursor: default;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    .diagram-panel > .figure-interaction-hint {
+      margin-right: 8px;
+      margin-left: 8px;
+    }
+
+    .figure-interaction-hint {
+      font-size: 12px;
+    }
+
+    .matrix-wrap .matrix-meta {
+      gap: 0 5px;
+    }
+  }
+}
