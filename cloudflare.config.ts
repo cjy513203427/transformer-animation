@@ -1,12 +1,13 @@
 import { defineConfig } from 'cf/config';
 
-// Local preparation only. Choose identity/access policy before enabling an entry point.
+// Public workers.dev deployment authorized by the owner; version previews stay disabled.
 export default defineConfig({
+  accountId: '022d0703f819b09d7c97afd1fdcd191d',
   worker: {
     name: 'llm-mechanism-lab',
     compatibilityDate: '2026-11-05',
     assets: { notFoundHandling: 'single-page-application' },
-    workersDev: false,
+    workersDev: true,
     previewUrls: false,
   },
 });

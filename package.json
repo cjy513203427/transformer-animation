@@ -11,6 +11,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "build:cloudflare": "tsc --noEmit && cf build --mode cloudflare",
+    "deploy": "npm run build:cloudflare && cf deploy --prebuilt --mode cloudflare",
     "format": "prettier --write src tests *.config.ts *.json index.html README.md docs .github",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
