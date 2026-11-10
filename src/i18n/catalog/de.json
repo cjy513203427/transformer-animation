@@ -1516,7 +1516,7 @@
   "教学调度：从 HBM 读 K / V 块，在片上更新 m、l、a": "Lehrablauf: K/V-Blöcke aus dem HBM lesen, m, l, a auf dem Chip aktualisieren",
   "HBM · 完整 K / V": "HBM · vollständige K / V",
   "读取 {#0} 行": "{#0} Zeilen lesen",
-  "行归一化": "Zeilennormierung",
+  "行归一化": "Softmax je Zeile",
   "每行 P × V": "P × V pro Zeile",
   "基线保留完整 S 与 P · 每张 [4, 4]": "die Basis behält vollständiges S und P · je [4, 4]",
   "片上 SRAM / 寄存器 · 示意": "On-Chip-SRAM / Register · schematisch",

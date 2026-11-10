@@ -146,9 +146,17 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
           {full ? (
             <>
               <path className="flash-wire" d="M202 120 H249" />
-              <text x="224" y="109" textAnchor="middle" className="flash-svg-small">
+              {/* Only the 58-unit gap between S and P is free; longer labels wrap upwards. */}
+              <FitText
+                x="224"
+                y="109"
+                textAnchor="middle"
+                className="flash-svg-small"
+                width={52}
+                grow="up"
+              >
                 {T('行归一化')}
-              </text>
+              </FitText>
               <path className="flash-wire" d="M330 202 V240 H220 V261" />
               <text x="220" y="236" textAnchor="middle" className="flash-svg-small">
                 {T('每行 P × V')}

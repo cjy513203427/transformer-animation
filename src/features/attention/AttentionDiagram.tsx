@@ -128,12 +128,28 @@ export function AttentionDiagram({
             />
           ),
         )}
-        <text x="355" y="303" textAnchor="middle" className="diagram-bypass-label">
+        {/* Between the Mask box (right edge 284) and the V wire (x 425); longer translations
+            wrap away from each other: the label upwards, the note downwards. */}
+        <FitText
+          x="355"
+          y="303"
+          textAnchor="middle"
+          className="diagram-bypass-label"
+          width={128}
+          grow="up"
+        >
           {T('V 不参与打分')}
-        </text>
-        <text x="350" y="326" textAnchor="middle" className="diagram-bypass-note">
+        </FitText>
+        <FitText
+          x="350"
+          y="326"
+          textAnchor="middle"
+          className="diagram-bypass-note"
+          width={118}
+          grow="down"
+        >
           {T('留到最后，按比例取内容')}
-        </text>
+        </FitText>
         {node(270, 611, 194, 'X', T('各位置当前的表示'), 0)}
         {node(85, 530, 119, '× W_Q', T('生成 Query'), 0, 'query', '\\times W_Q')}
         {node(245, 530, 119, '× W_K', T('生成 Key'), 0, 'key', '\\times W_K')}

@@ -238,7 +238,8 @@ export function TransformerOverview({
             <text x="75" y="284" className="architecture-block-caption">
               Block
             </text>
-            <text x="328" y="555" className="architecture-block-caption">
+            {/* Below the Attention box (bottom 550, thicker when selected), inside the Block frame. */}
+            <text x="328" y="563" className="architecture-block-caption">
               {T('× N 层')}
             </text>
             {ARCHITECTURE_NODES.slice(0, -1).map((node, i) => {

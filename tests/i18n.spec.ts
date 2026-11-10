@@ -118,6 +118,137 @@ async function spilledText(page: Page) {
   });
 }
 
+/**
+ * Text drawn on top of other text: an SVG label running into another label or into a small
+ * legend swatch / marker, or HTML text lines colliding (e.g. with a button placed beside them).
+ * Translations are longer than the Chinese source, so labels laid out at fixed offsets collide.
+ * Boxes are trimmed to the glyphs and to what clipping ancestors leave visible.
+ */
+async function overlappingText(page: Page) {
+  // Let finite transitions settle so an animation frame is not mistaken for the layout.
+  await page.evaluate(async () => {
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+    const finite = document
+      .getAnimations()
+      .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity);
+    await Promise.race([
+      Promise.all(finite.map((a) => a.finished.catch(() => undefined))),
+      new Promise((done) => setTimeout(done, 1500)),
+    ]);
+  });
+  return page.evaluate(() => {
+    type Box = { x0: number; x1: number; y0: number; y1: number };
+    const found = new Set<string>();
+    const name = (el: Element) => (el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 50);
+    const shown = (el: Element) =>
+      el.getClientRects().length > 0 &&
+      el.checkVisibility({
+        opacityProperty: true,
+        visibilityProperty: true,
+        contentVisibilityAuto: true,
+      });
+    const hit = (a: Box, b: Box, pad: number) =>
+      Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) > pad &&
+      Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0) > pad;
+    const visiblePart = (box: Box, el: Element): Box | null => {
+      for (let e = el.parentElement; e && e !== document.documentElement; e = e.parentElement) {
+        const style = getComputedStyle(e);
+        if (style.overflowX === 'visible' && style.overflowY === 'visible') continue;
+        const r = e.getBoundingClientRect();
+        box = {
+          x0: Math.max(box.x0, r.left),
+          x1: Math.min(box.x1, r.right),
+          y0: Math.max(box.y0, r.top),
+          y1: Math.min(box.y1, r.bottom),
+        };
+      }
+      return box.x1 - box.x0 > 1 && box.y1 - box.y0 > 1 ? box : null;
+    };
+    /** Union of the character cells, trimmed to roughly the cap height. */
+    const glyphs = (text: SVGTextElement): Box | null => {
+      const m = text.getScreenCTM();
+      const b = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
+      for (let i = 0; m && i < text.getNumberOfChars(); i++) {
+        // Chrome returns an SVGRect here (typed as DOMRect): it has no right / bottom.
+        let x0: number, y0: number, x1: number, y1: number;
+        try {
+          const cell = text.getExtentOfChar(i);
+          [x0, y0, x1, y1] = [cell.x, cell.y, cell.x + cell.width, cell.y + cell.height];
+        } catch {
+          continue;
+        }
+        for (const [x, y] of [
+          [x0, y0],
+          [x1, y1],
+          [x0, y1],
+          [x1, y0],
+        ]) {
+          const p = new DOMPoint(x, y).matrixTransform(m);
+          b.x0 = Math.min(b.x0, p.x);
+          b.x1 = Math.max(b.x1, p.x);
+          b.y0 = Math.min(b.y0, p.y);
+          b.y1 = Math.max(b.y1, p.y);
+        }
+      }
+      if (!(b.x1 > b.x0)) return null;
+      const h = b.y1 - b.y0;
+      return visiblePart(
+        { x0: b.x0 + 0.5, x1: b.x1 - 0.5, y0: b.y0 + h * 0.22, y1: b.y1 - h * 0.18 },
+        text,
+      );
+    };
+    const main = document.querySelector('main') ?? document.body;
+    for (const svg of main.querySelectorAll('svg')) {
+      if (!shown(svg) || svg.closest('.katex')) continue;
+      const texts = [...svg.querySelectorAll('text')]
+        .filter((t) => name(t) && !t.closest('defs') && shown(t))
+        .map((t) => ({ t, b: glyphs(t) }))
+        .filter((x): x is { t: SVGTextElement; b: Box } => !!x.b);
+      for (let i = 0; i < texts.length; i++)
+        for (let j = i + 1; j < texts.length; j++)
+          if (hit(texts[i].b, texts[j].b, 0.5))
+            found.add(`“${name(texts[i].t)}” overlaps “${name(texts[j].t)}”`);
+      for (const shape of svg.querySelectorAll('rect, circle, path, polygon')) {
+        const r = shape.getBoundingClientRect();
+        if (r.width > 16 || r.height > 16 || r.width * r.height < 4) continue;
+        if (shape.closest('defs, marker, clipPath, mask') || !shown(shape)) continue;
+        const style = getComputedStyle(shape);
+        if (style.fill === 'none' && style.stroke === 'none') continue;
+        const s = { x0: r.left, x1: r.right, y0: r.top, y1: r.bottom };
+        for (const { t, b } of texts) {
+          const cx = (b.x0 + b.x1) / 2,
+            cy = (b.y0 + b.y1) / 2;
+          if (cx > s.x0 && cx < s.x1 && cy > s.y0 && cy < s.y1) continue; // drawn on its marker
+          if (hit(b, s, 1.5)) found.add(`“${name(t)}” runs into a swatch or marker`);
+        }
+      }
+    }
+    const lines: { node: Text; el: Element; b: Box }[] = [];
+    const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const el = node.parentElement;
+      if (!el || !node.textContent?.trim()) continue;
+      if (el.closest('svg, .katex, select, textarea') || !shown(el)) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for (const r of range.getClientRects()) {
+        const h = r.height;
+        const b = visiblePart(
+          { x0: r.left + 0.5, x1: r.right - 0.5, y0: r.top + h * 0.25, y1: r.bottom - h * 0.25 },
+          el,
+        );
+        if (b) lines.push({ node: node as Text, el, b });
+      }
+    }
+    lines.sort((a, b) => a.b.y0 - b.b.y0);
+    for (let i = 0; i < lines.length; i++)
+      for (let j = i + 1; j < lines.length && lines[j].b.y0 < lines[i].b.y1; j++)
+        if (lines[i].node !== lines[j].node && hit(lines[i].b, lines[j].b, 1))
+          found.add(`“${name(lines[i].el)}” overlaps “${name(lines[j].el)}”`);
+    return [...found];
+  });
+}
+
 /** Checks the page, then clicks forward through every visible stepper; returns the clicks made. */
 async function walkSteps(page: Page, locale: 'en' | 'de', label: string) {
   let clicks = 0;
@@ -125,6 +256,7 @@ async function walkSteps(page: Page, locale: 'en' | 'de', label: string) {
     expect(await chineseLeftovers(page), `${label} after ${clicks} clicks`).toEqual([]);
     expect(await overflow(page), `${label} horizontal overflow`).toBeLessThanOrEqual(1);
     expect(await spilledText(page), `${label} text outside its box`).toEqual([]);
+    expect(await overlappingText(page), `${label} overlapping text`).toEqual([]);
     let clicked = false;
     for (const button of await page.getByRole('button', { name: NEXT[locale] }).all()) {
       if ((await button.isVisible()) && (await button.isEnabled())) {

@@ -729,13 +729,25 @@
 }
 @media (max-width: 700px) {
   :root {
+    /* The share button shares the eyebrow's row; the eyebrow takes whatever width the
+       (translated) button leaves, so neither runs into the other. */
     .page-heading {
-      display: block;
-      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 0 12px;
       margin-bottom: 22px;
     }
-    .page-heading .eyebrow {
-      max-width: calc(100% - 115px);
+    .page-heading > div {
+      display: contents;
+    }
+    .page-heading > div > * {
+      grid-column: 1 / -1;
+    }
+    .page-heading > div > .eyebrow {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: center;
     }
     h1 {
       font-size: 29px;
@@ -746,9 +758,9 @@
       font-size: 15px;
     }
     .share-button {
-      position: absolute;
-      top: -5px;
-      right: 0;
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
       margin: 0;
       font-size: 11px;
       min-height: 32px;

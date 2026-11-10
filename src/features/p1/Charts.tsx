@@ -120,15 +120,28 @@ export function PlotDiagram({ plot }: { plot: Plot }) {
       )
     : [];
   const clip = useId().replace(/:/g, '');
-  /** Point labels that would overlap an earlier one move below their point. */
+  /**
+   * Point labels go right of their point (left near the right edge), switch sides rather than
+   * run across a vertical guide line, and move below their point if they would overlap an
+   * earlier label.
+   */
   const placed: { x: number; y: number; w: number }[] = [];
+  const crossesGuide = (from: number, to: number) =>
+    labels.some((g) => g.px > from - 2 && g.px < to + 2);
   const pointLabels = plot.points.map((p) => {
     if (!p.label) return null;
     const x = sx(p.x),
       y = sy(clamp(p.y, plot.y.min, plot.y.max)),
-      end = x > right - 60,
-      w = textWidth(p.label, 12),
+      w = textWidth(p.label, 12);
+    let end = x > right - 60,
       lx = end ? x - 9 - w : x + 9;
+    if (crossesGuide(lx, lx + w)) {
+      const other = end ? x + 9 : x - 9 - w;
+      if (other >= left + 2 && other + w <= W - 4 && !crossesGuide(other, other + w)) {
+        end = !end;
+        lx = other;
+      }
+    }
     let ly = y - 8;
     if (placed.some((b) => Math.abs(b.y - ly) < 13 && lx < b.x + b.w && lx + w > b.x)) ly = y + 20;
     placed.push({ x: lx, y: ly, w });
@@ -244,23 +257,58 @@ export function PlotDiagram({ plot }: { plot: Plot }) {
   );
 }
 
+/**
+ * Legend entries from left to right. Each starts no earlier than its `x` (the Chinese layout); a
+ * longer translation pushes the following entries along, and an entry that would leave the
+ * drawing starts a new row at `left`.
+ */
+function legendLayout(entries: { x: number; width: number }[], left: number, right: number) {
+  let row = 0,
+    end = -Infinity;
+  return entries.map(({ x, width }) => {
+    let at = Math.max(row ? left : x, end + 14);
+    if (at + width > right && end > -Infinity) {
+      row++;
+      at = left;
+    }
+    end = at + width;
+    return { x: at, y: row * 16, row };
+  });
+}
+
 /** Sorted candidates: probability before (hollow) and after (filled) a renormalizing filter. */
 export function RankingDiagram({ ranking }: { ranking: Ranking }) {
-  const left = 44,
+  const threshold = ranking.threshold,
+    labels = [T('筛选前'), T('重新归一化后'), T('累计概率（从高到低）')],
+    legend = legendLayout(
+      [
+        { x: 12, width: 16 + textWidth(labels[0]) },
+        { x: 82, width: 16 + textWidth(labels[1]) },
+        ...(threshold !== undefined ? [{ x: 196, width: 28 + textWidth(labels[2]) }] : []),
+      ],
+      12,
+      W - 4,
+    ),
+    shift = Math.max(...legend.map((l) => l.row)) * 16,
+    left = 44,
     right = W - 16,
-    top = 40,
-    bottom = 222,
-    height = 270,
+    top = 40 + shift,
+    bottom = 222 + shift,
     n = ranking.items.length,
     column = (right - left) / n,
     sy = (v: number) => bottom - v * (bottom - top),
     center = (i: number) => left + column * (i + 0.5),
-    threshold = ranking.threshold,
     visited = ranking.items.filter((item) => item.before > 0),
     crossing =
       threshold !== undefined && threshold < 1
         ? ranking.items.findIndex((item) => item.cumulative >= threshold)
-        : -1;
+        : -1,
+    status = ranking.items.map((item, i) =>
+      item.kept ? (i === crossing ? T('保留（跨过阈值）') : T('保留')) : T('删去'),
+    ),
+    statusRoom = column - 8,
+    // A status that wraps onto a second line needs one more line of room below the axis.
+    height = 270 + shift + (status.some((s) => textWidth(s) > statusRoom) ? 13 : 0);
   return (
     <svg
       className="p1-svg"
@@ -278,27 +326,33 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
       )}
     >
       <title>{T('柱高对应本步实际概率；累计折线由同一个筛选规则逐项累加')}</title>
-      <rect x={12} y={8} width={11} height={11} className="p1-bar-before" />
-      <text x={28} y={18} className="p1-svg-small">
-        {T('筛选前')}
-      </text>
-      <rect x={82} y={8} width={11} height={11} className="p1-bar-after" />
-      <text x={98} y={18} className="p1-svg-small">
-        {T('重新归一化后')}
-      </text>
+      {['p1-bar-before', 'p1-bar-after'].map((swatch, i) => (
+        <g key={swatch}>
+          <rect x={legend[i].x} y={8 + legend[i].y} width={11} height={11} className={swatch} />
+          <text x={legend[i].x + 16} y={18 + legend[i].y} className="p1-svg-small">
+            {labels[i]}
+          </text>
+        </g>
+      ))}
       {threshold !== undefined && (
         <>
           <line
-            x1={196}
-            x2={218}
-            y1={13}
-            y2={13}
+            x1={legend[2].x}
+            x2={legend[2].x + 22}
+            y1={13 + legend[2].y}
+            y2={13 + legend[2].y}
             className="p1-curve p1-curve-1"
             strokeDasharray="7 4"
           />
-          <Marker series={1} x={207} y={13} size={3.5} />
-          <FitText x={224} y={18} className="p1-svg-small" width={W - 228} maxLines={1}>
-            {T('累计概率（从高到低）')}
+          <Marker series={1} x={legend[2].x + 11} y={13 + legend[2].y} size={3.5} />
+          <FitText
+            x={legend[2].x + 28}
+            y={18 + legend[2].y}
+            className="p1-svg-small"
+            width={W - 4 - (legend[2].x + 28)}
+            maxLines={1}
+          >
+            {labels[2]}
           </FitText>
         </>
       )}
@@ -351,14 +405,16 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
             <text x={c} y={bottom + 18} textAnchor="middle" className="p1-svg-title">
               {Tx('第 {#0} 名 · {#1}', i + 1, item.name)}
             </text>
-            <text
+            <FitText
               x={c}
               y={bottom + 35}
               textAnchor="middle"
               className={item.kept ? 'p1-svg-small' : 'p1-svg-dropped'}
+              width={statusRoom}
+              grow="down"
             >
-              {item.kept ? (i === crossing ? T('保留（跨过阈值）') : T('保留')) : T('删去')}
-            </text>
+              {status[i]}
+            </FitText>
           </g>
         );
       })}
