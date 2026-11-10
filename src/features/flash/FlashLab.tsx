@@ -22,6 +22,8 @@ import {
 } from '../../state/flash';
 import { FlashDiagram } from './FlashDiagram';
 import { FlashInputs, FlashWidget } from './FlashWidgets';
+import { localePath, T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
@@ -98,7 +100,7 @@ export default function FlashLab() {
       setRevision((value) => value + 1);
       setRecallOpen(false);
       setManualLink('');
-      setNotice(next.warning ?? '已从链接恢复实验。');
+      setNotice(next.warning ?? T('已从链接恢复实验。'));
     };
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onMotion = () => {
@@ -116,64 +118,72 @@ export default function FlashLab() {
   }, []);
 
   async function copyLink() {
-    const url = new URL('/flash-attention', window.location.origin);
+    const url = new URL(localePath('/flash-attention'), window.location.origin);
     url.hash = serializeFlashState(state);
     try {
       await navigator.clipboard.writeText(url.href);
       setManualLink('');
-      setNotice('已复制当前实验状态的链接。');
+      setNotice(T('已复制当前实验状态的链接。'));
     } catch {
       setManualLink(url.href);
-      setNotice('浏览器未允许剪贴板访问，请从下方选择并复制链接。');
+      setNotice(T('浏览器未允许剪贴板访问，请从下方选择并复制链接。'));
     }
   }
 
   return (
-    <AppShell active="flash" crumb="FlashAttention" indicator="浏览器内计算" title="FlashAttention">
+    <AppShell
+      active="flash"
+      crumb="FlashAttention"
+      indicator={T('浏览器内计算')}
+      title="FlashAttention"
+    >
       <section className="page-heading">
         <div>
           <div className="eyebrow">
-            原书导读 <span>·</span> 第 21 章 <span>·</span> 同一公式，换一种计算顺序
+            {Tx(
+              '原书导读 {#0} 第 21 章 {#1} 同一公式，换一种计算顺序',
+              <span>·</span>,
+              <span>·</span>,
+            )}
           </div>
-          <h1>
-            FlashAttention：<span>分块，为什么结果不变？</span>
-          </h1>
+          <h1>{Tx('FlashAttention：{#0}', <span>{T('分块，为什么结果不变？')}</span>)}</h1>
           <p>
-            4 个位置、2 维向量。逐块读取 K / V，跟踪在线最大值、归一化总量和输出累积，再与完整
-            Attention 核对。
+            {T(
+              '4 个位置、2 维向量。逐块读取 K / V，跟踪在线最大值、归一化总量和输出累积，再与完整 Attention 核对。',
+            )}
           </p>
         </div>
         <button className="button secondary share-button" onClick={() => void copyLink()}>
-          <span aria-hidden="true">↗</span> 复制实验链接
+          {Tx('{#0} 复制实验链接', <span aria-hidden="true">↗</span>)}
         </button>
       </section>
       {notice && (
         <div className="notice" role="status">
           {notice}
-          <button aria-label="关闭提示" onClick={() => setNotice('')}>
+          <button aria-label={T('关闭提示')} onClick={() => setNotice('')}>
             ×
           </button>
         </div>
       )}
       {manualLink && (
         <label className="manual-share">
-          手动复制链接
+          {T('手动复制链接')}
           <input readOnly value={manualLink} onFocus={(event) => event.target.select()} />
         </label>
       )}
       <WhyIntro why={flashWhy} />
 
-      <section className="lesson-panel flash-panel" aria-label="FlashAttention 逐步实验">
+      <section className="lesson-panel flash-panel" aria-label={T('FlashAttention 逐步实验')}>
         <div className="lesson-panel-heading">
           <div>
-            <span className="lesson-eyebrow">动手验证：改变分块大小，最终输出会变吗？</span>
-            <h2>读一块，更新三个状态，再读下一块。</h2>
+            <span className="lesson-eyebrow">{T('动手验证：改变分块大小，最终输出会变吗？')}</span>
+            <h2>{T('读一块，更新三个状态，再读下一块。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {FLASH_STEP_COUNT}
           </span>
         </div>
-        <div className="lesson-steps flash-steps" aria-label="FlashAttention 步骤">
+        <div className="lesson-steps flash-steps" aria-label={T('FlashAttention 步骤')}>
           {flashSteps.map((item, i) => (
             <button
               key={item.name}
@@ -192,7 +202,7 @@ export default function FlashLab() {
           </div>
           <div className="lesson-reading">
             <div className="lesson-reading-top">
-              <span>这一步</span>
+              <span>{T('这一步')}</span>
               <button
                 onClick={() =>
                   edit({
@@ -201,13 +211,13 @@ export default function FlashLab() {
                   })
                 }
               >
-                {hide ? '显示说明' : '隐藏说明'}
+                {hide ? T('显示说明') : T('隐藏说明')}
               </button>
             </div>
             <h3>{step.title}</h3>
             {hide ? (
               <div className="lesson-recall">
-                <strong>先自己说一遍</strong>
+                <strong>{T('先自己说一遍')}</strong>
                 <p>
                   <Rich text={step.prompt} />
                 </p>
@@ -224,13 +234,13 @@ export default function FlashLab() {
               onChange={edit}
             />
             <div className="lesson-takeaway">
-              <strong>这一步，记住一句话</strong>
+              <strong>{T('这一步，记住一句话')}</strong>
               <p>
-                <Rich text={hide ? '先自己复述，再点击“显示说明”核对。' : step.takeaway} />
+                <Rich text={hide ? T('先自己复述，再点击“显示说明”核对。') : step.takeaway} />
               </p>
             </div>
             <details className="lesson-formula">
-              <summary>需要时再看公式</summary>
+              <summary>{T('需要时再看公式')}</summary>
               <Formula expression={step.formula} />
             </details>
             <StepSources book={step.book} source={step.source} />
@@ -243,7 +253,7 @@ export default function FlashLab() {
               disabled={state.step === 0}
               onClick={() => jump(state.step - 1)}
             >
-              ← 上一步
+              {T('← 上一步')}
             </button>
             <button
               className="button primary"
@@ -251,34 +261,34 @@ export default function FlashLab() {
               onClick={() => jump(state.step + 1)}
             >
               {state.step === FLASH_STEP_COUNT - 1
-                ? '已到最后一步'
-                : `下一步：${flashSteps[state.step + 1].name} →`}
+                ? T('已到最后一步')
+                : T('下一步：{#0} →', flashSteps[state.step + 1].name)}
             </button>
           </div>
           <div>
             <button className="lesson-text-button" onClick={() => jump(0)}>
-              从头看
+              {T('从头看')}
             </button>
             <button
               className="lesson-text-button"
               onClick={() => {
                 edit({ ...initialFlashState(), view: state.view });
-                setNotice('已恢复默认示例。');
+                setNotice(T('已恢复默认示例。'));
               }}
             >
-              恢复默认示例
+              {T('恢复默认示例')}
             </button>
             <button
               className="lesson-text-button"
-              aria-label={playing ? '暂停自动逐步' : '播放自动逐步'}
+              aria-label={playing ? T('暂停自动逐步') : T('播放自动逐步')}
               onClick={togglePlay}
             >
-              {playing ? 'Ⅱ 暂停' : '▶ 自动逐步'}
+              {playing ? T('Ⅱ 暂停') : T('▶ 自动逐步')}
             </button>
             <label>
-              速度
+              {T('速度')}
               <select
-                aria-label="播放速度"
+                aria-label={T('播放速度')}
                 value={state.view.speed}
                 onChange={(e) =>
                   edit({ ...state, view: { ...state.view, speed: Number(e.target.value) } })
@@ -292,17 +302,20 @@ export default function FlashLab() {
           </div>
         </div>
         {reducedMotion && (
-          <p className="lesson-motion">已遵循减少动态效果偏好；图表直接切换，不做过渡动画。</p>
+          <p className="lesson-motion">
+            {T('已遵循减少动态效果偏好；图表直接切换，不做过渡动画。')}
+          </p>
         )}
       </section>
 
       <section className="recall-card">
         <div>
-          <span className="section-kicker">离开之前 · 试着复述</span>
-          <h2>不看图，解释为什么分块也能得到整行 Softmax。</h2>
+          <span className="section-kicker">{T('离开之前 · 试着复述')}</span>
+          <h2>{T('不看图，解释为什么分块也能得到整行 Softmax。')}</h2>
           <p>
-            m、l、a 各保存什么？新块出现更大的最大值时，为什么 l 和 a
-            都要缩放？省掉完整中间矩阵，为什么仍要计算所有可见的 Query–Key 配对？
+            {T(
+              'm、l、a 各保存什么？新块出现更大的最大值时，为什么 l 和 a 都要缩放？省掉完整中间矩阵，为什么仍要计算所有可见的 Query–Key 配对？',
+            )}
           </p>
         </div>
         <button
@@ -314,39 +327,33 @@ export default function FlashLab() {
             setState((s) => ({ ...s, view: { ...s.view, explanations: false } }));
           }}
         >
-          {recallOpen ? '收起参考解释' : '查看参考解释'}
+          {recallOpen ? T('收起参考解释') : T('查看参考解释')}
         </button>
         {recallOpen && (
           <p className="recall-answer">
-            m 保存已见分数的最大值，l 保存相对 m 的指数之和，a 保存同样指数加权的 V
-            之和。新块把最大值提高到 m′ 时，用 exp(m − m′) 把旧 l 和旧 a
-            换到同一基准，再加新块的贡献。最后 a / l
-            得到完整行输出。块大小只改变分组与浮点求和顺序。逐块在片上保留临时状态，就不用把完整
-            S、P 写回 HBM；完整 Attention 的配对计算仍随序列长度呈二次增长。真实 FlashAttention 使用
-            GPU 分块调度，本页只验证数学与账本。
+            {T(
+              'm 保存已见分数的最大值，l 保存相对 m 的指数之和，a 保存同样指数加权的 V 之和。新块把最大值提高到 m′ 时，用 exp(m − m′) 把旧 l 和旧 a 换到同一基准，再加新块的贡献。最后 a / l 得到完整行输出。块大小只改变分组与浮点求和顺序。逐块在片上保留临时状态，就不用把完整 S、P 写回 HBM；完整 Attention 的配对计算仍随序列长度呈二次增长。真实 FlashAttention 使用 GPU 分块调度，本页只验证数学与账本。',
+            )}
           </p>
         )}
       </section>
       <details className="details-panel source-panel">
         <summary>
-          <span>适用条件与来源</span>
-          <span className="summary-hint">简化假设 · 常见误区 · 参考文献</span>
+          <span>{T('适用条件与来源')}</span>
+          <span className="summary-hint">{T('简化假设 · 常见误区 · 参考文献')}</span>
         </summary>
         <div className="details-body">
           <p>
-            教学配置：单头、忽略 batch，Q、K、V 都是 [4, 2]
-            的行向量矩阵。固定教学激活不代表语义；采用标准缩放点积 Attention，可切换因果 Mask，不含
-            Dropout。最后一个 K 的第一维可做 −2 到 2
-            的激活干预。“递增分数”展示后续块提高最大值；“书中 21.4.4
-            一行分数”复现原书手算的那一行，最大值在第一块；“混合输入”由种子确定。
+            {T(
+              '教学配置：单头、忽略 batch，Q、K、V 都是 [4, 2] 的行向量矩阵。固定教学激活不代表语义；采用标准缩放点积 Attention，可切换因果 Mask，不含 Dropout。最后一个 K 的第一维可做 −2 到 2 的激活干预。“递增分数”展示后续块提高最大值；“书中 21.4.4 一行分数”复现原书手算的那一行，最大值在第一块；“混合输入”由种子确定。',
+            )}
           </p>
           <p>
-            内部使用 JavaScript float64，展示时才舍入，等价容差
-            1e-12。为了核对，页面额外保存完整参考矩阵与过程快照；这不是低内存 CUDA
-            kernel。账本假设每元素 4 B，只统计指定教学调度的临时状态与 S / P
-            中间载荷，不含完整输入输出、KV 缓存、实际分配器开销或硬件耗时。
+            {T(
+              '内部使用 JavaScript float64，展示时才舍入，等价容差 1e-12。为了核对，页面额外保存完整参考矩阵与过程快照；这不是低内存 CUDA kernel。账本假设每元素 4 B，只统计指定教学调度的临时状态与 S / P 中间载荷，不含完整输入输出、KV 缓存、实际分配器开销或硬件耗时。',
+            )}
           </p>
-          <strong className="exp-notes-title">与原书说法的对照</strong>
+          <strong className="exp-notes-title">{T('与原书说法的对照')}</strong>
           <ul>
             {flashBookNotes.map((note) => (
               <li key={note}>
@@ -354,7 +361,7 @@ export default function FlashLab() {
               </li>
             ))}
           </ul>
-          <strong className="exp-notes-title">常见误区</strong>
+          <strong className="exp-notes-title">{T('常见误区')}</strong>
           <ul>
             {flashMyths.map((myth) => (
               <li key={myth}>
@@ -371,7 +378,9 @@ export default function FlashLab() {
               </li>
             ))}
           </ul>
-          <p className="subtle">来源核对日期：{flashVerifiedDate}。图形与说明为本项目编写。</p>
+          <p className="subtle">
+            {Tx('来源核对日期：{#0}。图形与说明为本项目编写。', flashVerifiedDate)}
+          </p>
         </div>
       </details>
     </AppShell>

@@ -12,6 +12,7 @@ import {
   type Ranking,
   type Strip,
 } from './shared';
+import { T } from '../../i18n';
 const NAMES = 'abc';
 const TEMPERATURE_RANGE: [number, number] = [0.25, 4];
 export function filterTokens(prob: number[], k: number, threshold: number) {
@@ -112,7 +113,14 @@ function strip(prob: number[], u: number, chosen: number): Strip {
     segments,
     u,
     chosen,
-    caption: `u = ${fmt(u, 4)} 落在 ${hit.name} 的区间 [${fmt(hit.start, 3)}, ${fmt(hit.end, 3)})，所以这次选 ${hit.name}。被删去的候选区间长度为 0，不可能被选中。`,
+    caption: T(
+      'u = {#0} 落在 {#1} 的区间 [{#2}, {#3})，所以这次选 {#4}。被删去的候选区间长度为 0，不可能被选中。',
+      fmt(u, 4),
+      hit.name,
+      fmt(hit.start, 3),
+      fmt(hit.end, 3),
+      hit.name,
+    ),
   };
 }
 export function sampling(x: number[], p: Parameters, seed: number): Computation {
@@ -130,27 +138,27 @@ export function sampling(x: number[], p: Parameters, seed: number): Computation 
   return {
     frames: [
       frame(
-        '候选分数先变成概率',
+        T('候选分数先变成概率'),
         [tensor('logits', x), tensor('Softmax(logits)', raw)],
-        [['概率和', sum(raw)]],
-        'a、b、c 是玩具词表；没有调用语言模型。',
+        [[T('概率和'), sum(raw)]],
+        T('a、b、c 是玩具词表；没有调用语言模型。'),
       ),
       {
         ...frame(
-          '温度先除 logits，再归一化',
+          T('温度先除 logits，再归一化'),
           [
             tensor(
               'logits / τ',
               x.map((v) => v / p.temperature),
             ),
-            tensor('温度分布', prob),
+            tensor(T('温度分布'), prob),
           ],
-          [['温度 τ', p.temperature]],
-          'τ > 0；较小温度强化较高分数。全部同分时仍均匀。',
+          [[T('温度 τ'), p.temperature]],
+          T('τ > 0；较小温度强化较高分数。全部同分时仍均匀。'),
         ),
         plot: {
-          x: { label: '温度 τ', min: low, max: high },
-          y: { label: '概率', min: 0, max: 1 },
+          x: { label: T('温度 τ'), min: low, max: high },
+          y: { label: T('概率'), min: 0, max: 1 },
           curves: [...NAMES].map((name, i) => ({
             label: name,
             points: sample(low, high, 76, (t) => softmax(x.map((v) => v / t))[i]),
@@ -162,74 +170,85 @@ export function sampling(x: number[], p: Parameters, seed: number): Computation 
             series: i,
           })),
           guides: [
-            { axis: 'x', value: p.temperature, label: `当前 τ = ${fmt(p.temperature)}` },
+            { axis: 'x', value: p.temperature, label: T('当前 τ = {#0}', fmt(p.temperature)) },
             ...(p.temperature === 1 ? [] : [{ axis: 'x' as const, value: 1, label: 'τ = 1' }]),
           ],
           caption: same
-            ? '三个 logits 相同，三条线重合在 1/3：温度改变不了均匀分布。'
-            : '每条线是一个候选的概率随 τ 的变化，竖线是当前 τ。往左（τ 小），最高分越来越占优；往右（τ 大），三条线互相靠近。',
+            ? T('三个 logits 相同，三条线重合在 1/3：温度改变不了均匀分布。')
+            : T(
+                '每条线是一个候选的概率随 τ 的变化，竖线是当前 τ。往左（τ 小），最高分越来越占优；往右（τ 大），三条线互相靠近。',
+              ),
         },
       },
       {
         ...frame(
-          'Top-K 按概率排序，恰好留下 K 个',
-          [tensor('Top-K 后的分布', topK.probabilities)],
-          [['保留 ID', topK.kept.map((i) => NAMES[i]).join('、')]],
-          '并列时按 token ID；这是恰好 K 个的教学规则，部分库按阈值保留并列项时可能超过 K。',
+          T('Top-K 按概率排序，恰好留下 K 个'),
+          [tensor(T('Top-K 后的分布'), topK.probabilities)],
+          [[T('保留 ID'), topK.kept.map((i) => NAMES[i]).join(T('、'))]],
+          T('并列时按 token ID；这是恰好 K 个的教学规则，部分库按阈值保留并列项时可能超过 K。'),
         ),
         ranking: ranking(
           prob,
           topK,
-          `从高到低排好，前 K = ${fmt(p.k)} 个保留；空心柱是筛选前的概率，实心柱是除以保留项之和 ${fmt(keptMass, 4)} 之后的概率。`,
+          T(
+            '从高到低排好，前 K = {#0} 个保留；空心柱是筛选前的概率，实心柱是除以保留项之和 {#1} 之后的概率。',
+            fmt(p.k),
+            fmt(keptMass, 4),
+          ),
         ),
       },
       {
         ...frame(
-          '在 Top-K 分布上做 Top-P，保留跨过阈值的一项',
+          T('在 Top-K 分布上做 Top-P，保留跨过阈值的一项'),
           [
-            tensor('筛选前', topK.probabilities),
-            tensor('筛选并重新归一化', filtered.probabilities),
+            tensor(T('筛选前'), topK.probabilities),
+            tensor(T('筛选并重新归一化'), filtered.probabilities),
           ],
           [
-            ['阈值 P', p.topP],
-            ['保留 ID', filtered.kept.map((i) => NAMES[i]).join('、')],
-            ['截止累计质量', filtered.cumulative],
+            [T('阈值 P'), p.topP],
+            [T('保留 ID'), filtered.kept.map((i) => NAMES[i]).join(T('、'))],
+            [T('截止累计质量'), filtered.cumulative],
           ],
-          '本例明确先 K 后 P；P 的累计是在当时的归一化分布上计算。',
+          T('本例明确先 K 后 P；P 的累计是在当时的归一化分布上计算。'),
         ),
         ranking: ranking(
           topK.probabilities,
           filtered,
           p.topP < 1
-            ? `折线是从高到低的累计概率，虚线是 P = ${fmt(p.topP)}。累计第一次 ≥ P 的是 ${NAMES[crossing]}（累计 ${fmt(filtered.cumulative, 4)}），它也保留，后面的删去。`
-            : 'P = 1：累计要到全部正概率项加完才达到 1，所以一项也不删。',
+            ? T(
+                '折线是从高到低的累计概率，虚线是 P = {#0}。累计第一次 ≥ P 的是 {#1}（累计 {#2}），它也保留，后面的删去。',
+                fmt(p.topP),
+                NAMES[crossing],
+                fmt(filtered.cumulative, 4),
+              )
+            : T('P = 1：累计要到全部正概率项加完才达到 1，所以一项也不删。'),
           p.topP,
         ),
       },
       {
         ...frame(
-          '固定种子生成一次均匀数，落在哪段就选谁',
-          [tensor('采样分布', filtered.probabilities)],
+          T('固定种子生成一次均匀数，落在哪段就选谁'),
+          [tensor(T('采样分布'), filtered.probabilities)],
           [
             ['u ∈ [0,1)', u],
-            ['本次 token', NAMES[sample_]],
+            [T('本次 token'), NAMES[sample_]],
           ],
-          '固定种子可复现一次抽样；一次结果不代表长期频率。',
+          T('固定种子可复现一次抽样；一次结果不代表长期频率。'),
         ),
         strip: strip(filtered.probabilities, u, sample_),
       },
       {
         ...frame(
-          '两步树：局部最大不保证序列联合概率最大',
+          T('两步树：局部最大不保证序列联合概率最大'),
           [
             {
-              ...tensor('条件概率 P(y₂|y₁)', tree.conditional),
+              ...tensor(T('条件概率 P(y₂|y₁)'), tree.conditional),
               rows: ['a', 'b', 'c'],
               columns: ['a', 'b', 'c'],
             },
             {
               ...tensor(
-                '所有两步路径概率',
+                T('所有两步路径概率'),
                 tree.paths.map((v) => [v.score]),
               ),
               rows: tree.paths.map((v) => v.path),
@@ -238,9 +257,11 @@ export function sampling(x: number[], p: Parameters, seed: number): Computation 
           [
             ['Greedy', `${tree.greedy.path} · ${tree.greedy.score.toPrecision(4)}`],
             ['Beam-2', `${tree.beam.path} · ${tree.beam.score.toPrecision(4)}`],
-            ['穷举最优', tree.best.path],
+            [T('穷举最优'), tree.best.path],
           ],
-          '第一步用当前温度分布；条件表固定，不应用 Top-K/P。固定长度 2，无 EOS 与长度惩罚；Beam 在一般情形也可能剪掉全局最优。',
+          T(
+            '第一步用当前温度分布；条件表固定，不应用 Top-K/P。固定长度 2，无 EOS 与长度惩罚；Beam 在一般情形也可能剪掉全局最优。',
+          ),
         ),
         tree: {
           root: prob,
@@ -251,8 +272,8 @@ export function sampling(x: number[], p: Parameters, seed: number): Computation 
       },
     ],
     checks: [
-      check('筛选后概率和', [sum(filtered.probabilities)], [1]),
-      check('采样 token 位于保留集合', [filtered.kept.includes(sample_) ? 1 : 0], [1]),
+      check(T('筛选后概率和'), [sum(filtered.probabilities)], [1]),
+      check(T('采样 token 位于保留集合'), [filtered.kept.includes(sample_) ? 1 : 0], [1]),
     ],
     signature: filtered.probabilities,
   };

@@ -1,4 +1,5 @@
 import type { FlashConfig, FlashInput } from '../math/flash';
+import { T } from '../i18n';
 
 /** Materialized attention → tiles → online statistics → rescaling → comparison → ledger. */
 export const FLASH_STEP_COUNT = 6;
@@ -91,7 +92,7 @@ export function restoreFlashState(hash: string): { state: FlashState; warning: s
   } catch {
     // Unsupported or malformed links always restore a usable, deterministic example.
   }
-  return { state: initialFlashState(), warning: '分享链接无效或版本不受支持，已恢复默认示例。' };
+  return { state: initialFlashState(), warning: T('分享链接无效或版本不受支持，已恢复默认示例。') };
 }
 
 export function moveFlashStep(state: FlashState, delta: number): FlashState {

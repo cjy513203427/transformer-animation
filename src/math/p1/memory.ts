@@ -10,6 +10,7 @@ import {
   type Computation,
   type Parameters,
 } from './shared';
+import { T } from '../../i18n';
 export const phi = (x: number[]) => x.map((v) => (v >= 0 ? v + 1 : Math.exp(v)));
 const zero = () => [
   [0, 0],
@@ -115,73 +116,77 @@ export function memory(x: number[], p: Parameters): Computation {
     );
   return {
     frames: [
-      frame('完整因果 Attention 访问所有可见历史', [
-        tensor('Q（由输入给定）', Q),
-        tensor('P（行 Q、列 K）', dense.probabilities),
-        tensor('Softmax 输出', dense.output),
+      frame(T('完整因果 Attention 访问所有可见历史'), [
+        tensor(T('Q（由输入给定）'), Q),
+        tensor(T('P（行 Q、列 K）'), dense.probabilities),
+        tensor(T('Softmax 输出'), dense.output),
       ]),
       frame(
-        '因果滑动窗口只保留最近 w 个 Key',
-        [tensor('窗口概率 P', weights), tensor('窗口输出', sparse)],
-        [['窗口 w（含自身）', p.window]],
-        '本页用稠密矩阵加 Mask 验证数学；只有相应稀疏实现才能减少实际计算。',
+        T('因果滑动窗口只保留最近 w 个 Key'),
+        [tensor(T('窗口概率 P'), weights), tensor(T('窗口输出'), sparse)],
+        [[T('窗口 w（含自身）'), p.window]],
+        T('本页用稠密矩阵加 Mask 验证数学；只有相应稀疏实现才能减少实际计算。'),
       ),
       frame(
-        '换成正核特征，定义另一种 Attention',
+        T('换成正核特征，定义另一种 Attention'),
         [
           tensor('φ(Q) = ELU(Q)+1', Q.map(phi)),
-          tensor('显式核 Attention 输出', reference),
-          tensor('Softmax 输出（对照）', dense.output),
+          tensor(T('显式核 Attention 输出'), reference),
+          tensor(T('Softmax 输出（对照）'), dense.output),
         ],
         [],
-        '核归一化不是标准 Softmax 的恒等重写，输出一般不同。',
+        T('核归一化不是标准 Softmax 的恒等重写，输出一般不同。'),
       ),
       frame(
-        '核权重可通过固定大小 S、z 状态递推',
+        T('核权重可通过固定大小 S、z 状态递推'),
         [
-          tensor('最后 S [2, 2]', scan.S),
-          tensor('最后 z [1, 2]', scan.z),
-          tensor('线性递推输出', scan.outputs),
+          tensor(T('最后 S [2, 2]'), scan.S),
+          tensor(T('最后 z [1, 2]'), scan.z),
+          tensor(T('线性递推输出'), scan.outputs),
         ],
-        [['状态标量数', 6]],
-        '包含当前 Key 后再读取。固定特征维度时扫描对 T 线性；本页额外保存轨迹以便核对。',
+        [[T('状态标量数'), 6]],
+        T('包含当前 Key 后再读取。固定特征维度时扫描对 T 线性；本页额外保存轨迹以便核对。'),
       ),
       frame(
-        'Infini：先读上一段记忆，再合并本段局部结果',
+        T('Infini：先读上一段记忆，再合并本段局部结果'),
         [
-          tensor('上一段记忆读出', infini.memory),
-          tensor('本段因果 Softmax', infini.local),
-          tensor('门控合并输出', infini.outputs),
+          tensor(T('上一段记忆读出'), infini.memory),
+          tensor(T('本段因果 Softmax'), infini.local),
+          tensor(T('门控合并输出'), infini.outputs),
         ],
         [
-          ['记忆门 sigmoid(β)', gate],
-          ['更新规则', p.delta ? 'Delta' : 'Linear'],
+          [T('记忆门 sigmoid(β)'), gate],
+          [T('更新规则'), p.delta ? 'Delta' : 'Linear'],
         ],
-        '每段 2 token；整段更新都读取同一个旧记忆。初始空记忆返回零。Delta 更新预测 V 后写残差，z 仍累加。',
+        T(
+          '每段 2 token；整段更新都读取同一个旧记忆。初始空记忆返回零。Delta 更新预测 V 后写残差，z 仍累加。',
+        ),
       ),
       frame(
-        '两段不同历史，可以压缩到同一个状态',
+        T('两段不同历史，可以压缩到同一个状态'),
         [
-          tensor('历史 A 的 V', [
+          tensor(T('历史 A 的 V'), [
             [1, 0],
             [0, 1],
           ]),
-          tensor('历史 B 的 V', [
+          tensor(T('历史 B 的 V'), [
             [0.5, 0.5],
             [0.5, 0.5],
           ]),
-          tensor('二者相同的最终 S', collisionA.S),
+          tensor(T('二者相同的最终 S'), collisionA.S),
         ],
-        [['共同 z', collisionA.z.join(', ')]],
-        '这说明此压缩映射有碰撞。可计算长流不代表无损保存所有历史，也不保证任意长上下文的可靠性。',
+        [[T('共同 z'), collisionA.z.join(', ')]],
+        T(
+          '这说明此压缩映射有碰撞。可计算长流不代表无损保存所有历史，也不保证任意长上下文的可靠性。',
+        ),
       ),
     ].map((item, index) =>
       index < 2 ? { ...item, connections: index === 0 ? dense.probabilities : weights } : item,
     ),
     checks: [
-      check('线性递推与显式核基线等价', flat(scan.outputs), flat(reference)),
+      check(T('线性递推与显式核基线等价'), flat(scan.outputs), flat(reference)),
       check(
-        '不同历史的压缩状态碰撞',
+        T('不同历史的压缩状态碰撞'),
         flat(collisionA.S).concat(collisionA.z),
         flat(collisionB.S).concat(collisionB.z),
       ),

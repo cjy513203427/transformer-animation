@@ -1,5 +1,7 @@
 import { Rich } from './Tex';
 import type { BookLink } from '../content/book';
+import { T } from '../i18n';
+import { Tx } from '../i18n/jsx';
 import '../styles/why-intro.css';
 
 export interface WhyContent {
@@ -17,8 +19,13 @@ export function WhyIntro({ why }: { why: WhyContent }) {
   return (
     <details className="why-intro" open>
       <summary>
-        <span className="why-kicker">先说为什么</span>
+        <span className="why-kicker">{T('先说为什么')}</span>
         <strong>{why.question}</strong>
+        {/* A flex summary loses the native disclosure triangle; say what a click does instead. */}
+        <span className="why-toggle" aria-hidden="true">
+          <span className="why-toggle-open">{T('收起 ▴')}</span>
+          <span className="why-toggle-closed">{T('展开 ▾')}</span>
+        </span>
       </summary>
       <div className="why-body">
         <div className="why-text">
@@ -28,12 +35,12 @@ export function WhyIntro({ why }: { why: WhyContent }) {
             </p>
           ))}
           <a className="lesson-source" href={why.book[1]} target="_blank" rel="noreferrer">
-            对应原书：{why.book[0]} ↗
+            {Tx('对应原书：{#0} ↗', why.book[0])}
           </a>
         </div>
         {why.analogy && (
-          <aside className="why-analogy" aria-label="原书类比">
-            <span>原书类比 · {why.analogy.title}</span>
+          <aside className="why-analogy" aria-label={T('原书类比')}>
+            <span>{Tx('原书类比 · {#0}', why.analogy.title)}</span>
             <p>
               <Rich text={why.analogy.text} />
             </p>
@@ -50,12 +57,12 @@ export function StepSources({ book, source }: { book?: BookLink; source?: BookLi
     <div className="step-sources">
       {book && (
         <a className="lesson-source" href={book[1]} target="_blank" rel="noreferrer">
-          对应原书：{book[0]} ↗
+          {Tx('对应原书：{#0} ↗', book[0])}
         </a>
       )}
       {source && (
         <a className="lesson-source" href={source[1]} target="_blank" rel="noreferrer">
-          核对来源：{source[0]} ↗
+          {Tx('核对来源：{#0} ↗', source[0])}
         </a>
       )}
     </div>

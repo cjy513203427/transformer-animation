@@ -1,6 +1,9 @@
 import { formatNumber as fmt } from '../../math/attention';
 import { computeMoE, D_MODEL, EXPERTS, TOKENS } from '../../math/moe';
 import type { MoEState } from '../../state/moe';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
+import { FitText } from '../../components/FitText';
 
 type Result = ReturnType<typeof computeMoE>;
 const vec = (values: number[]) => `[${values.map((value) => fmt(value)).join(', ')}]`;
@@ -14,11 +17,15 @@ function RouterDiagram({ state, result }: { state: MoEState; result: Result }) {
       className="moe-svg"
       viewBox="0 0 440 330"
       role="img"
-      aria-label={`t${token} 的 Router：输入 ${vec(result.x[token])}，得到四个专家的分数和概率`}
+      aria-label={T(
+        't{#0} 的 Router：输入 {#1}，得到四个专家的分数和概率',
+        token,
+        vec(result.x[token]),
+      )}
     >
-      <title>同一个 token 给四个专家打分，Softmax 沿专家轴归一化</title>
+      <title>{T('同一个 token 给四个专家打分，Softmax 沿专家轴归一化')}</title>
       <text x="220" y="19" textAnchor="middle" className="moe-svg-label">
-        输入行向量 · x_{token} [1, {D_MODEL}]
+        {Tx('输入行向量 · x_{#0} [1, {#1}]', token, D_MODEL)}
       </text>
       <g className="moe-node moe-token moe-node-on">
         <rect x="130" y="32" width="180" height="43" rx="4" />
@@ -38,7 +45,7 @@ function RouterDiagram({ state, result }: { state: MoEState; result: Result }) {
         × W_R [2, 4]
       </text>
       <text x="10" y="125" className="moe-svg-label">
-        z · 分数
+        {T('z · 分数')}
       </text>
       {experts.map((expert) => (
         <g key={expert} className="moe-node moe-expert">
@@ -55,7 +62,7 @@ function RouterDiagram({ state, result }: { state: MoEState; result: Result }) {
       <g className="moe-node moe-probability">
         <rect x="10" y="207" width="420" height="32" rx="4" />
         <text x="220" y="228" textAnchor="middle">
-          Softmax · 整行沿专家轴归一化
+          {T('Softmax · 整行沿专家轴归一化')}
         </text>
       </g>
       {experts.map((expert) => (
@@ -68,7 +75,7 @@ function RouterDiagram({ state, result }: { state: MoEState; result: Result }) {
         </g>
       ))}
       <text x="10" y="320" className="moe-svg-label">
-        p · 每行四个概率之和 = 1
+        {T('p · 每行四个概率之和 = 1')}
       </text>
     </svg>
   );
@@ -78,24 +85,29 @@ function RoutingDiagram({ state, result }: { state: MoEState; result: Result }) 
   const selectedToken = state.input.token;
   const y = (index: number) => 63 + index * 70;
   const showReturn = state.step >= 3;
-  const selection = result.selected[selectedToken].map((expert) => `E${expert}`).join('、');
+  const selection = result.selected[selectedToken].map((expert) => `E${expert}`).join(T('、'));
   return (
     <svg
       className="moe-svg"
       viewBox="0 0 440 320"
       role="img"
-      aria-label={`t${selectedToken} 选中 ${selection}；${showReturn ? '专家结果按 token 身份合并回原顺序' : '只向选中的专家分发输入'}`}
+      aria-label={T(
+        't{#0} 选中 {#1}；{#2}',
+        selectedToken,
+        selection,
+        showReturn ? T('专家结果按 token 身份合并回原顺序') : T('只向选中的专家分发输入'),
+      )}
     >
-      <title>输入 token、编号专家与按原顺序返回的输出；橙色线追踪当前 token</title>
+      <title>{T('输入 token、编号专家与按原顺序返回的输出；橙色线追踪当前 token')}</title>
       <text x="42" y="18" textAnchor="middle" className="moe-svg-label">
         X [4, 2]
       </text>
       <text x="220" y="18" textAnchor="middle" className="moe-svg-label">
-        {state.step === 1 ? 'Top-K 门控' : '专家 FFN'}
+        {state.step === 1 ? T('Top-K 门控') : T('专家 FFN')}
       </text>
-      <text x="398" y="18" textAnchor="middle" className="moe-svg-label">
-        {showReturn ? 'Y [4, 2]' : '稍后合并'}
-      </text>
+      <FitText x="398" y="18" textAnchor="middle" className="moe-svg-label" width={80} maxLines={1}>
+        {showReturn ? 'Y [4, 2]' : T('稍后合并')}
+      </FitText>
       {tokens.flatMap((token) =>
         result.selected[token].map((expert) => (
           <g key={`${token}-${expert}`}>
@@ -132,7 +144,7 @@ function RoutingDiagram({ state, result }: { state: MoEState; result: Result }) 
               E{expert}
             </text>
             <text x="220" y={y(expert) + 15} textAnchor="middle" className="moe-svg-number">
-              {on ? `g=${fmt(result.gates[selectedToken][expert])}` : '未选中'}
+              {on ? `g=${fmt(result.gates[selectedToken][expert])}` : T('未选中')}
             </text>
           </g>
         );
@@ -150,8 +162,8 @@ function RoutingDiagram({ state, result }: { state: MoEState; result: Result }) 
       ))}
       <text x="220" y="311" textAnchor="middle" className="moe-svg-label">
         {showReturn
-          ? '沿 token ID 返回，按门控权重相加'
-          : `每个 token 发送给 ${state.config.topK} 个专家`}
+          ? T('沿 token ID 返回，按门控权重相加')
+          : T('每个 token 发送给 {#0} 个专家', state.config.topK)}
       </text>
     </svg>
   );
@@ -161,32 +173,35 @@ function LoadDiagram({ state, result }: { state: MoEState; result: Result }) {
   const assignments = TOKENS * state.config.topK;
   return (
     <div className="moe-load-diagram">
-      <ul className="moe-load-bars" aria-label="四个专家的 token 分配负载">
+      <ul className="moe-load-bars" aria-label={T('四个专家的 token 分配负载')}>
         {experts.map((expert) => (
           <li key={expert}>
             <span>E{expert}</span>
             <span className="moe-load-track">
               <i style={{ width: `${(result.load[expert] / TOKENS) * 100}%` }} />
             </span>
-            <strong>{result.load[expert]} 次</strong>
+            <strong>{Tx('{#0} 次', result.load[expert])}</strong>
             <small>
               {result.packets
                 .filter((packet) => packet.expert === expert)
                 .map((packet) => `t${packet.token}`)
-                .join(' · ') || '空闲'}
+                .join(' · ') || T('空闲')}
             </small>
           </li>
         ))}
       </ul>
       <div className="moe-readout">
         <strong>
-          {TOKENS} token × Top-{state.config.topK} = {assignments} 次专家调用
+          {Tx('{#0} token × Top-{#1} = {#2} 次专家调用', TOKENS, state.config.topK, assignments)}
         </strong>
         <span>
-          总参数 {result.counts.totalParams}；每 token 激活参数 {result.counts.activeParamsPerToken}
-          。
+          {Tx(
+            '总参数 {#0}；每 token 激活参数 {#1}。',
+            result.counts.totalParams,
+            result.counts.activeParamsPerToken,
+          )}
         </span>
-        <span>负载统计调用次数，每次输入仍是同一个 D = {D_MODEL} 维向量。</span>
+        <span>{Tx('负载统计调用次数，每次输入仍是同一个 D = {#0} 维向量。', D_MODEL)}</span>
       </div>
     </div>
   );
@@ -207,11 +222,15 @@ function ParallelDiagram({ state, result }: { state: MoEState; result: Result })
         role="img"
         aria-label={
           split
-            ? `两个设备直接交换激活，远端分配 ${result.traffic.remoteAssignments} 次，总有效载荷 ${result.traffic.totalBytes} 字节`
-            : '全部 token 和专家位于设备 0，跨设备通信为 0 字节'
+            ? T(
+                '两个设备直接交换激活，远端分配 {#0} 次，总有效载荷 {#1} 字节',
+                result.traffic.remoteAssignments,
+                result.traffic.totalBytes,
+              )
+            : T('全部 token 和专家位于设备 0，跨设备通信为 0 字节')
         }
       >
-        <title>专家权重驻留在各自设备，只交换 token 激活与专家输出</title>
+        <title>{T('专家权重驻留在各自设备，只交换 token 激活与专家输出')}</title>
         {devices.map((device) => {
           const x = split ? 8 + device * 222 : 44;
           const width = split ? 202 : 352;
@@ -223,25 +242,24 @@ function ParallelDiagram({ state, result }: { state: MoEState; result: Result })
             <g key={device}>
               <rect className="moe-device" x={x} y="18" width={width} height="145" rx="5" />
               <text className="moe-device-title" x={x + 14} y="43">
-                设备 {device}
+                {Tx('设备 {#0}', device)}
               </text>
-              <text className="moe-svg-label" x={x + 14} y="68">
-                原 token：{residentTokens.map((token) => `t${token}`).join('、')}
-              </text>
-              <text className="moe-svg-label" x={x + 14} y="94">
-                驻留专家：{residentExperts.map((expert) => `E${expert}`).join('、')}
-              </text>
-              <text className="moe-svg-label" x={x + 14} y="124">
-                本地完成：
-                {
+              <FitText className="moe-svg-label" x={x + 14} y="68" width={width - 28} maxLines={1}>
+                {T('原 token：{#0}', residentTokens.map((token) => `t${token}`).join(T('、')))}
+              </FitText>
+              <FitText className="moe-svg-label" x={x + 14} y="94" width={width - 28} maxLines={1}>
+                {T('驻留专家：{#0}', residentExperts.map((expert) => `E${expert}`).join(T('、')))}
+              </FitText>
+              <FitText className="moe-svg-label" x={x + 14} y="124" width={width - 28} maxLines={1}>
+                {T(
+                  '本地完成：{#0} 次',
                   result.packets.filter((packet) => packet.homeDevice === device && !packet.remote)
-                    .length
-                }{' '}
-                次
-              </text>
-              <text className="moe-svg-label" x={x + 14} y="148">
-                返回后按原 token 合并
-              </text>
+                    .length,
+                )}
+              </FitText>
+              <FitText className="moe-svg-label" x={x + 14} y="148" width={width - 28} maxLines={1}>
+                {T('返回后按原 token 合并')}
+              </FitText>
             </g>
           );
         })}
@@ -250,15 +268,23 @@ function ParallelDiagram({ state, result }: { state: MoEState; result: Result })
             <path className="moe-wire moe-wire-on" d="M70 164 V190 H370 V164" />
             <path className="moe-arrow-head" d="M365 172 L370 164 L375 172" />
             <text className="moe-svg-label" x="220" y="211" textAnchor="middle">
-              0 → 1：{destinations[0].length} 份输入 + {destinations[1].length} 份返回
+              {Tx(
+                '0 → 1：{#0} 份输入 + {#1} 份返回',
+                destinations[0].length,
+                destinations[1].length,
+              )}
             </text>
             <path className="moe-wire moe-wire-on" d="M370 166 V238 H70 V166" />
             <path className="moe-arrow-head" d="M65 174 L70 166 L75 174" />
             <text className="moe-svg-label" x="220" y="259" textAnchor="middle">
-              1 → 0：{destinations[1].length} 份输入 + {destinations[0].length} 份返回
+              {Tx(
+                '1 → 0：{#0} 份输入 + {#1} 份返回',
+                destinations[1].length,
+                destinations[0].length,
+              )}
             </text>
             <text className="moe-svg-label" x="220" y="284" textAnchor="middle">
-              直接设备间交换，无中央节点
+              {T('直接设备间交换，无中央节点')}
             </text>
           </>
         )}
@@ -269,18 +295,28 @@ function ParallelDiagram({ state, result }: { state: MoEState; result: Result })
           {result.traffic.totalBytes} B
         </strong>
         <span>
-          只算远端 D = {D_MODEL} 维向量，float32 每个数 4 B；每份输入与返回各 {D_MODEL * 4} B。
+          {Tx(
+            '只算远端 D = {#0} 维向量，float32 每个数 4 B；每份输入与返回各 {#1} B。',
+            D_MODEL,
+            D_MODEL * 4,
+          )}
         </span>
       </div>
       {split && (
-        <ul className="moe-packet-list" aria-label="跨设备激活包">
+        <ul className="moe-packet-list" aria-label={T('跨设备激活包')}>
           {remote.map((packet) => (
             <li key={`${packet.token}-${packet.expert}`}>
-              t{packet.token}：设备 {packet.homeDevice} → E{packet.expert}（设备{' '}
-              {packet.expertDevice}）→ 原设备 {packet.homeDevice}
+              {Tx(
+                't{#0}：设备 {#1} → E{#2}（设备 {#3}）→ 原设备 {#4}',
+                packet.token,
+                packet.homeDevice,
+                packet.expert,
+                packet.expertDevice,
+                packet.homeDevice,
+              )}
             </li>
           ))}
-          {remote.length === 0 && <li>本配置没有远端分配。</li>}
+          {remote.length === 0 && <li>{T('本配置没有远端分配。')}</li>}
         </ul>
       )}
     </div>
@@ -290,12 +326,12 @@ function ParallelDiagram({ state, result }: { state: MoEState; result: Result })
 export function MoEDiagram({ state, result }: { state: MoEState; result: Result }) {
   const token = state.input.token;
   const titles = [
-    '同一个输入，给四个专家打分',
-    '只向 Top-K 专家分发',
-    '不同专家，各自完成 FFN',
-    '带着 token 身份返回并加权合并',
-    '负载取决于路由，参数仍需存储',
-    '专家驻留设备，激活直接往返',
+    T('同一个输入，给四个专家打分'),
+    T('只向 Top-K 专家分发'),
+    T('不同专家，各自完成 FFN'),
+    T('带着 token 身份返回并加权合并'),
+    T('负载取决于路由，参数仍需存储'),
+    T('专家驻留设备，激活直接往返'),
   ];
   return (
     <div className="moe-diagram-panel">
@@ -313,20 +349,23 @@ export function MoEDiagram({ state, result }: { state: MoEState; result: Result 
       )}
       {state.step < 4 && (
         <div className="moe-readout">
-          <strong>
-            追踪 t{token} · 输入 {vec(result.x[token])}
-          </strong>
+          <strong>{Tx('追踪 t{#0} · 输入 {#1}', token, vec(result.x[token]))}</strong>
           {state.step === 0 ? (
             <span>
-              z = {vec(result.logits[token])}；p = {vec(result.probabilities[token])}。
+              {Tx(
+                'z = {#0}；p = {#1}。',
+                vec(result.logits[token]),
+                vec(result.probabilities[token]),
+              )}
             </span>
           ) : (
             <span>
-              选中{' '}
-              {result.selected[token]
-                .map((expert) => `E${expert}（g=${fmt(result.gates[token][expert])}）`)
-                .join('、')}
-              。
+              {Tx(
+                '选中 {#0}。',
+                result.selected[token]
+                  .map((expert) => T('E{#0}（g={#1}）', expert, fmt(result.gates[token][expert])))
+                  .join(T('、')),
+              )}
             </span>
           )}
           {state.step === 2 &&
@@ -337,13 +376,17 @@ export function MoEDiagram({ state, result }: { state: MoEState; result: Result 
             ))}
           {state.step === 3 && (
             <span>
-              y{token} = {vec(result.output[token])}；输出行顺序仍是 t0、t1、t2、t3。
+              {Tx(
+                'y{#0} = {#1}；输出行顺序仍是 t0、t1、t2、t3。',
+                token,
+                vec(result.output[token]),
+              )}
             </span>
           )}
         </div>
       )}
       <p className="exp-caption">
-        编号只是专家身份，未预设语义分工。教学小矩阵，图线表示数据去向。
+        {T('编号只是专家身份，未预设语义分工。教学小矩阵，图线表示数据去向。')}
       </p>
     </div>
   );

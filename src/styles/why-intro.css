@@ -18,15 +18,15 @@
   .why-intro > summary::-webkit-details-marker {
     display: none;
   }
-  /* A flex summary loses the native disclosure triangle; say what a click does instead. */
-  .why-intro > summary::after {
-    content: '收起 ▴';
+  /* The toggle text lives in the DOM (translated), not in ::after content. */
+  .why-toggle {
     margin-left: auto;
     font-size: 12px;
     color: var(--muted);
   }
-  .why-intro:not([open]) > summary::after {
-    content: '展开 ▾';
+  .why-intro:not([open]) .why-toggle-open,
+  .why-intro[open] .why-toggle-closed {
+    display: none;
   }
   .why-kicker {
     font-size: 12px;

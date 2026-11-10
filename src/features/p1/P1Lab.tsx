@@ -21,6 +21,8 @@ import {
   type TopicDefinition,
 } from '../../content/p1/types';
 import { initialLabState, restoreLabState, serializeLabState, type LabState } from '../../state/p1';
+import { localePath, T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
@@ -34,7 +36,7 @@ function cellLabel(t: Tensor, i: number) {
     row = Math.floor(i / width),
     column = t.columns?.[i % width] ?? `d${i % width}`;
   if (t.rows) return `${t.rows[row]} · ${column}`;
-  return t.values.length > 1 ? `行${row} · ${column}` : column;
+  return t.values.length > 1 ? T('行{#0} · {#1}', row, column) : column;
 }
 const cellText = (value: number) =>
   value !== 0 && Math.abs(value) < 1e-5 ? value.toExponential(2) : fmt(value, 5);
@@ -86,7 +88,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
         setRevision((r) => r + 1);
         setRecall(false);
         setManual('');
-        setNotice(next.warning ?? '已从链接恢复实验。');
+        setNotice(next.warning ?? T('已从链接恢复实验。'));
       },
       media = window.matchMedia('(prefers-reduced-motion: reduce)'),
       motion = () => {
@@ -103,45 +105,50 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
     };
   }, [topic]);
   async function share() {
-    const url = new URL(topic.path, location.origin);
+    const url = new URL(localePath(topic.path), location.origin);
     url.hash = serializeLabState(topic, state);
     try {
       await navigator.clipboard.writeText(url.href);
       setManual('');
-      setNotice('已复制当前实验状态的链接。');
+      setNotice(T('已复制当前实验状态的链接。'));
     } catch {
       setManual(url.href);
-      setNotice('剪贴板不可用，请手动复制下方链接。');
+      setNotice(T('剪贴板不可用，请手动复制下方链接。'));
     }
   }
   return (
-    <AppShell active={topic.id} crumb={topic.title} indicator="浏览器内计算" title={topic.title}>
+    <AppShell
+      active={topic.id}
+      crumb={topic.title}
+      indicator={T('浏览器内计算')}
+      title={topic.title}
+    >
       <section className="page-heading">
         <div>
-          <div className="eyebrow">原书导读 · {topic.chapter} · 可手算的机制实验</div>
+          <div className="eyebrow">{Tx('原书导读 · {#0} · 可手算的机制实验', topic.chapter)}</div>
           <h1>{topic.title}</h1>
           <p>{topic.intro}</p>
         </div>
         <button className="button secondary share-button" onClick={() => void share()}>
-          ↗ 复制实验链接
+          {T('↗ 复制实验链接')}
         </button>
       </section>
       {notice && (
         <div className="notice" role="status">
           {notice}
-          <button aria-label="关闭提示" onClick={() => setNotice('')}>
+          <button aria-label={T('关闭提示')} onClick={() => setNotice('')}>
             ×
           </button>
         </div>
       )}
       {manual && (
         <label className="manual-share">
-          手动复制链接
+          {T('手动复制链接')}
           <input readOnly value={manual} onFocus={(e) => e.target.select()} />
         </label>
       )}
       <WhyIntro why={topic.why} />
-      <section className="lesson-panel p1-panel" aria-label={`${topic.id} 逐步实验`}>
+      <section className="lesson-panel p1-panel" aria-label={T('{#0} 逐步实验', topic.id)}>
         <div className="lesson-panel-heading">
           <div>
             <span className="lesson-eyebrow">{topic.question}</span>
@@ -151,7 +158,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
             {state.step + 1} / {topic.steps.length}
           </span>
         </div>
-        <div className="lesson-steps p1-steps" aria-label="计算步骤">
+        <div className="lesson-steps p1-steps" aria-label={T('计算步骤')}>
           {topic.steps.map((s, i) => (
             <button
               key={s.name}
@@ -164,13 +171,13 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           ))}
         </div>
         <div className="p1-inputs">
-          <div className="p1-presets" role="group" aria-label="预设示例">
-            <span>输入预设</span>
+          <div className="p1-presets" role="group" aria-label={T('预设示例')}>
+            <span>{T('输入预设')}</span>
             {topic.examples.map((example) => (
               <button
                 key={example.name}
                 className={example.book ? 'p1-book-preset' : undefined}
-                title={example.book ? '数字取自原书，可与书中手算结果对照' : undefined}
+                title={example.book ? T('数字取自原书，可与书中手算结果对照') : undefined}
                 onClick={() => {
                   const initial = initialLabState(topic);
                   edit({
@@ -184,10 +191,10 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               </button>
             ))}
             <label>
-              随机种子
+              {T('随机种子')}
               <input
                 type="number"
-                aria-label="随机种子"
+                aria-label={T('随机种子')}
                 min={1}
                 max={9999}
                 value={state.seed}
@@ -202,17 +209,19 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
                 edit({ ...state, input: randomValues(state.seed, state.input.length) })
               }
             >
-              按种子生成输入
+              {T('按种子生成输入')}
             </button>
           </div>
           <details className="p1-edit-input">
-            <summary>编辑输入向量 · {state.input.map((v) => fmt(v)).join(', ')}</summary>
+            <summary>
+              {Tx('编辑输入向量 · {#0}', state.input.map((v) => fmt(v)).join(', '))}
+            </summary>
             <div className="p1-vector-editor">
               {state.input.map((value, i) => (
                 <label key={i}>
                   {topic.inputNames?.[i] ?? `x${i}`}
                   <input
-                    aria-label={`输入 x${i}`}
+                    aria-label={T('输入 x{#0}', i)}
                     type="number"
                     min={low}
                     max={high}
@@ -228,8 +237,11 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               ))}
             </div>
             <p className="exp-caption">
-              范围 {fmt(low)} 到 {fmt(high)}，默认步长
-              0.25，允许输入小数；二维矩阵按行展平。小范围便于核对，不代表真实模型激活范围。
+              {Tx(
+                '范围 {#0} 到 {#1}，默认步长 0.25，允许输入小数；二维矩阵按行展平。小范围便于核对，不代表真实模型激活范围。',
+                fmt(low),
+                fmt(high),
+              )}
             </p>
           </details>
           <div className="p1-fields">
@@ -249,7 +261,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
         </div>
         <div className="lesson-columns p1-columns">
           <div className="diagram-panel">
-            <p className="p1-figure-title">图：{current.title}</p>
+            <p className="p1-figure-title">{Tx('图：{#0}', current.title)}</p>
             <MechanismDiagram frame={current} fallback={<VectorDiagram frame={current} />} />
             <div className="p1-metrics">
               {current.metrics.map(([label, value]) => (
@@ -261,13 +273,17 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
             </div>
             <p className="exp-caption">
               {hasMechanism(current)
-                ? '图中位置、连接或节点对应本步实际计算。数值表保留完整坐标；切步直接重建，不把插值当成算法状态。'
-                : '柱长对应本步实际数值，横线表示零；不同形状的张量分别展开坐标，不是语义空间降维。切步直接重建数值。'}
+                ? T(
+                    '图中位置、连接或节点对应本步实际计算。数值表保留完整坐标；切步直接重建，不把插值当成算法状态。',
+                  )
+                : T(
+                    '柱长对应本步实际数值，横线表示零；不同形状的张量分别展开坐标，不是语义空间降维。切步直接重建数值。',
+                  )}
             </p>
           </div>
           <div className="lesson-reading">
             <div className="lesson-reading-top">
-              <span>这一步</span>
+              <span>{T('这一步')}</span>
               <button
                 onClick={() =>
                   edit({
@@ -276,7 +292,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
                   })
                 }
               >
-                {state.view.explanations ? '隐藏说明' : '显示说明'}
+                {state.view.explanations ? T('隐藏说明') : T('显示说明')}
               </button>
             </div>
             <h3>{step.title}</h3>
@@ -286,7 +302,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               </p>
             ) : (
               <div className="lesson-recall">
-                <strong>先自己说一遍</strong>
+                <strong>{T('先自己说一遍')}</strong>
                 <p>
                   <Rich text={step.prompt} />
                 </p>
@@ -308,15 +324,15 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               />
             )}
             <div className="lesson-takeaway">
-              <strong>这一步，记住一句话</strong>
+              <strong>{T('这一步，记住一句话')}</strong>
               <p>
                 <Rich
-                  text={state.view.explanations ? step.takeaway : '先自己复述，再显示说明核对。'}
+                  text={state.view.explanations ? step.takeaway : T('先自己复述，再显示说明核对。')}
                 />
               </p>
             </div>
             <details className="lesson-formula">
-              <summary>需要时再看公式</summary>
+              <summary>{T('需要时再看公式')}</summary>
               <Formula expression={step.formula} />
             </details>
             <StepSources book={step.book} source={step.source} />
@@ -329,7 +345,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               disabled={!state.step}
               onClick={() => jump(state.step - 1)}
             >
-              ← 上一步
+              {T('← 上一步')}
             </button>
             <button
               className="button primary"
@@ -337,38 +353,38 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               onClick={() => jump(state.step + 1)}
             >
               {state.step === topic.steps.length - 1
-                ? '已到最后一步'
-                : `下一步：${topic.steps[state.step + 1].name} →`}
+                ? T('已到最后一步')
+                : T('下一步：{#0} →', topic.steps[state.step + 1].name)}
             </button>
           </div>
           <div>
             <button onClick={() => jump(0)} className="lesson-text-button">
-              从头看
+              {T('从头看')}
             </button>
             <button
               className="lesson-text-button"
               onClick={() => {
                 edit({ ...initialLabState(topic), view: state.view });
-                setNotice('已恢复默认示例。');
+                setNotice(T('已恢复默认示例。'));
               }}
             >
-              恢复默认示例
+              {T('恢复默认示例')}
             </button>
             <button
               className="lesson-text-button"
-              aria-label={playing ? '暂停自动逐步' : '播放自动逐步'}
+              aria-label={playing ? T('暂停自动逐步') : T('播放自动逐步')}
               onClick={() => {
                 if (!playing && state.step === topic.steps.length - 1)
                   setState((s) => ({ ...s, step: 0 }));
                 setPlaying((v) => !v);
               }}
             >
-              {playing ? 'Ⅱ 暂停' : '▶ 自动逐步'}
+              {playing ? T('Ⅱ 暂停') : T('▶ 自动逐步')}
             </button>
             <label>
-              速度
+              {T('速度')}
               <select
-                aria-label="播放速度"
+                aria-label={T('播放速度')}
                 value={state.view.speed}
                 onChange={(e) =>
                   edit({ ...state, view: { ...state.view, speed: Number(e.target.value) } })
@@ -382,29 +398,39 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           </div>
         </div>
         {reduced && (
-          <p className="lesson-motion">已遵循减少动态效果偏好；图表直接切换，不做过渡动画。</p>
+          <p className="lesson-motion">
+            {T('已遵循减少动态效果偏好；图表直接切换，不做过渡动画。')}
+          </p>
         )}
       </section>
       <details className="details-panel p1-checks">
-        <summary>数值性质核对 · {result.checks.length} 项</summary>
+        <summary>{Tx('数值性质核对 · {#0} 项', result.checks.length)}</summary>
         <div className="details-body">
           {result.checks.map((c) => (
             <p key={c.label} className={`exp-verdict ${c.error <= c.tolerance ? 'ok' : ''}`}>
-              {c.label}：误差 {errorText(c.error)}，容差 {c.tolerance} ·{' '}
-              {c.error <= c.tolerance ? '通过' : '超出容差'}
+              {Tx(
+                '{#0}：误差 {#1}，容差 {#2} · {#3}',
+                c.label,
+                errorText(c.error),
+                c.tolerance,
+                c.error <= c.tolerance ? T('通过') : T('超出容差'),
+              )}
             </p>
           ))}
           <p className="exp-caption">
-            仅核对当前列出的数学性质；不会把浏览器小例子当作真实模型质量或硬件性能测试。
+            {T('仅核对当前列出的数学性质；不会把浏览器小例子当作真实模型质量或硬件性能测试。')}
           </p>
         </div>
       </details>
       <section className="recall-card">
         <div>
-          <span className="section-kicker">离开之前 · 试着复述</span>
-          <h2>把这 {topic.steps.length} 步连成一条计算链。</h2>
+          <span className="section-kicker">{T('离开之前 · 试着复述')}</span>
+          <h2>{Tx('把这 {#0} 步连成一条计算链。', topic.steps.length)}</h2>
           <p>
-            {topic.steps.map((s) => s.name).join(' → ')}。改变哪个输入会影响什么？哪些结论有条件？
+            {Tx(
+              '{#0}。改变哪个输入会影响什么？哪些结论有条件？',
+              topic.steps.map((s) => s.name).join(' → '),
+            )}
           </p>
         </div>
         <button
@@ -417,28 +443,26 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           }}
         >
           {' '}
-          {recall ? '收起参考解释' : '查看参考解释'}
+          {recall ? T('收起参考解释') : T('查看参考解释')}
         </button>
         {recall && (
           <div className="recall-answer">
             {topic.steps.map((s) => (
-              <p key={s.name}>
-                {s.name}：<Rich text={s.takeaway} />
-              </p>
+              <p key={s.name}>{Tx('{#0}：{#1}', s.name, <Rich text={s.takeaway} />)}</p>
             ))}
           </div>
         )}
       </section>
       <details className="details-panel source-panel">
         <summary>
-          <span>适用条件与来源</span>
-          <span className="summary-hint">简化假设 · 常见误区 · 来源日期</span>
+          <span>{T('适用条件与来源')}</span>
+          <span className="summary-hint">{T('简化假设 · 常见误区 · 来源日期')}</span>
         </summary>
         <div className="details-body">
           <p>
-            全部数值在浏览器中实际计算，内部使用 JavaScript
-            float64，显示时才舍入。随机输入与掩码可由种子重现；修改输入或参数会暂停播放并重建步骤。没有模型服务、真实模型权重或
-            GPU 性能实测。
+            {T(
+              '全部数值在浏览器中实际计算，内部使用 JavaScript float64，显示时才舍入。随机输入与掩码可由种子重现；修改输入或参数会暂停播放并重建步骤。没有模型服务、真实模型权重或 GPU 性能实测。',
+            )}
           </p>
           <ul>
             {topic.limits.map((s) => (
@@ -447,7 +471,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           </ul>
           {topic.bookNotes && (
             <>
-              <strong className="exp-notes-title">与原书说法的对照</strong>
+              <strong className="exp-notes-title">{T('与原书说法的对照')}</strong>
               <ul>
                 {topic.bookNotes.map((note) => (
                   <li key={note}>
@@ -466,7 +490,9 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               </li>
             ))}
           </ul>
-          <p className="subtle">来源核对日期：{verifiedDate}。解释、图形和教学数值由本项目编写。</p>
+          <p className="subtle">
+            {Tx('来源核对日期：{#0}。解释、图形和教学数值由本项目编写。', verifiedDate)}
+          </p>
         </div>
       </details>
     </AppShell>
@@ -518,11 +544,11 @@ function TensorTable({ tensor: t }: { tensor: Tensor }) {
     <div className="exp-table-wrap">
       <table className="exp-table" aria-label={t.name}>
         <caption>
-          {t.name} · [{t.values.length}, {t.values[0].length}] · 行 ↓ 列 →
+          {Tx('{#0} · [{#1}, {#2}] · 行 ↓ 列 →', t.name, t.values.length, t.values[0].length)}
         </caption>
         <thead>
           <tr>
-            <th scope="col">坐标</th>
+            <th scope="col">{T('坐标')}</th>
             {t.values[0].map((_, i) => (
               <th scope="col" key={i}>
                 {t.columns?.[i] ?? `d${i}`}
@@ -533,7 +559,9 @@ function TensorTable({ tensor: t }: { tensor: Tensor }) {
         <tbody>
           {t.values.map((row, i) => (
             <tr key={i}>
-              <th scope="row">{t.rows?.[i] ?? (t.values.length > 1 ? `行 ${i}` : '值')}</th>
+              <th scope="row">
+                {t.rows?.[i] ?? (t.values.length > 1 ? T('行 {#0}', i) : T('值'))}
+              </th>
               {row.map((v, j) => (
                 <td key={j}>{cellText(v)}</td>
               ))}
@@ -557,9 +585,9 @@ function VectorDiagram({ frame: f }: { frame: Frame }) {
       className="p1-svg"
       viewBox={`0 0 430 ${height}`}
       role="img"
-      aria-label={`${f.title}：${tensors.map((t) => t.name).join('，')}`}
+      aria-label={T('{#0}：{#1}', f.title, tensors.map((t) => t.name).join(T('，')))}
     >
-      <title>本步实际数值对照，不同张量分别展开</title>
+      <title>{T('本步实际数值对照，不同张量分别展开')}</title>
       {tensors.map((t, g) => {
         const values = t.values.flat(),
           offset = 30 + lengths.slice(0, g).reduce((s, n) => s + Math.min(n, 12) * 22 + 52, 0);
@@ -598,7 +626,7 @@ function VectorDiagram({ frame: f }: { frame: Frame }) {
             })}
             {values.length > 12 && (
               <text x="12" y={offset + 26 + 12 * 22} className="p1-svg-small">
-                其余数值见右侧表格
+                {T('其余数值见右侧表格')}
               </text>
             )}
           </g>
@@ -630,12 +658,15 @@ function Experiment({
     } | null>(null);
   return (
     <div className="exp-experiment">
-      <strong>先预测，再执行对照</strong>
+      <strong>{T('先预测，再执行对照')}</strong>
       <p className="exp-caption">
-        核对量：{topic.prediction.label}。只有下方待执行参数会改变，当前输入与其他参数保持一致。
+        {Tx(
+          '核对量：{#0}。只有下方待执行参数会改变，当前输入与其他参数保持一致。',
+          topic.prediction.label,
+        )}
       </p>
       <ParameterField
-        field={{ ...field, label: `待执行：${field.label}` }}
+        field={{ ...field, label: T('待执行：{#0}', field.label) }}
         value={target}
         onChange={(v) => {
           onChange(state, true);
@@ -646,8 +677,8 @@ function Experiment({
       <Prediction
         question={topic.prediction.question}
         options={[
-          { value: 'same', label: '容差内不变' },
-          { value: 'different', label: '会改变' },
+          { value: 'same', label: T('容差内不变') },
+          { value: 'different', label: T('会改变') },
         ]}
         choice={choice}
         onChoose={(c) => {
@@ -666,16 +697,20 @@ function Experiment({
           setVerdict({
             difference,
             correct: choice === (difference <= 1e-10 ? 'same' : 'different'),
-            label: choice === 'same' ? '容差内不变' : '会改变',
+            label: choice === 'same' ? T('容差内不变') : T('会改变'),
           });
           onChange(next, true);
         }}
       >
-        验证预测并执行 →
+        {T('验证预测并执行 →')}
       </button>
       {verdict && (
         <p className={`exp-verdict ${verdict.correct ? 'ok' : ''}`} role="status">
-          {topic.prediction.label}最大绝对变化 = {errorText(verdict.difference)}，判等容差 1e-10。
+          {Tx(
+            '{#0}最大绝对变化 = {#1}，判等容差 1e-10。',
+            topic.prediction.label,
+            errorText(verdict.difference),
+          )}
           <PredictionResult label={verdict.label} holds={verdict.correct} />
         </p>
       )}

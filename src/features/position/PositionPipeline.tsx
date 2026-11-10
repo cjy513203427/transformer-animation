@@ -1,6 +1,8 @@
 import { useId, type KeyboardEvent } from 'react';
 import { SvgTex } from '../../components/Tex';
 import type { Insertion } from '../../content/position';
+import { T } from '../../i18n';
+import { FitText } from '../../components/FitText';
 
 export const INSERTION_COLORS: Record<Insertion, string> = {
   add: '#b45309',
@@ -9,9 +11,9 @@ export const INSERTION_COLORS: Record<Insertion, string> = {
 };
 const INSERTION_STEP: Record<Insertion, number> = { add: 1, rope: 3, alibi: 5 };
 const INSERTION_LABEL: Record<Insertion, string> = {
-  add: '① 加法位置编码：加到 X 上',
-  rope: '② RoPE：旋转 Q 和 K',
-  alibi: '③ ALiBi：分数加距离偏置',
+  add: T('① 加法位置编码：加到 X 上'),
+  rope: T('② RoPE：旋转 Q 和 K'),
+  alibi: T('③ ALiBi：分数加距离偏置'),
 };
 
 function Box({
@@ -43,9 +45,16 @@ function Box({
         </text>
       )}
       {sub && (
-        <text className="pp-sub" x={x} y={y + 11} textAnchor="middle">
+        <FitText
+          className="pp-sub"
+          x={x}
+          y={y + 11}
+          textAnchor="middle"
+          width={width - 8}
+          maxLines={1}
+        >
           {sub}
-        </text>
+        </FitText>
       )}
     </g>
   );
@@ -68,7 +77,7 @@ export function PositionPipeline({
       className: `pp-insert ${on(kind) ? 'active' : 'idle'}`,
       role: 'button',
       tabIndex: 0,
-      'aria-label': `${INSERTION_LABEL[kind]}，跳到对应步骤`,
+      'aria-label': T('{#0}，跳到对应步骤', INSERTION_LABEL[kind]),
       'aria-pressed': on(kind),
       onClick: select,
       onKeyDown: (e: KeyboardEvent) => {
@@ -83,13 +92,13 @@ export function PositionPipeline({
   return (
     <div className="pp-panel">
       <div className="diagram-caption">
-        <strong>顺序信息从哪里进入？</strong>
-        <span>↑ 从下往上读</span>
+        <strong>{T('顺序信息从哪里进入？')}</strong>
+        <span>{T('↑ 从下往上读')}</span>
       </div>
       <svg
         viewBox="0 0 460 640"
         role="group"
-        aria-label="单头 Attention 计算流程，标出三种位置编码加入的位置"
+        aria-label={T('单头 Attention 计算流程，标出三种位置编码加入的位置')}
       >
         <defs>
           {(['base', 'add', 'rope', 'alibi'] as const).map((tone) => (
@@ -184,7 +193,7 @@ export function PositionPipeline({
         />
         <path className="pp-wire" d="M230 47 V30" markerEnd={`url(#${id}-base)`} />
         <text className="pp-output" x="230" y="22" textAnchor="middle">
-          输出 O
+          {T('输出 O')}
         </text>
 
         <Box
@@ -193,9 +202,9 @@ export function PositionPipeline({
           width={170}
           label="E[token]"
           tex="E[\text{token}]"
-          sub="查嵌入表：只有内容"
+          sub={T('查嵌入表：只有内容')}
         />
-        <Box x={230} y={504} width={120} label="X" sub="进入 Attention 的表示" />
+        <Box x={230} y={504} width={120} label="X" sub={T('进入 Attention 的表示')} />
         <Box x={110} y={446} width={86} label="× W_Q" tex="\times W_Q" tone="query" />
         <Box x={230} y={446} width={86} label="× W_K" tex="\times W_K" tone="key" />
         <Box x={350} y={446} width={86} label="× W_V" tex="\times W_V" tone="value" />
@@ -208,14 +217,14 @@ export function PositionPipeline({
           width={170}
           label="Q·Kᵀ / √d"
           tex="QK^{\top}/\sqrt{d}"
-          sub="逐对打分"
+          sub={T('逐对打分')}
         />
-        <Box x={170} y={168} width={150} label="Mask" sub="挡住未来" />
+        <Box x={170} y={168} width={150} label="Mask" sub={T('挡住未来')} />
         <Box x={170} y={118} width={150} label="Softmax" tone="probability" />
-        <Box x={230} y={64} width={180} label="P · V" sub="按比例汇总 V" tone="probability" />
-        <text className="pp-note" x={362} y={300} textAnchor="start">
-          {active.length > 1 ? '' : on('rope') ? 'V 不旋转' : on('add') ? 'V 也带位置' : ''}
-        </text>
+        <Box x={230} y={64} width={180} label="P · V" sub={T('按比例汇总 V')} tone="probability" />
+        <FitText className="pp-note" x={362} y={300} textAnchor="start" width={92} grow="down">
+          {active.length > 1 ? '' : on('rope') ? T('V 不旋转') : on('add') ? T('V 也带位置') : ''}
+        </FitText>
 
         {/* ① additive PE */}
         <g {...insertionProps('add')}>
@@ -257,18 +266,25 @@ export function PositionPipeline({
             ⊕
           </text>
           <rect x="16" y="202" width="118" height="32" rx="6" className="pp-side" />
-          <SvgTex x={75} y={223} width={118} size={12} prefix="③ " tex="-m\cdot\text{距离}" />
+          <SvgTex
+            x={75}
+            y={223}
+            width={118}
+            size={12}
+            prefix="③ "
+            tex={T('-m\\cdot\\text{距离}')}
+          />
           <path d="M134 218 H151" className="pp-insert-wire" />
         </g>
         {!active.length && (
           <g className="pp-empty" aria-hidden="true">
             <rect x="322" y="588" width="130" height="46" rx="8" />
-            <text x="387" y="607" textAnchor="middle">
-              三个入口都未启用
-            </text>
-            <text x="387" y="625" textAnchor="middle">
-              X 只含内容
-            </text>
+            <FitText x="387" y="607" textAnchor="middle" width={122} maxLines={1}>
+              {T('三个入口都未启用')}
+            </FitText>
+            <FitText x="387" y="625" textAnchor="middle" width={122} maxLines={1}>
+              {T('X 只含内容')}
+            </FitText>
           </g>
         )}
       </svg>

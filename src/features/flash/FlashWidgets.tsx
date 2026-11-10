@@ -4,6 +4,8 @@ import { Matrix } from '../../components/Matrix';
 import { formatNumber as fmt } from '../../math/attention';
 import { computeFlash, type FlashResult } from '../../math/flash';
 import type { FlashState } from '../../state/flash';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 
 export interface FlashProps {
   state: FlashState;
@@ -18,28 +20,32 @@ export function FlashInputs({ state, onChange }: FlashProps) {
   return (
     <div className="flash-inputs">
       <Segment
-        label="输入预设"
+        label={T('输入预设')}
         options={['rising', 'book', 'mixed'] as const}
         value={state.input.preset}
         onSelect={(preset) =>
           onChange({ ...state, input: { ...state.input, preset, keyDelta: 0, block: 0 } })
         }
         render={(preset) =>
-          preset === 'rising' ? '递增分数' : preset === 'book' ? '书中 21.4.4 一行分数' : '混合输入'
+          preset === 'rising'
+            ? T('递增分数')
+            : preset === 'book'
+              ? T('书中 21.4.4 一行分数')
+              : T('混合输入')
         }
       />
       <div className="flash-input-row">
         <Segment
-          label="观察 Query"
+          label={T('观察 Query')}
           options={[0, 1, 2, 3] as const}
           value={state.input.query}
           onSelect={(query) => onChange({ ...state, input: { ...state.input, query } })}
           render={(query) => 't' + query}
         />
         <label className="flash-field">
-          混合输入种子
+          {T('混合输入种子')}
           <input
-            aria-label="混合输入种子"
+            aria-label={T('混合输入种子')}
             disabled={state.input.preset !== 'mixed'}
             type="number"
             min={1}
@@ -54,7 +60,7 @@ export function FlashInputs({ state, onChange }: FlashProps) {
       </div>
       <div className="flash-input-row">
         <Segment
-          label="每块 Key 数 B"
+          label={T('每块 Key 数 B')}
           options={sizes}
           value={state.config.blockSize}
           onSelect={(blockSize) =>
@@ -74,15 +80,17 @@ export function FlashInputs({ state, onChange }: FlashProps) {
               onChange({ ...state, config: { ...state.config, causal: e.target.checked } })
             }
           />
-          因果 Mask
+          {T('因果 Mask')}
         </label>
       </div>
       <p className="exp-caption">
-        {state.config.causal
-          ? '每行只能读取自己与之前的位置。'
-          : '双向读取对照：每行可读取全部位置。'}{' '}
-        当前 ΔK[3,0] = {fmt(state.input.keyDelta)}；在“重缩放”中先预测再修改。切块会从第 1
-        块重新查看。
+        {Tx(
+          '{#0} 当前 ΔK[3,0] = {#1}；在“重缩放”中先预测再修改。切块会从第 1 块重新查看。',
+          state.config.causal
+            ? T('每行只能读取自己与之前的位置。')
+            : T('双向读取对照：每行可读取全部位置。'),
+          fmt(state.input.keyDelta),
+        )}
       </p>
     </div>
   );
@@ -93,14 +101,12 @@ function Baseline({ state, result }: FlashProps) {
   return (
     <div className="exp-widget">
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="完整行 Attention 数值">
-          <caption>
-            Query t{t} · q = {vec(result.q[t])} · Key 轴归一化
-          </caption>
+        <table className="exp-table" aria-label={T('完整行 Attention 数值')}>
+          <caption>{Tx('Query t{#0} · q = {#1} · Key 轴归一化', t, vec(result.q[t]))}</caption>
           <thead>
             <tr>
               <th scope="col">Key</th>
-              <th scope="col">分数 + Mask</th>
+              <th scope="col">{T('分数 + Mask')}</th>
               <th scope="col">P</th>
               <th scope="col">V</th>
             </tr>
@@ -118,10 +124,14 @@ function Baseline({ state, result }: FlashProps) {
         </table>
       </div>
       <p className="exp-verdict ok">
-        完整行输出 O[t{t}] = {vec(result.reference.output[t])}。P 的每一项乘对应的 V，再逐维相加。
+        {Tx(
+          '完整行输出 O[t{#0}] = {#1}。P 的每一项乘对应的 V，再逐维相加。',
+          t,
+          vec(result.reference.output[t]),
+        )}
       </p>
       <details className="lesson-formula">
-        <summary>展开同一份 Q、K、V 激活</summary>
+        <summary>{T('展开同一份 Q、K、V 激活')}</summary>
         <div className="flash-matrices">
           <Matrix name="Q" data={result.q} tone="query" row={t} />
           <Matrix name="K" data={result.k} tone="key" />
@@ -137,16 +147,20 @@ function TileValues({ state, result }: FlashProps) {
   return (
     <div className="exp-widget">
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="当前 K V 块数值">
+        <table className="exp-table" aria-label={T('当前 K V 块数值')}>
           <caption>
-            第 {block.index + 1} 块 · K 与 V 按相同位置读取 · 实际 {block.keys.length} 行
+            {Tx(
+              '第 {#0} 块 · K 与 V 按相同位置读取 · 实际 {#1} 行',
+              block.index + 1,
+              block.keys.length,
+            )}
           </caption>
           <thead>
             <tr>
-              <th scope="col">位置</th>
+              <th scope="col">{T('位置')}</th>
               <th scope="col">K [1, 2]</th>
               <th scope="col">V [1, 2]</th>
-              <th scope="col">分数 + Mask</th>
+              <th scope="col">{T('分数 + Mask')}</th>
             </tr>
           </thead>
           <tbody>
@@ -162,10 +176,13 @@ function TileValues({ state, result }: FlashProps) {
         </table>
       </div>
       <p className="exp-verdict">
-        当前有 {block.validCount} 个有效 Key。
-        {block.validCount === 0
-          ? '这一块全部被屏蔽，直接保留旧状态。'
-          : '局部分数仍需与此前块共用归一化尺度，不能把各块的 Softmax 直接平均。'}
+        {Tx(
+          '当前有 {#0} 个有效 Key。{#1}',
+          block.validCount,
+          block.validCount === 0
+            ? T('这一块全部被屏蔽，直接保留旧状态。')
+            : T('局部分数仍需与此前块共用归一化尺度，不能把各块的 Softmax 直接平均。'),
+        )}
       </p>
     </div>
   );
@@ -176,27 +193,27 @@ function Accumulator({ state, result }: FlashProps) {
   return (
     <div className="exp-widget">
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="在线累积量更新">
-          <caption>第 {b.index + 1} 块后的状态 · a 是未归一化的 2 维向量</caption>
+        <table className="exp-table" aria-label={T('在线累积量更新')}>
+          <caption>{Tx('第 {#0} 块后的状态 · a 是未归一化的 2 维向量', b.index + 1)}</caption>
           <thead>
             <tr>
-              <th scope="col">状态</th>
-              <th scope="col">旧值</th>
-              <th scope="col">旧值 × α</th>
-              <th scope="col">本块贡献</th>
-              <th scope="col">新值</th>
+              <th scope="col">{T('状态')}</th>
+              <th scope="col">{T('旧值')}</th>
+              <th scope="col">{T('旧值 × α')}</th>
+              <th scope="col">{T('本块贡献')}</th>
+              <th scope="col">{T('新值')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row">l 分母</th>
+              <th scope="row">{T('l 分母')}</th>
               <td>{fmt(b.previousL, 5)}</td>
               <td>{fmt(b.scaledPreviousL, 5)}</td>
               <td>{fmt(b.blockL, 5)}</td>
               <td>{fmt(b.l, 5)}</td>
             </tr>
             <tr>
-              <th scope="row">a 分子</th>
+              <th scope="row">{T('a 分子')}</th>
               <td>{vec(b.previousA)}</td>
               <td>{vec(b.scaledPreviousA)}</td>
               <td>{vec(b.blockA)}</td>
@@ -206,24 +223,36 @@ function Accumulator({ state, result }: FlashProps) {
         </table>
       </div>
       <p className="flash-equation">
-        m：{fmt(b.previousM)} → {fmt(b.m)}；本块最大值 {fmt(b.blockM)}；α = {fmt(b.alpha, 6)}
+        {Tx(
+          'm：{#0} → {#1}；本块最大值 {#2}；α = {#3}',
+          fmt(b.previousM),
+          fmt(b.m),
+          fmt(b.blockM),
+          fmt(b.alpha, 6),
+        )}
       </p>
       <p className="exp-caption">
-        本块 exp(s − m′) = {vec(b.exponentials)}；已经读到 t{b.keys.at(-1)}
-        。显示的小数不参与后续计算。
+        {Tx(
+          '本块 exp(s − m′) = {#0}；已经读到 t{#1}。显示的小数不参与后续计算。',
+          vec(b.exponentials),
+          b.keys.at(-1),
+        )}
       </p>
       <p className="exp-verdict" role="status">
-        {b.validCount === 0
-          ? '全屏蔽块：α = 1，旧 m、l、a 保持不变。'
-          : b.rescaled
-            ? '新最大值出现：旧 l 与旧 a 都已重缩放。'
-            : b.previousL === 0
-              ? '首个有效块：旧累积为零，α = 0。'
-              : '最大值没有增大：α = 1，沿用原尺度。'}{' '}
-        当前 a / l = {vec(b.output)}
-        {b.index === result.rows[state.input.query].length - 1
-          ? '，已读完全部块。'
-          : '，这是前缀暂时输出。'}
+        {Tx(
+          '{#0} 当前 a / l = {#1}{#2}',
+          b.validCount === 0
+            ? T('全屏蔽块：α = 1，旧 m、l、a 保持不变。')
+            : b.rescaled
+              ? T('新最大值出现：旧 l 与旧 a 都已重缩放。')
+              : b.previousL === 0
+                ? T('首个有效块：旧累积为零，α = 0。')
+                : T('最大值没有增大：α = 1，沿用原尺度。'),
+          vec(b.output),
+          b.index === result.rows[state.input.query].length - 1
+            ? T('，已读完全部块。')
+            : T('，这是前缀暂时输出。'),
+        )}
       </p>
     </div>
   );
@@ -239,21 +268,23 @@ function RescaleExperiment(props: FlashProps) {
     alpha: number;
     correct: boolean;
   } | null>(null);
-  const labels = { up: 'm 变大', same: 'm 不变', down: 'm 变小' };
+  const labels = { up: T('m 变大'), same: T('m 不变'), down: T('m 变小') };
   return (
     <>
       <Accumulator {...props} />
       <div className="exp-experiment">
-        <strong>只修改最后一个 Key，先判断最终最大值。</strong>
+        <strong>{T('只修改最后一个 Key，先判断最终最大值。')}</strong>
         <p className="exp-caption">
-          当前 ΔK[3,0] = {fmt(state.input.keyDelta)}；Q、V 保持不变。被因果 Mask 排除的 Key
-          不参与最大值。
+          {Tx(
+            '当前 ΔK[3,0] = {#0}；Q、V 保持不变。被因果 Mask 排除的 Key 不参与最大值。',
+            fmt(state.input.keyDelta),
+          )}
         </p>
         <label className="exp-range">
-          待执行 ΔK[3,0]
+          {T('待执行 ΔK[3,0]')}
           <input
             type="range"
-            aria-label="待执行 Key 偏移"
+            aria-label={T('待执行 Key 偏移')}
             min={-2}
             max={2}
             step={0.25}
@@ -267,7 +298,7 @@ function RescaleExperiment(props: FlashProps) {
           <output>{fmt(target)}</output>
         </label>
         <Prediction
-          question="读完全部块后，m 会怎样变化？"
+          question={T('读完全部块后，m 会怎样变化？')}
           options={[
             { value: 'up', label: labels.up },
             { value: 'same', label: labels.same },
@@ -306,12 +337,16 @@ function RescaleExperiment(props: FlashProps) {
             onChange(next, true);
           }}
         >
-          验证预测并执行 →
+          {T('验证预测并执行 →')}
         </button>
         {verdict && (
           <p className={`exp-verdict ${verdict.correct ? 'ok' : ''}`} role="status">
-            最终 m：{fmt(verdict.before)} → {fmt(verdict.after)}；最后一块 α ={' '}
-            {fmt(verdict.alpha, 6)}。
+            {Tx(
+              '最终 m：{#0} → {#1}；最后一块 α = {#2}。',
+              fmt(verdict.before),
+              fmt(verdict.after),
+              fmt(verdict.alpha, 6),
+            )}
             <PredictionResult label={choice ? labels[choice] : null} holds={verdict.correct} />
           </p>
         )}
@@ -330,13 +365,13 @@ function Equality(props: FlashProps) {
   return (
     <div className="exp-widget">
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="分块与全量输出核对">
-          <caption>全部 Query、全部块完成后的输出 · [4, 2]</caption>
+        <table className="exp-table" aria-label={T('分块与全量输出核对')}>
+          <caption>{T('全部 Query、全部块完成后的输出 · [4, 2]')}</caption>
           <thead>
             <tr>
               <th scope="col">Query</th>
-              <th scope="col">全量 O</th>
-              <th scope="col">分块 O</th>
+              <th scope="col">{T('全量 O')}</th>
+              <th scope="col">{T('分块 O')}</th>
             </tr>
           </thead>
           <tbody>
@@ -351,13 +386,15 @@ function Equality(props: FlashProps) {
         </table>
       </div>
       <p className="exp-verdict ok">
-        全部行最大绝对误差 = {errorText(result.maxError)}，容差
-        1e-12。数学等价，浮点结果无需逐比特相同。
+        {Tx(
+          '全部行最大绝对误差 = {#0}，容差 1e-12。数学等价，浮点结果无需逐比特相同。',
+          errorText(result.maxError),
+        )}
       </p>
       <div className="exp-experiment">
-        <strong>同一份输入，换一种切块。</strong>
+        <strong>{T('同一份输入，换一种切块。')}</strong>
         <Segment
-          label="待执行块大小"
+          label={T('待执行块大小')}
           options={sizes}
           value={target}
           onSelect={(size) => {
@@ -365,13 +402,13 @@ function Equality(props: FlashProps) {
             setTarget(size);
             setVerdict(null);
           }}
-          render={(size) => '切为 ' + size}
+          render={(size) => T('切为 {#0}', size)}
         />
         <Prediction
-          question="只改变块大小，最终 O 会变吗？"
+          question={T('只改变块大小，最终 O 会变吗？')}
           options={[
-            { value: 'same', label: '容差内不变' },
-            { value: 'different', label: '输出会改变' },
+            { value: 'same', label: T('容差内不变') },
+            { value: 'different', label: T('输出会改变') },
           ]}
           choice={choice}
           onChoose={(next) => {
@@ -399,13 +436,13 @@ function Equality(props: FlashProps) {
             onChange(next, true);
           }}
         >
-          验证分块预测 →
+          {T('验证分块预测 →')}
         </button>
         {verdict && (
           <p className={`exp-verdict ${verdict.correct ? 'ok' : ''}`} role="status">
-            切块前后最大差 = {errorText(verdict.error)}。
+            {Tx('切块前后最大差 = {#0}。', errorText(verdict.error))}
             <PredictionResult
-              label={choice === 'same' ? '容差内不变' : '输出会改变'}
+              label={choice === 'same' ? T('容差内不变') : T('输出会改变')}
               holds={verdict.correct}
             />
           </p>
@@ -420,33 +457,33 @@ function Ledger({ result }: FlashProps) {
   return (
     <div className="exp-widget">
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="中间存储与 I O 账本">
-          <caption>教学调度 · T = 4，B = {l.blockSize} · 假设每元素 4 B</caption>
+        <table className="exp-table" aria-label={T('中间存储与 I O 账本')}>
+          <caption>{Tx('教学调度 · T = 4，B = {#0} · 假设每元素 4 B', l.blockSize)}</caption>
           <thead>
             <tr>
-              <th scope="col">计数范围</th>
-              <th scope="col">朴素全量</th>
-              <th scope="col">逐行分块</th>
+              <th scope="col">{T('计数范围')}</th>
+              <th scope="col">{T('朴素全量')}</th>
+              <th scope="col">{T('逐行分块')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row">完整 S / P 中间元素</th>
+              <th scope="row">{T('完整 S / P 中间元素')}</th>
               <td>{l.naiveIntermediateElements}</td>
               <td>0</td>
             </tr>
             <tr>
-              <th scope="row">分块临时槽位</th>
-              <td>另计</td>
+              <th scope="row">{T('分块临时槽位')}</th>
+              <td>{T('另计')}</td>
               <td>{l.tiledScratchElements}</td>
             </tr>
             <tr>
-              <th scope="row">仅 S / P 往返载荷</th>
+              <th scope="row">{T('仅 S / P 往返载荷')}</th>
               <td>{l.naiveIntermediateTransfers * l.bytesPerElement} B</td>
               <td>{l.tiledIntermediateTransfers} B</td>
             </tr>
             <tr>
-              <th scope="row">可见配对数</th>
+              <th scope="row">{T('可见配对数')}</th>
               <td>{l.validPairs}</td>
               <td>{l.validPairs}</td>
             </tr>
@@ -454,20 +491,24 @@ function Ledger({ result }: FlashProps) {
         </table>
       </div>
       <p className="exp-caption">
-        矩形网格共 {l.pairCount} 对，Mask 后有 {l.validPairs} 对有效。这里数逻辑配对，不保证具体 GPU
-        kernel 会跳过所有屏蔽算术。
+        {Tx(
+          '矩形网格共 {#0} 对，Mask 后有 {#1} 对有效。这里数逻辑配对，不保证具体 GPU kernel 会跳过所有屏蔽算术。',
+          l.pairCount,
+          l.validPairs,
+        )}
       </p>
       <p className="exp-verdict">
-        0 B 只指完整 S / P 的写回与读回。Q / K / V / O 仍要搬运；这份计数不能推算总 HBM 流量、KV
-        Cache 或运行时间。
+        {T(
+          '0 B 只指完整 S / P 的写回与读回。Q / K / V / O 仍要搬运；这份计数不能推算总 HBM 流量、KV Cache 或运行时间。',
+        )}
       </p>
       <details className="lesson-formula">
-        <summary>展开调度与计数口径</summary>
+        <summary>{T('展开调度与计数口径')}</summary>
         <p className="exp-caption">
-          朴素路径保存两张 T × T 中间矩阵，各写一次、读一次，共 4T² 个元素。分块路径固定一个 Query
-          行，保留 K/V 块、指数块、一个 Query、两份向量累积与三个标量，合计 B(d_k + d_v + 1) + d_k +
-          2d_v + 3 = {l.tiledScratchElements}{' '}
-          个临时槽位。此小例子不保证工作区更小。两列不含各自完整输入输出；实际内核会采用不同的寄存器复用与调度。本演示为核对还额外保存参考矩阵和过程快照。
+          {Tx(
+            '朴素路径保存两张 T × T 中间矩阵，各写一次、读一次，共 4T² 个元素。分块路径固定一个 Query 行，保留 K/V 块、指数块、一个 Query、两份向量累积与三个标量，合计 B(d_k + d_v + 1) + d_k + 2d_v + 3 = {#0} 个临时槽位。此小例子不保证工作区更小。两列不含各自完整输入输出；实际内核会采用不同的寄存器复用与调度。本演示为核对还额外保存参考矩阵和过程快照。',
+            l.tiledScratchElements,
+          )}
         </p>
       </details>
     </div>

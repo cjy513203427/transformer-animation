@@ -1,6 +1,9 @@
 import { formatNumber as fmt } from '../../math/attention';
 import { Segment } from '../../components/Controls';
 import { vec, type FlashProps } from './FlashWidgets';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
+import { FitText } from '../../components/FitText';
 
 export function FlashDiagram({ state, result, onChange }: FlashProps) {
   const t = state.input.query;
@@ -12,12 +15,12 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
       <div className="flash-diagram-heading">
         <strong>
           {state.step === 5
-            ? '数据留在哪里？'
+            ? T('数据留在哪里？')
             : full
-              ? '完整行作为核对基线'
-              : `Query t${t} · 读到第 ${b.index + 1} 块`}
+              ? T('完整行作为核对基线')
+              : T('Query t{#0} · 读到第 {#1} 块', t, b.index + 1)}
         </strong>
-        <span>行 Query ↓ · 列 Key →</span>
+        <span>{T('行 Query ↓ · 列 Key →')}</span>
       </div>
       {state.step === 5 ? (
         <MemoryDiagram />
@@ -28,14 +31,20 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
           role="img"
           aria-label={
             full
-              ? '完整分数与概率矩阵，沿 Key 轴做 Softmax'
-              : `分块图：第${b.index + 1}块含Key ${b.keys.map((j) => 't' + j).join('、')}，当前最大值${fmt(b.m)}，归一化总量${fmt(b.l)}`
+              ? T('完整分数与概率矩阵，沿 Key 轴做 Softmax')
+              : T(
+                  '分块图：第{#0}块含Key {#1}，当前最大值{#2}，归一化总量{#3}',
+                  b.index + 1,
+                  b.keys.map((j) => 't' + j).join(T('、')),
+                  fmt(b.m),
+                  fmt(b.l),
+                )
           }
         >
           <title>
             {full
-              ? '完整 S / P 热力图，选中 Query 行'
-              : '教学调度：从 HBM 读 K / V 块，在片上更新 m、l、a'}
+              ? T('完整 S / P 热力图，选中 Query 行')
+              : T('教学调度：从 HBM 读 K / V 块，在片上更新 m、l、a')}
           </title>
           <text x="122" y="22" className="flash-svg-title" textAnchor="middle">
             S + M · [4, 4]
@@ -108,7 +117,7 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
           {!full && (
             <>
               <text x="325" y="43" textAnchor="middle" className="flash-svg-small">
-                HBM · 完整 K / V
+                {T('HBM · 完整 K / V')}
               </text>
               {[0, 1, 2, 3].map((j) => (
                 <g key={j}>
@@ -130,7 +139,7 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
               ))}
               <path className="flash-wire" d="M330 202 V228 H220 V244" />
               <text x="338" y="222" className="flash-svg-small">
-                读取 {b.keys.length} 行
+                {Tx('读取 {#0} 行', b.keys.length)}
               </text>
             </>
           )}
@@ -138,25 +147,25 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
             <>
               <path className="flash-wire" d="M202 120 H249" />
               <text x="224" y="109" textAnchor="middle" className="flash-svg-small">
-                行归一化
+                {T('行归一化')}
               </text>
               <path className="flash-wire" d="M330 202 V240 H220 V261" />
               <text x="220" y="236" textAnchor="middle" className="flash-svg-small">
-                每行 P × V
+                {T('每行 P × V')}
               </text>
               <rect x="42" y="263" width="356" height="64" rx="3" className="flash-output" />
               <text x="220" y="289" textAnchor="middle" className="flash-svg-title">
                 O[t{t}] = {vec(result.reference.output[t])}
               </text>
               <text x="220" y="311" textAnchor="middle" className="flash-svg-small">
-                基线保留完整 S 与 P · 每张 [4, 4]
+                {T('基线保留完整 S 与 P · 每张 [4, 4]')}
               </text>
             </>
           ) : (
             <>
               <rect x="25" y="246" width="390" height="98" rx="3" className="flash-onchip" />
               <text x="220" y="266" textAnchor="middle" className="flash-svg-small">
-                片上 SRAM / 寄存器 · 示意
+                {T('片上 SRAM / 寄存器 · 示意')}
               </text>
               {[
                 ['m', fmt(b.m)],
@@ -185,9 +194,16 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
                   </text>
                 </g>
               ))}
-              <text x="220" y="364" textAnchor="middle" className="flash-svg-small">
-                完整 S / P 不写回 HBM；本图额外画出 S 便于核对
-              </text>
+              <FitText
+                x="220"
+                y="364"
+                textAnchor="middle"
+                className="flash-svg-small"
+                width={428}
+                maxLines={1}
+              >
+                {T('完整 S / P 不写回 HBM；本图额外画出 S 便于核对')}
+              </FitText>
             </>
           )}
         </svg>
@@ -195,12 +211,12 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
       {!full && state.step !== 5 && (
         <>
           <Segment
-            label="查看完成的块"
+            label={T('查看完成的块')}
             options={blocks.map((block) => block.index)}
             value={b.index}
             onSelect={(block) => onChange({ ...state, input: { ...state.input, block } })}
             render={(index) =>
-              `块 ${index + 1} · ${blocks[index].keys.map((j) => 't' + j).join('、')}`
+              T('块 {#0} · {#1}', index + 1, blocks[index].keys.map((j) => 't' + j).join(T('、')))
             }
           />
           <div className="flash-block-controls">
@@ -208,31 +224,34 @@ export function FlashDiagram({ state, result, onChange }: FlashProps) {
               disabled={b.index === 0}
               onClick={() => onChange({ ...state, input: { ...state.input, block: b.index - 1 } })}
             >
-              ← 前一块
+              {T('← 前一块')}
             </button>
             <button
               disabled={b.index === blocks.length - 1}
               onClick={() => onChange({ ...state, input: { ...state.input, block: b.index + 1 } })}
             >
-              读下一块 →
+              {T('读下一块 →')}
             </button>
           </div>
-          <p className="flash-readout" aria-label="当前块状态">
+          <p className="flash-readout" aria-label={T('当前块状态')}>
             {b.validCount === 0
-              ? '全屏蔽块 · 保留旧状态'
+              ? T('全屏蔽块 · 保留旧状态')
               : b.rescaled
-                ? '更大最大值 · 旧累积量重缩放'
-                : '当前块已累积'}
+                ? T('更大最大值 · 旧累积量重缩放')
+                : T('当前块已累积')}
             <br />m = {fmt(b.m)} · l = {fmt(b.l, 5)}
             <br />
-            {b.index === blocks.length - 1 ? '最终输出' : '前缀暂时输出'} a / l = {vec(b.output)}
+            {b.index === blocks.length - 1 ? T('最终输出') : T('前缀暂时输出')} a / l ={' '}
+            {vec(b.output)}
           </p>
         </>
       )}
       <p className="exp-caption">
         {state.step === 5
-          ? '箭头表示数据搬运，不表示耗时。真实 kernel 的块形状、复用与并行调度更复杂。'
-          : '格子是实际数值，橙框标出当前 Query / Key 块。切换上方 Query 查看另一行；屏蔽项以 −∞ 标明。'}
+          ? T('箭头表示数据搬运，不表示耗时。真实 kernel 的块形状、复用与并行调度更复杂。')
+          : T(
+              '格子是实际数值，橙框标出当前 Query / Key 块。切换上方 Query 查看另一行；屏蔽项以 −∞ 标明。',
+            )}
       </p>
     </div>
   );
@@ -244,43 +263,57 @@ function MemoryDiagram() {
       className="flash-svg"
       viewBox="0 0 440 390"
       role="img"
-      aria-label="朴素路径将S和P写回HBM，分块路径在片上直接累积并写出O"
+      aria-label={T('朴素路径将S和P写回HBM，分块路径在片上直接累积并写出O')}
     >
-      <title>两条计算路径的中间矩阵去向</title>
-      <text x="220" y="24" textAnchor="middle" className="flash-svg-title">
-        朴素调度：完整中间矩阵往返
-      </text>
+      <title>{T('两条计算路径的中间矩阵去向')}</title>
+      <FitText
+        x="220"
+        y="24"
+        textAnchor="middle"
+        className="flash-svg-title"
+        width={428}
+        maxLines={1}
+      >
+        {T('朴素调度：完整中间矩阵往返')}
+      </FitText>
       <rect x="20" y="44" width="400" height="108" className="flash-kv" rx="3" />
       <text x="40" y="67" className="flash-svg-small">
         HBM
       </text>
       <text x="220" y="91" textAnchor="middle" className="flash-svg-title">
-        Q、K、V　＋　S [T, T]、P [T, T]
+        {T('Q、K、V　＋　S [T, T]、P [T, T]')}
       </text>
       <text x="220" y="123" textAnchor="middle" className="flash-svg-small">
-        S 写入 → 读出归一化 → P 写入 → 读出汇总 V
+        {T('S 写入 → 读出归一化 → P 写入 → 读出汇总 V')}
       </text>
       <text x="220" y="199" textAnchor="middle" className="flash-svg-title">
-        逐行分块：块用完即丢弃
+        {T('逐行分块：块用完即丢弃')}
       </text>
       <rect x="20" y="218" width="400" height="56" className="flash-kv" rx="3" />
       <text x="220" y="252" textAnchor="middle" className="flash-svg-title">
-        HBM · Q、K、V 与最终 O
+        {T('HBM · Q、K、V 与最终 O')}
       </text>
       <path className="flash-wire" d="M110 274 V306 M330 306 V274" />
       <text x="123" y="296" className="flash-svg-small">
-        读块
+        {T('读块')}
       </text>
       <text x="340" y="296" className="flash-svg-small">
-        写 O
+        {T('写 O')}
       </text>
       <rect x="20" y="308" width="400" height="65" className="flash-onchip" rx="3" />
       <text x="220" y="335" textAnchor="middle" className="flash-svg-title">
-        片上 · 分数块 → 更新 m、l、a
+        {T('片上 · 分数块 → 更新 m、l、a')}
       </text>
-      <text x="220" y="358" textAnchor="middle" className="flash-svg-small">
-        循环读块，最后 O = a / l；无需保存完整 S、P
-      </text>
+      <FitText
+        x="220"
+        y="358"
+        textAnchor="middle"
+        className="flash-svg-small"
+        width={392}
+        maxLines={1}
+      >
+        {T('循环读块，最后 O = a / l；无需保存完整 S、P')}
+      </FitText>
     </svg>
   );
 }

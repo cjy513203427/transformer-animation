@@ -1,4 +1,5 @@
 import { attention, matmul, type Matrix } from './attention';
+import { T } from '../i18n';
 
 /** Head counts offered by the lesson. d_model = 4 is divisible by each of them. */
 export const HEAD_OPTIONS = [1, 2, 4] as const;
@@ -21,7 +22,7 @@ function checkGrid(matrix: Matrix, name: string): [number, number] {
  * contiguous columns [h·d_key, (h+1)·d_key). Token rows keep their order inside every head.
  */
 export function splitHeads(matrix: Matrix, numHeads: number): Matrix[] {
-  const [, columns] = checkGrid(matrix, '待切分的矩阵');
+  const [, columns] = checkGrid(matrix, T('待切分的矩阵'));
   if (!Number.isInteger(numHeads) || numHeads < 1 || columns % numHeads !== 0)
     throw new Error('d_model 必须能被 num_heads 整除。');
   const dKey = columns / numHeads;
@@ -35,7 +36,7 @@ export function splitHeads(matrix: Matrix, numHeads: number): Matrix[] {
  * consecutive pieces; no number moves. Transposing the first two axes gives `splitHeads`.
  */
 export function viewHeads(matrix: Matrix, numHeads: number): Matrix[] {
-  const [, columns] = checkGrid(matrix, '待变形的矩阵');
+  const [, columns] = checkGrid(matrix, T('待变形的矩阵'));
   if (!Number.isInteger(numHeads) || numHeads < 1 || columns % numHeads !== 0)
     throw new Error('d_model 必须能被 num_heads 整除。');
   const dKey = columns / numHeads;
@@ -47,9 +48,9 @@ export function viewHeads(matrix: Matrix, numHeads: number): Matrix[] {
 /** Concatenate：[num_heads][T][d_key] → [T, num_heads·d_key]，即转置回去再 view。 */
 export function mergeHeads(heads: Matrix[]): Matrix {
   if (!heads.length) throw new Error('至少需要一个头。');
-  const [tokens, dKey] = checkGrid(heads[0], '头输出');
+  const [tokens, dKey] = checkGrid(heads[0], T('头输出'));
   heads.forEach((head) => {
-    const [rows, columns] = checkGrid(head, '头输出');
+    const [rows, columns] = checkGrid(head, T('头输出'));
     if (rows !== tokens || columns !== dKey) throw new Error('所有头的形状必须相同。');
   });
   return Array.from({ length: tokens }, (_, t) => heads.flatMap((head) => head[t]));
@@ -57,13 +58,13 @@ export function mergeHeads(heads: Matrix[]): Matrix {
 
 /** Columns [start, end) of a weight matrix: W_Q 的第 h 组列就是“方式一”里的 Wq_h。 */
 export function columnBlock(matrix: Matrix, start: number, end: number): Matrix {
-  checkGrid(matrix, '权重');
+  checkGrid(matrix, T('权重'));
   return matrix.map((row) => row.slice(start, end));
 }
 
 /** Rows [start, end) of a weight matrix: Wo 中与第 h 个头相乘的那几行。 */
 export function rowBlock(matrix: Matrix, start: number, end: number): Matrix {
-  checkGrid(matrix, '权重');
+  checkGrid(matrix, T('权重'));
   return matrix.slice(start, end).map((row) => [...row]);
 }
 

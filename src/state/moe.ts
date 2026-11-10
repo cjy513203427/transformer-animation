@@ -1,4 +1,5 @@
 import { TOKENS, type MoEConfig, type MoEInput } from '../math/moe';
+import { T } from '../i18n';
 
 /** Router → Top-K → FFN → combine → load → expert parallel ledger. */
 export const MOE_STEP_COUNT = 6;
@@ -94,7 +95,7 @@ export function restoreMoEState(hash: string): { state: MoEState; warning: strin
   } catch {
     // Malformed or unsupported URLs restore a complete, usable example.
   }
-  return { state: initialMoEState(), warning: '分享链接无效或版本不受支持，已恢复默认示例。' };
+  return { state: initialMoEState(), warning: T('分享链接无效或版本不受支持，已恢复默认示例。') };
 }
 
 export function moveMoEStep(state: MoEState, delta: number): MoEState {

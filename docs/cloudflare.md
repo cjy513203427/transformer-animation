@@ -24,6 +24,7 @@ npx wrangler deploy --dry-run
 - 公开：`workers_dev: true`，地址为 `transformer-animation.<账号子域>.workers.dev`，任何持有链接的人都可访问。
 - `preview_urls: false`：不生成版本预览 URL。
 - 没有自定义域名或路由。
+- 英文、德文页面是同一个 Worker 下的 `/en/…`、`/de/…` 路径，由 `not_found_handling: single-page-application` 回退到 `index.html`，不需要额外配置；访问范围与中文页面相同。
 - 改为私人访问时，在控制台 Worker → Settings → Domains & Routes → workers.dev 启用 Cloudflare Access；若以后添加自定义域名或预览 URL，也要分别加上相同的保护。
 
 ## 访问统计
@@ -33,6 +34,7 @@ npx wrangler deploy --dry-run
 - 代码与 token 写在 `vite.config.ts`。token 本来就会出现在页面源码中，不是秘密。
 - 只有 `vite build --mode deploy`（即 `npm run build:deploy`）会把脚本插入 `index.html`；`npm run dev`、`npm run build`、`npm run preview` 与 e2e 测试都不加载，避免本地访问计入统计。两种构建的 JS/CSS 资源相同。
 - 站内导航是普通链接，每次换页都会完整加载页面；实验参数写在 URL hash 中，不算新的页面浏览。
+- 三种语言的路径不同（`/moe`、`/en/moe`、`/de/moe`），在统计里按路径分开显示，可以看出各语言的访问量。
 - Workers & Pages → Worker → Metrics 只有原始请求数，每个 JS、CSS、字体文件都算一次，爬虫也计入，不区分页面和访客。
 
 ## `cf` CLI 构建（暂不用于发布）

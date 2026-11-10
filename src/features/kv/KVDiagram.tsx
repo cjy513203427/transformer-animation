@@ -16,6 +16,8 @@ import {
   TOKENS,
 } from '../../math/kv';
 import { kvHeadChoices, type KVState } from '../../state/kv';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 
 const kindOf = (g: number, h: number) => (g === h ? 'MHA' : g === 1 ? 'MQA' : `GQA-${g}`);
 
@@ -33,7 +35,7 @@ function Bars({
         <li key={row.name} className={row.current ? 'kv-bar-current' : undefined}>
           <span className="kv-bar-name">
             {row.name}
-            {row.current && <small>当前</small>}
+            {row.current && <small>{T('当前')}</small>}
           </span>
           <span className="kv-bar-track">
             {(row.parts ?? [row.value]).map((part, i) => (
@@ -61,10 +63,14 @@ function HeadMap({ kvHeads, head }: { kvHeads: number; head: number }) {
       className="kv-headmap"
       viewBox={`0 0 ${width} 230`}
       role="img"
-      aria-label={`${Q_HEADS} 个 Query 头读 ${kvHeads} 组 K/V：${Array.from(
-        { length: Q_HEADS },
-        (_, h) => `Q${h} 读第 ${groupOf(h, Q_HEADS, kvHeads)} 组`,
-      ).join('，')}`}
+      aria-label={T(
+        '{#0} 个 Query 头读 {#1} 组 K/V：{#2}',
+        Q_HEADS,
+        kvHeads,
+        Array.from({ length: Q_HEADS }, (_, h) =>
+          T('Q{#0} 读第 {#1} 组', h, groupOf(h, Q_HEADS, kvHeads)),
+        ).join(T('，')),
+      )}
     >
       {Array.from({ length: Q_HEADS }, (_, h) => {
         const g = groupOf(h, Q_HEADS, kvHeads);
@@ -100,10 +106,10 @@ function HeadMap({ kvHeads, head }: { kvHeads: number; head: number }) {
         </g>
       ))}
       <text x={8} y={14} className="kv-axis">
-        Query 头（数量不变）
+        {T('Query 头（数量不变）')}
       </text>
       <text x={8} y={222} className="kv-axis">
-        K/V 头：{kvHeads} 组（{kindOf(kvHeads, Q_HEADS)}）
+        {Tx('K/V 头：{#0} 组（{#1}）', kvHeads, kindOf(kvHeads, Q_HEADS))}
       </text>
     </svg>
   );
@@ -120,7 +126,7 @@ interface CacheDesign {
 function cacheDesigns(): CacheDesign[] {
   const kv = (g: number): CacheDesign => ({
     name: kindOf(g, Q_HEADS),
-    sub: `${g} 组 K/V`,
+    sub: T('{#0} 组 K/V', g),
     rows: g,
     columns: [
       ...Array.from({ length: D_HEAD }, () => ({ kind: 'k' as const, label: 'k' })),
@@ -177,9 +183,14 @@ function CacheBlock({ design }: { design: CacheDesign }) {
       <svg
         viewBox={`0 ${viewTop} 176 ${BLOCK_BOTTOM + 16 - viewTop}`}
         role="img"
-        aria-label={`${design.name}：${TOKENS} 个 token × ${
-          design.name === 'MLA' ? '' : `${rows} 组 K/V × `
-        }${cols} 个数 = ${design.elements} 个数`}
+        aria-label={T(
+          '{#0}：{#1} 个 token × {#2}{#3} 个数 = {#4} 个数',
+          design.name,
+          TOKENS,
+          design.name === 'MLA' ? '' : T('{#0} 组 K/V × ', rows),
+          cols,
+          design.elements,
+        )}
       >
         <Cuboid
           x={BLOCK_LEFT}
@@ -198,7 +209,7 @@ function CacheBlock({ design }: { design: CacheDesign }) {
             textAnchor="end"
             className="kv-blk-axis"
           >
-            {rows}组
+            {T('{#0}组', rows)}
           </text>
         )}
         {design.columns.map((col, c) => (
@@ -223,9 +234,7 @@ function CacheBlock({ design }: { design: CacheDesign }) {
       <figcaption>
         <strong>{design.name}</strong>
         <span>{design.sub}</span>
-        <span>
-          每 token {perToken} 个 × {TOKENS} = {design.elements}
-        </span>
+        <span>{Tx('每 token {#0} 个 × {#1} = {#2}', perToken, TOKENS, design.elements)}</span>
       </figcaption>
     </figure>
   );
@@ -234,15 +243,22 @@ function CacheBlock({ design }: { design: CacheDesign }) {
 function CacheBlocks() {
   return (
     <>
-      <div className="kv-blocks" role="group" aria-label={`一层里 ${TOKENS} 个 token 的 KV 缓存块`}>
+      <div
+        className="kv-blocks"
+        role="group"
+        aria-label={T('一层里 {#0} 个 token 的 KV 缓存块', TOKENS)}
+      >
         {cacheDesigns().map((design) => (
           <CacheBlock key={design.name} design={design} />
         ))}
       </div>
       <p className="exp-caption">
-        每个小方块是缓存里的一个数。块的正面是一个 token 的一片：行是 KV 头，列是 k、v 各 {D_HEAD}{' '}
-        维（MLA 没有 KV 头这一维，每片是 latent c 的 {D_LATENT} 维和 RoPE Key 的 {D_ROPE}{' '}
-        维）；往后每多一个 token 多一片。这是一层、一个请求的缓存，L 层、batch B 时再乘 L × B。
+        {Tx(
+          '每个小方块是缓存里的一个数。块的正面是一个 token 的一片：行是 KV 头，列是 k、v 各 {#0} 维（MLA 没有 KV 头这一维，每片是 latent c 的 {#1} 维和 RoPE Key 的 {#2} 维）；往后每多一个 token 多一片。这是一层、一个请求的缓存，L 层、batch B 时再乘 L × B。',
+          D_HEAD,
+          D_LATENT,
+          D_ROPE,
+        )}
       </p>
     </>
   );
@@ -263,7 +279,7 @@ function Flow({
     <section className={active ? 'kv-flow kv-flow-on' : 'kv-flow'} aria-label={title}>
       <strong>
         {title}
-        {active && <small>当前</small>}
+        {active && <small>{T('当前')}</small>}
       </strong>
       <ol>
         {steps.map((step, i) => (
@@ -285,10 +301,10 @@ export function KVDiagram({ state }: { state: KVState }) {
 
   if (step === 0) {
     const c = state.calc;
-    title = '同一配置下，不同 KV 头数的缓存';
+    title = T('同一配置下，不同 KV 头数的缓存');
     body = (
       <Bars
-        label="不同 KV 头数的 KV 缓存字节数"
+        label={T('不同 KV 头数的 KV 缓存字节数')}
         rows={kvHeadChoices(c.qHeads)
           .slice(0, 8)
           .map((g) => {
@@ -302,7 +318,7 @@ export function KVDiagram({ state }: { state: KVState }) {
               bytesPerElement: c.bytes,
             });
             return {
-              name: `${kindOf(g, c.qHeads)} · ${g} 个 KV 头`,
+              name: T('{#0} · {#1} 个 KV 头', kindOf(g, c.qHeads), g),
               value: bytes,
               text: formatBytes(bytes),
               current: g === c.kvHeads,
@@ -311,65 +327,75 @@ export function KVDiagram({ state }: { state: KVState }) {
       />
     );
   } else if (step === 1) {
-    title = 'Query 头不变，K/V 头分组共享';
+    title = T('Query 头不变，K/V 头分组共享');
     body = <HeadMap kvHeads={state.group.kvHeads} head={state.group.head} />;
   } else if (step === 2) {
-    title = `一层里 ${TOKENS} 个 token 的缓存：一个小方块是一个数`;
+    title = T('一层里 {#0} 个 token 的缓存：一个小方块是一个数', TOKENS);
     body = <CacheBlocks />;
   } else if (step === 3) {
     const coupled = state.mla.coupled;
-    title = 'RoPE 放在哪里，决定了能不能吸收';
+    title = T('RoPE 放在哪里，决定了能不能吸收');
     body = (
       <div className="kv-flows">
         <Flow
-          title="不解耦：RoPE 加在还原出的 K 上"
+          title={T('不解耦：RoPE 加在还原出的 K 上')}
           active={coupled}
           steps={[
-            { tex: 'c_j', text: '读缓存', kind: 'cache' },
-            { tex: 'k_j=c_jW_{UK}', text: '还原内容 Key' },
-            { tex: '\\operatorname{RoPE}_j(k_j)', text: '旋转依赖位置 j', kind: 'warn' },
-            { tex: 'q\\,R_tR_j^{\\top}W_{UK}^{\\top}c_j^{\\top}', text: '中间矩阵随 t − j 变化' },
+            { tex: 'c_j', text: T('读缓存'), kind: 'cache' },
+            { tex: 'k_j=c_jW_{UK}', text: T('还原内容 Key') },
+            { tex: '\\operatorname{RoPE}_j(k_j)', text: T('旋转依赖位置 j'), kind: 'warn' },
+            {
+              tex: 'q\\,R_tR_j^{\\top}W_{UK}^{\\top}c_j^{\\top}',
+              text: T('中间矩阵随 t − j 变化'),
+            },
           ]}
-          note="没有一个固定矩阵能把 W_UK 并进 Query，只能为每个历史位置重新还原 K。"
+          note={T('没有一个固定矩阵能把 W_UK 并进 Query，只能为每个历史位置重新还原 K。')}
         />
         <Flow
-          title="解耦：位置信息单独走一支"
+          title={T('解耦：位置信息单独走一支')}
           active={!coupled}
           steps={[
-            { tex: 'c_j', text: '内容：读缓存', kind: 'cache' },
-            { tex: '\\left(qW_{UK}^{\\top}\\right)c_j^{\\top}', text: '内容分数可以吸收' },
-            { tex: 'k^R_j', text: '位置：读缓存（所有头共享）', kind: 'cache' },
-            { tex: 'q^R\\cdot k^R_j', text: '位置分数，两部分相加' },
+            { tex: 'c_j', text: T('内容：读缓存'), kind: 'cache' },
+            { tex: '\\left(qW_{UK}^{\\top}\\right)c_j^{\\top}', text: T('内容分数可以吸收') },
+            { tex: 'k^R_j', text: T('位置：读缓存（所有头共享）'), kind: 'cache' },
+            { tex: 'q^R\\cdot k^R_j', text: T('位置分数，两部分相加') },
           ]}
-          note="缓存里多存一个共享的 RoPE Key，换来内容部分可以吸收。"
+          note={T('缓存里多存一个共享的 RoPE Key，换来内容部分可以吸收。')}
         />
       </div>
     );
   } else if (step === 4) {
-    title = '同一个结果，两种计算顺序';
+    title = T('同一个结果，两种计算顺序');
     body = (
       <div className="kv-flows">
         <Flow
-          title="展开：先还原 K、V"
+          title={T('展开：先还原 K、V')}
           active={false}
           steps={[
-            { tex: 'c_j', text: '读缓存', kind: 'cache' },
-            { tex: 'k^C_{j,i}=c_jW_{UK}^{(i)},\\ v^C_{j,i}=c_jW_{UV}^{(i)}', text: '每个头还原' },
-            { tex: '\\sum_j p_j\\,v^C_{j,i}', text: '加权求和' },
-            { tex: '[o_1;\\dots;o_H]\\,W_O', text: '拼接后输出投影' },
+            { tex: 'c_j', text: T('读缓存'), kind: 'cache' },
+            {
+              tex: 'k^C_{j,i}=c_jW_{UK}^{(i)},\\ v^C_{j,i}=c_jW_{UV}^{(i)}',
+              text: T('每个头还原'),
+            },
+            { tex: '\\sum_j p_j\\,v^C_{j,i}', text: T('加权求和') },
+            { tex: '[o_1;\\dots;o_H]\\,W_O', text: T('拼接后输出投影') },
           ]}
-          note="教学上直观：每个头先拿到自己的 K、V。"
+          note={T('教学上直观：每个头先拿到自己的 K、V。')}
         />
         <Flow
-          title="吸收：只读缓存，不还原"
+          title={T('吸收：只读缓存，不还原')}
           active
           steps={[
-            { tex: '\\tilde q=h_t\\tilde W_Q^{(i)}', text: `Query 变成 ${D_LATENT} 维` },
-            { tex: '\\tilde q\\cdot c_j+q^R\\cdot k^R_j', text: '直接与缓存打分', kind: 'cache' },
-            { tex: '\\sum_j p_j\\,c_j', text: '加权求和停在 latent 空间' },
-            { tex: '\\sum_i(\\cdot)\\,\\tilde W_O^{(i)}', text: '吸收后的输出投影' },
+            { tex: '\\tilde q=h_t\\tilde W_Q^{(i)}', text: T('Query 变成 {#0} 维', D_LATENT) },
+            {
+              tex: '\\tilde q\\cdot c_j+q^R\\cdot k^R_j',
+              text: T('直接与缓存打分'),
+              kind: 'cache',
+            },
+            { tex: '\\sum_j p_j\\,c_j', text: T('加权求和停在 latent 空间') },
+            { tex: '\\sum_i(\\cdot)\\,\\tilde W_O^{(i)}', text: T('吸收后的输出投影') },
           ]}
-          note="结合律保证结果相同；推理时每个历史 token 只读缓存里的数。"
+          note={T('结合律保证结果相同；推理时每个历史 token 只读缓存里的数。')}
         />
       </div>
     );
@@ -388,15 +414,19 @@ export function KVDiagram({ state }: { state: KVState }) {
       });
     const mla = mlaCacheBytes({ batch: 1, layers, tokens, latent, ropeDim, bytesPerElement: 2 });
     const latentOnly = (mla * latent) / (latent + ropeDim);
-    title = `DeepSeek-V2 的头数与头维，${tokens.toLocaleString('en-US')} 个 token`;
+    title = T('DeepSeek-V2 的头数与头维，{#0} 个 token', tokens.toLocaleString('en-US'));
     body = (
       <>
         <Bars
-          label="同样头数与头维时四种设计的 KV 缓存"
+          label={T('同样头数与头维时四种设计的 KV 缓存')}
           rows={[
-            { name: `MHA · ${heads} 个 KV 头`, value: kv(heads), text: formatBytes(kv(heads)) },
-            { name: 'GQA-8 · 8 个 KV 头', value: kv(8), text: formatBytes(kv(8)) },
-            { name: 'MQA · 1 个 KV 头', value: kv(1), text: formatBytes(kv(1)) },
+            {
+              name: T('MHA · {#0} 个 KV 头', heads),
+              value: kv(heads),
+              text: formatBytes(kv(heads)),
+            },
+            { name: T('GQA-8 · 8 个 KV 头'), value: kv(8), text: formatBytes(kv(8)) },
+            { name: T('MQA · 1 个 KV 头'), value: kv(1), text: formatBytes(kv(1)) },
             {
               name: 'MLA · latent + RoPE Key',
               value: mla,
@@ -406,7 +436,9 @@ export function KVDiagram({ state }: { state: KVState }) {
           ]}
         />
         <p className="exp-caption">
-          MLA 一栏分两段：深色是 latent，浅色是共享的 RoPE Key。BF16、batch = 1，只统计 KV 缓存。
+          {T(
+            'MLA 一栏分两段：深色是 latent，浅色是共享的 RoPE Key。BF16、batch = 1，只统计 KV 缓存。',
+          )}
         </p>
       </>
     );

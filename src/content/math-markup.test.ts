@@ -5,7 +5,7 @@ import { inferenceMyths, inferenceSteps } from './inference';
 import { kvBookNotes, kvMyths, kvSteps, kvWhy } from './kv';
 import { moeBookNotes, moeMyths, moeSteps, moeWhy } from './moe';
 import { flashBookNotes, flashMyths, flashSteps, flashWhy } from './flash';
-import { BOOK_URL } from './topics';
+import { BOOK_URL } from './book';
 import { bookNotes, positionSteps } from './position';
 
 // Prose strings mark inline math as $...$. In an ordinary JS string "\sqrt" silently becomes

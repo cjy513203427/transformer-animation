@@ -1,6 +1,7 @@
 import type { Matrix } from '../math/attention';
 import { HEAD_OPTIONS, type HeadCount } from '../math/multihead';
 import { ARCHITECTURE_NODES, LESSON_MODES, type ArchitectureNode, type LessonMode } from './lesson';
+import { T } from '../i18n';
 
 export const STEP_COUNT = 5;
 /** 投影 → 切分多头 → 矩阵变形 → 每头 Attention → Concatenate → Wo */
@@ -196,7 +197,7 @@ export function restoreState(hash: string): { state: ExperimentState; warning: s
   } catch {
     /* Invalid links always fall back to a safe, complete example. */
   }
-  return { state: initialState(), warning: '分享链接无效或版本不受支持，已恢复基础示例。' };
+  return { state: initialState(), warning: T('分享链接无效或版本不受支持，已恢复基础示例。') };
 }
 
 export function moveStep(state: ExperimentState, delta: number): ExperimentState {

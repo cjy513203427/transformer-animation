@@ -1,3 +1,4 @@
+import { T } from '../i18n';
 /** 位置盲 → 正弦表 → 相加 → RoPE 旋转 → RoPE 相对位置 → ALiBi → 对照 */
 export const POSITION_STEP_COUNT = 7;
 export const D_MODEL_OPTIONS = [4, 64, 512] as const;
@@ -96,7 +97,7 @@ export function restorePositionState(hash: string): {
   }
   return {
     state: initialPositionState(),
-    warning: '分享链接无效或版本不受支持，已恢复默认示例。',
+    warning: T('分享链接无效或版本不受支持，已恢复默认示例。'),
   };
 }
 

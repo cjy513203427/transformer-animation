@@ -2,12 +2,16 @@ import { Cuboid } from '../../components/Oblique';
 import { formatNumber as fmt, type Matrix } from '../../math/attention';
 import { viewHeads } from '../../math/multihead';
 import { HEAD_COLORS } from './MultiHeadDiagram';
+import { T } from '../../i18n';
 
 const CW = 34;
 const CH = 22;
 /** Same cell size as the flat diagram above, so the two figures share one scale. */
 const MAIN_WIDTH = 480;
 const CARD: [number, number] = [6, 3];
+/** Advance of an 11px Consolas label: 0.55 em per Latin glyph, a full em for CJK. */
+const labelWidth = (text: string) =>
+  [...text].reduce((w, ch) => w + (/[⺀-￿]/.test(ch) ? 11 : 6.05), 0);
 
 /**
  * A [T, d_model] activation viewed as [T, num_heads, d_key], drawn with three real axes: token
@@ -41,7 +45,10 @@ export function HeadTensor({
     sy = (h: number) => oy - h * gapY,
     last = numHeads - 1,
     right = sx(last) + dKey * CW + CARD[0],
-    width = right + 124,
+    sliceLabel = T('每片 {#0}_h：[{#1}, {#2}]', name, tokens, dKey),
+    tokensLabel = T('{#0} 个 token 都在', tokens),
+    // Room for the two side labels (11px monospace, wider CJK glyphs); never less than before.
+    width = right + Math.max(124, 16 + Math.max(labelWidth(sliceLabel), labelWidth(tokensLabel))),
     height = oy + tokens * CH + 44;
   const heads = Array.from({ length: numHeads }, (_, h) => h),
     rows = Array.from({ length: tokens }, (_, t) => t);
@@ -72,12 +79,28 @@ export function HeadTensor({
       role="img"
       aria-label={
         by === 'token'
-          ? `${name} 形状 ${shape}：先按 token 取，${rows.map((t) => `${name}[t${t}] 是 ${numHeads} 个头各 ${dKey} 维`).join('，')}`
-          : `${name} 形状 ${shape}：先按 head 取，${heads.map((h) => `head ${h + 1} 是 ${tokens} 个 token 各 ${dKey} 维`).join('，')}`
+          ? T(
+              '{#0} 形状 {#1}：先按 token 取，{#2}',
+              name,
+              shape,
+              rows
+                .map((t) => T('{#0}[t{#1}] 是 {#2} 个头各 {#3} 维', name, t, numHeads, dKey))
+                .join(T('，')),
+            )
+          : T(
+              '{#0} 形状 {#1}：先按 head 取，{#2}',
+              name,
+              shape,
+              heads
+                .map((h) => T('head {#0} 是 {#1} 个 token 各 {#2} 维', h + 1, tokens, dKey))
+                .join(T('，')),
+            )
       }
     >
       <title>
-        三条轴：token 向下、d_key 向右、head 向右上；每个格子的位置只由它的 (token, head, d) 决定
+        {T(
+          '三条轴：token 向下、d_key 向右、head 向右上；每个格子的位置只由它的 (token, head, d) 决定',
+        )}
       </title>
       {numHeads > 1 &&
         corners.map(([cx, cy], i) => (
@@ -157,10 +180,10 @@ export function HeadTensor({
           </g>
         ))}
         <text x={right + 8} y={sy(last) + 15} className="ht-band-label ht-band-label-on">
-          每片 {name}_h：[{tokens}, {dKey}]
+          {sliceLabel}
         </text>
         <text x={right + 8} y={sy(last) + 33} className="ht-band-label">
-          {tokens} 个 token 都在
+          {tokensLabel}
         </text>
       </g>
       {rows.map((t) => (
@@ -186,7 +209,7 @@ export function HeadTensor({
         d_key = {dKey} →
       </text>
       <text x={right + 8} y={sy(last) - 8} className="ht-axis">
-        {numHeads > 1 ? `head ↗（${numHeads} 个）` : 'head 轴长度为 1'}
+        {numHeads > 1 ? T('head ↗（{#0} 个）', numHeads) : T('head 轴长度为 1')}
       </text>
       <g className="ht-overlay" style={{ opacity: by === 'token' ? 1 : 0 }} aria-hidden="true">
         {rows.map((t) => (

@@ -21,6 +21,8 @@ import {
   GroupWidget,
   RopeWidget,
 } from './KVWidgets';
+import { localePath, T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/experiment.css';
@@ -76,7 +78,7 @@ export default function KVLab() {
       setState(next.state);
       setRecallOpen(false);
       setManualLink('');
-      setNotice(next.warning ?? '已从链接恢复实验。');
+      setNotice(next.warning ?? T('已从链接恢复实验。'));
     };
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onMotion = () => {
@@ -94,15 +96,15 @@ export default function KVLab() {
   }, []);
 
   async function copyLink() {
-    const url = new URL('/kv-architectures', window.location.origin);
+    const url = new URL(localePath('/kv-architectures'), window.location.origin);
     url.hash = serializeKVState(state);
     try {
       await navigator.clipboard.writeText(url.href);
       setManualLink('');
-      setNotice('已复制当前实验状态的链接。');
+      setNotice(T('已复制当前实验状态的链接。'));
     } catch {
       setManualLink(url.href);
-      setNotice('浏览器未允许剪贴板访问，请从下方选择并复制链接。');
+      setNotice(T('浏览器未允许剪贴板访问，请从下方选择并复制链接。'));
     }
   }
 
@@ -117,51 +119,61 @@ export default function KVLab() {
   ][state.step];
 
   return (
-    <AppShell active="kv" crumb="KV 架构对照" indicator="浏览器内计算" title="KV 架构对照">
+    <AppShell
+      active="kv"
+      crumb={T('KV 架构对照')}
+      indicator={T('浏览器内计算')}
+      title={T('KV 架构对照')}
+    >
       <section className="page-heading">
         <div>
           <div className="eyebrow">
-            原书导读 <span>·</span> 第 22、23、30 章 <span>·</span> DeepSeek-V2 论文
+            {Tx(
+              '原书导读 {#0} 第 22、23、30 章 {#1} DeepSeek-V2 论文',
+              <span>·</span>,
+              <span>·</span>,
+            )}
           </div>
-          <h1>
-            KV 架构对照：缓存里<span>到底存什么</span>
-          </h1>
+          <h1>{Tx('KV 架构对照：缓存里{#0}', <span>{T('到底存什么')}</span>)}</h1>
           <p>
-            同一个缓存公式：MHA、GQA、MQA 通过减少 KV 头缩小它；MLA 改为缓存一个低维 latent
-            和一个共享的 RoPE Key。所有数值在浏览器内实际计算。
+            {T(
+              '同一个缓存公式：MHA、GQA、MQA 通过减少 KV 头缩小它；MLA 改为缓存一个低维 latent 和一个共享的 RoPE Key。所有数值在浏览器内实际计算。',
+            )}
           </p>
         </div>
         <button className="button secondary share-button" onClick={() => void copyLink()}>
-          <span aria-hidden="true">↗</span> 复制实验链接
+          {Tx('{#0} 复制实验链接', <span aria-hidden="true">↗</span>)}
         </button>
       </section>
       {notice && (
         <div className="notice" role="status">
           {notice}
-          <button aria-label="关闭提示" onClick={() => setNotice('')}>
+          <button aria-label={T('关闭提示')} onClick={() => setNotice('')}>
             ×
           </button>
         </div>
       )}
       {manualLink && (
         <label className="manual-share">
-          手动复制链接
+          {T('手动复制链接')}
           <input readOnly value={manualLink} onFocus={(event) => event.target.select()} />
         </label>
       )}
 
       <WhyIntro why={kvWhy} />
-      <section className="lesson-panel kv-panel" aria-label="KV 架构逐步实验">
+      <section className="lesson-panel kv-panel" aria-label={T('KV 架构逐步实验')}>
         <div className="lesson-panel-heading">
           <div>
-            <span className="lesson-eyebrow">同一个问题：每个 token 要在缓存里留下多少个数</span>
-            <h2>从缓存公式出发，对照四种 KV 设计。</h2>
+            <span className="lesson-eyebrow">
+              {T('同一个问题：每个 token 要在缓存里留下多少个数')}
+            </span>
+            <h2>{T('从缓存公式出发，对照四种 KV 设计。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {KV_STEP_COUNT}
           </span>
         </div>
-        <div className="lesson-steps kv-steps" aria-label="KV 架构步骤">
+        <div className="lesson-steps kv-steps" aria-label={T('KV 架构步骤')}>
           {kvSteps.map((item, i) => (
             <button
               key={item.name}
@@ -179,7 +191,7 @@ export default function KVLab() {
           </div>
           <div className="lesson-reading">
             <div className="lesson-reading-top">
-              <span>这一步</span>
+              <span>{T('这一步')}</span>
               <button
                 onClick={() =>
                   edit({
@@ -188,13 +200,13 @@ export default function KVLab() {
                   })
                 }
               >
-                {hide ? '显示说明' : '隐藏说明'}
+                {hide ? T('显示说明') : T('隐藏说明')}
               </button>
             </div>
             <h3>{step.title}</h3>
             {hide ? (
               <div className="lesson-recall">
-                <strong>先自己说一遍</strong>
+                <strong>{T('先自己说一遍')}</strong>
                 <p>
                   <Rich text={step.prompt} />
                 </p>
@@ -206,13 +218,13 @@ export default function KVLab() {
             )}
             {widget}
             <div className="lesson-takeaway">
-              <strong>这一步，记住一句话</strong>
+              <strong>{T('这一步，记住一句话')}</strong>
               <p>
-                <Rich text={hide ? '先自己复述，再点击“显示说明”核对。' : step.takeaway} />
+                <Rich text={hide ? T('先自己复述，再点击“显示说明”核对。') : step.takeaway} />
               </p>
             </div>
             <details className="lesson-formula">
-              <summary>需要时再看公式</summary>
+              <summary>{T('需要时再看公式')}</summary>
               <Formula expression={step.formula} />
             </details>
             <StepSources book={step.book} source={step.source} />
@@ -225,7 +237,7 @@ export default function KVLab() {
               disabled={state.step === 0}
               onClick={() => jump(state.step - 1)}
             >
-              ← 上一步
+              {T('← 上一步')}
             </button>
             <button
               className="button primary"
@@ -233,35 +245,35 @@ export default function KVLab() {
               onClick={() => jump(state.step + 1)}
             >
               {state.step === KV_STEP_COUNT - 1
-                ? '已到最后一步'
-                : `下一步：${kvSteps[state.step + 1].name} →`}
+                ? T('已到最后一步')
+                : T('下一步：{#0} →', kvSteps[state.step + 1].name)}
             </button>
           </div>
           <div>
             <button className="lesson-text-button" onClick={() => jump(0)}>
-              从头看
+              {T('从头看')}
             </button>
             <button
               className="lesson-text-button"
               onClick={() => {
                 setPlaying(false);
                 setState({ ...initialKVState(), view: state.view });
-                setNotice('已恢复默认示例。');
+                setNotice(T('已恢复默认示例。'));
               }}
             >
-              恢复默认示例
+              {T('恢复默认示例')}
             </button>
             <button
               className="lesson-text-button"
-              aria-label={playing ? '暂停自动逐步' : '播放自动逐步'}
+              aria-label={playing ? T('暂停自动逐步') : T('播放自动逐步')}
               onClick={togglePlay}
             >
-              {playing ? 'Ⅱ 暂停' : '▶ 自动逐步'}
+              {playing ? T('Ⅱ 暂停') : T('▶ 自动逐步')}
             </button>
             <label>
-              速度
+              {T('速度')}
               <select
-                aria-label="播放速度"
+                aria-label={T('播放速度')}
                 value={state.view.speed}
                 onChange={(e) =>
                   edit({ ...state, view: { ...state.view, speed: Number(e.target.value) } })
@@ -275,17 +287,20 @@ export default function KVLab() {
           </div>
         </div>
         {reducedMotion && (
-          <p className="lesson-motion">已遵循减少动态效果偏好；图表直接切换，不做过渡动画。</p>
+          <p className="lesson-motion">
+            {T('已遵循减少动态效果偏好；图表直接切换，不做过渡动画。')}
+          </p>
         )}
       </section>
 
       <section className="recall-card">
         <div>
-          <span className="section-kicker">离开之前 · 试着复述</span>
-          <h2>不看图，讲清楚四种设计各自缓存什么。</h2>
+          <span className="section-kicker">{T('离开之前 · 试着复述')}</span>
+          <h2>{T('不看图，讲清楚四种设计各自缓存什么。')}</h2>
           <p>
-            再解释：KV 缓存公式里有哪几项？GQA 减少了什么、没减少什么？MLA 的缓存为什么要加上 RoPE
-            Key？矩阵吸收为什么不改变结果？
+            {T(
+              '再解释：KV 缓存公式里有哪几项？GQA 减少了什么、没减少什么？MLA 的缓存为什么要加上 RoPE Key？矩阵吸收为什么不改变结果？',
+            )}
           </p>
         </div>
         <button
@@ -296,41 +311,34 @@ export default function KVLab() {
             setState((s) => ({ ...s, view: { ...s.view, explanations: false } }));
           }}
         >
-          {recallOpen ? '收起参考解释' : '查看参考解释'}
+          {recallOpen ? T('收起参考解释') : T('查看参考解释')}
         </button>
         {recallOpen && (
           <p className="recall-answer">
-            KV 缓存 = 批大小 × 层数 × token 数 × KV 头数 × (d_k + d_v) × 每个数的字节，只算
-            K、V。MHA 每个 Query 头各有一组 K、V；GQA 让同组的 Query 头共享一组，MQA
-            是只有一组的特例。它们减少的是 KV 头，Query 头数、W_Q、W_O 和打分次数不变。MLA
-            不减少头，而是缓存一个低维 latent，每个头的 K、V 用时由它还原。RoPE 若直接加在还原出的 K
-            上，位置相关的旋转会夹在 Query 和 latent 之间，无法吸收，所以 DeepSeek-V2
-            让位置信息单独走一支，共享的 RoPE Key 也要缓存。矩阵吸收利用结合律，把还原 K 的矩阵并进
-            Query、把还原 V 的矩阵并进输出投影，只改变计算顺序，不改变结果。
+            {T(
+              'KV 缓存 = 批大小 × 层数 × token 数 × KV 头数 × (d_k + d_v) × 每个数的字节，只算 K、V。MHA 每个 Query 头各有一组 K、V；GQA 让同组的 Query 头共享一组，MQA 是只有一组的特例。它们减少的是 KV 头，Query 头数、W_Q、W_O 和打分次数不变。MLA 不减少头，而是缓存一个低维 latent，每个头的 K、V 用时由它还原。RoPE 若直接加在还原出的 K 上，位置相关的旋转会夹在 Query 和 latent 之间，无法吸收，所以 DeepSeek-V2 让位置信息单独走一支，共享的 RoPE Key 也要缓存。矩阵吸收利用结合律，把还原 K 的矩阵并进 Query、把还原 V 的矩阵并进输出投影，只改变计算顺序，不改变结果。',
+            )}
           </p>
         )}
       </section>
 
       <details className="details-panel source-panel">
         <summary>
-          <span>适用条件与来源</span>
-          <span className="summary-hint">简化假设 · 常见误区 · 参考文献</span>
+          <span>{T('适用条件与来源')}</span>
+          <span className="summary-hint">{T('简化假设 · 常见误区 · 参考文献')}</span>
         </summary>
         <div className="details-body">
           <p>
-            所有数值由浏览器实时计算。玩具配置：4 个位置、d_model = 4、4 个 Query 头、每头 2 维；MLA
-            的 latent 为 3 维、RoPE Key 为 2 维（θ = 1）。权重由固定种子生成（取值 −1 到 1，步长
-            0.5），不是训练好的模型。 行向量记法 X W；DeepSeek-V2 论文用列向量 W
-            h，公式已转写。省略了论文中的 Query 压缩（它用于减少训练时的激活内存，不影响 KV
-            缓存）；RoPE Query 因此直接由 h 投影。GQA 的共享 K/V
-            投影由组内取平均得到，没有继续训练。
+            {T(
+              '所有数值由浏览器实时计算。玩具配置：4 个位置、d_model = 4、4 个 Query 头、每头 2 维；MLA 的 latent 为 3 维、RoPE Key 为 2 维（θ = 1）。权重由固定种子生成（取值 −1 到 1，步长 0.5），不是训练好的模型。 行向量记法 X W；DeepSeek-V2 论文用列向量 W h，公式已转写。省略了论文中的 Query 压缩（它用于减少训练时的激活内存，不影响 KV 缓存）；RoPE Query 因此直接由 h 投影。GQA 的共享 K/V 投影由组内取平均得到，没有继续训练。',
+            )}
           </p>
           <p>
-            缓存字节只统计 K、V（或 MLA 的 latent 与 RoPE Key），不含权重、激活和分配器开销。原书第
-            23 章与第 22 章的例子已由公式逐字节核对。DeepSeek-V2 的层数、头数、头维、d_c 与 d_h^R
-            取自论文 §3.1.2 与表 1 说明（d_c = 4 d_h，d_h^R = d_h / 2）。
+            {T(
+              '缓存字节只统计 K、V（或 MLA 的 latent 与 RoPE Key），不含权重、激活和分配器开销。原书第 23 章与第 22 章的例子已由公式逐字节核对。DeepSeek-V2 的层数、头数、头维、d_c 与 d_h^R 取自论文 §3.1.2 与表 1 说明（d_c = 4 d_h，d_h^R = d_h / 2）。',
+            )}
           </p>
-          <strong className="exp-notes-title">与原书说法的对照</strong>
+          <strong className="exp-notes-title">{T('与原书说法的对照')}</strong>
           <ul>
             {kvBookNotes.map((note) => (
               <li key={note}>
@@ -338,7 +346,7 @@ export default function KVLab() {
               </li>
             ))}
           </ul>
-          <strong className="exp-notes-title">常见误区</strong>
+          <strong className="exp-notes-title">{T('常见误区')}</strong>
           <ul>
             {kvMyths.map((myth) => (
               <li key={myth}>
@@ -355,7 +363,7 @@ export default function KVLab() {
               </li>
             ))}
           </ul>
-          <p className="subtle">来源核对日期：2026-11-07。图形与说明为本项目编写。</p>
+          <p className="subtle">{T('来源核对日期：2026-11-07。图形与说明为本项目编写。')}</p>
         </div>
       </details>
     </AppShell>

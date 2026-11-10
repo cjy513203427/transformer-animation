@@ -1,4 +1,5 @@
 import { attention, softmax, type Matrix } from './attention';
+import { T } from '../i18n';
 
 export const PE_BASE = 10000;
 
@@ -7,8 +8,8 @@ function checkVector(vector: number[], name: string) {
     throw new Error(`${name} 必须是只含有限数值的非空向量。`);
 }
 export function dot(a: number[], b: number[]): number {
-  checkVector(a, '向量');
-  checkVector(b, '向量');
+  checkVector(a, T('向量'));
+  checkVector(b, T('向量'));
   if (a.length !== b.length) throw new Error('点积的两个向量长度必须相同。');
   return a.reduce((sum, x, i) => sum + x * b[i], 0);
 }
@@ -82,7 +83,7 @@ export function rotatePair(pair: [number, number], angle: number): [number, numb
 
 /** R_m v: every adjacent pair (2i, 2i+1) is rotated by m·θ_i. Only Q and K receive this. */
 export function applyRope(vector: number[], position: number, base = PE_BASE): number[] {
-  checkVector(vector, 'RoPE 输入');
+  checkVector(vector, T('RoPE 输入'));
   if (vector.length % 2) throw new Error('RoPE 需要偶数维向量。');
   if (!Number.isFinite(position)) throw new Error('位置必须是有限数。');
   const out: number[] = [];

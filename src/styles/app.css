@@ -436,6 +436,10 @@ h1 span {
   font-size: 10px;
   color: #67736b;
   align-items: center;
+  /* Long English and German step names (“Normalisierung”) must break inside narrow cards. */
+  hyphens: auto;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 .step-index {
   font-size: 9px;

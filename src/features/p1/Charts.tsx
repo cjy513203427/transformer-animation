@@ -1,6 +1,9 @@
 import { useId } from 'react';
 import { formatNumber as fmt } from '../../math/attention';
 import type { Chain, Plot, Ranking, Strip } from '../../math/p1/shared';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
+import { FitText } from '../../components/FitText';
 
 const W = 430;
 /** Rough width of an 11px label: CJK glyphs are square, Latin glyphs about 0.6 em. */
@@ -136,9 +139,15 @@ export function PlotDiagram({ plot }: { plot: Plot }) {
       className="p1-svg"
       viewBox={`0 0 ${W} ${height}`}
       role="img"
-      aria-label={`${plot.y.label}随${plot.x.label}变化的图：${plot.curves.map((c) => c.label).join('、')}。${plot.caption}`}
+      aria-label={T(
+        '{#0}随{#1}变化的图：{#2}。{#3}',
+        plot.y.label,
+        plot.x.label,
+        plot.curves.map((c) => c.label).join(T('、')),
+        plot.caption,
+      )}
     >
-      <title>曲线由本步同一个公式逐点计算，标记点是当前输入的结果</title>
+      <title>{T('曲线由本步同一个公式逐点计算，标记点是当前输入的结果')}</title>
       <defs>
         <clipPath id={clip}>
           <rect x={left} y={top - 2} width={right - left} height={bottom - top + 4} />
@@ -257,21 +266,25 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
       className="p1-svg"
       viewBox={`0 0 ${W} ${height}`}
       role="img"
-      aria-label={`按概率排序：${ranking.items
-        .map(
-          (item) =>
-            `${item.name} ${fmt(item.before, 3)} → ${item.kept ? fmt(item.after, 3) : '删去'}`,
-        )
-        .join('，')}。${ranking.caption}`}
+      aria-label={T(
+        '按概率排序：{#0}。{#1}',
+        ranking.items
+          .map(
+            (item) =>
+              `${item.name} ${fmt(item.before, 3)} → ${item.kept ? fmt(item.after, 3) : T('删去')}`,
+          )
+          .join(T('，')),
+        ranking.caption,
+      )}
     >
-      <title>柱高对应本步实际概率；累计折线由同一个筛选规则逐项累加</title>
+      <title>{T('柱高对应本步实际概率；累计折线由同一个筛选规则逐项累加')}</title>
       <rect x={12} y={8} width={11} height={11} className="p1-bar-before" />
       <text x={28} y={18} className="p1-svg-small">
-        筛选前
+        {T('筛选前')}
       </text>
       <rect x={82} y={8} width={11} height={11} className="p1-bar-after" />
       <text x={98} y={18} className="p1-svg-small">
-        重新归一化后
+        {T('重新归一化后')}
       </text>
       {threshold !== undefined && (
         <>
@@ -284,9 +297,9 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
             strokeDasharray="7 4"
           />
           <Marker series={1} x={207} y={13} size={3.5} />
-          <text x={224} y={18} className="p1-svg-small">
-            累计概率（从高到低）
-          </text>
+          <FitText x={224} y={18} className="p1-svg-small" width={W - 228} maxLines={1}>
+            {T('累计概率（从高到低）')}
+          </FitText>
         </>
       )}
       {[0, 0.25, 0.5, 0.75, 1].map((t) => (
@@ -336,7 +349,7 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
               </text>
             )}
             <text x={c} y={bottom + 18} textAnchor="middle" className="p1-svg-title">
-              第 {i + 1} 名 · {item.name}
+              {Tx('第 {#0} 名 · {#1}', i + 1, item.name)}
             </text>
             <text
               x={c}
@@ -344,7 +357,7 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
               textAnchor="middle"
               className={item.kept ? 'p1-svg-small' : 'p1-svg-dropped'}
             >
-              {item.kept ? (i === crossing ? '保留（跨过阈值）' : '保留') : '删去'}
+              {item.kept ? (i === crossing ? T('保留（跨过阈值）') : T('保留')) : T('删去')}
             </text>
           </g>
         );
@@ -367,7 +380,7 @@ export function RankingDiagram({ ranking }: { ranking: Ranking }) {
               <Marker series={1} x={center(i)} y={sy(item.cumulative)} size={4} />
               {i === crossing && (
                 <text x={center(i) + 8} y={sy(item.cumulative) + 14} className="p1-svg-number">
-                  累计 {fmt(item.cumulative, 3)}
+                  {Tx('累计 {#0}', fmt(item.cumulative, 3))}
                 </text>
               )}
             </g>
@@ -395,9 +408,14 @@ export function StripDiagram({ strip }: { strip: Strip }) {
       className="p1-svg"
       viewBox={`0 0 ${W} 156`}
       role="img"
-      aria-label={`区间 [0, 1) 按 ${strip.segments.map((s) => `${s.name} [${fmt(s.start, 3)}, ${fmt(s.end, 3)})`).join('、')} 首尾相接；u = ${fmt(strip.u, 4)}，选中 ${strip.segments[strip.chosen].name}`}
+      aria-label={T(
+        '区间 [0, 1) 按 {#0} 首尾相接；u = {#1}，选中 {#2}',
+        strip.segments.map((s) => `${s.name} [${fmt(s.start, 3)}, ${fmt(s.end, 3)})`).join(T('、')),
+        fmt(strip.u, 4),
+        strip.segments[strip.chosen].name,
+      )}
     >
-      <title>每段长度等于该候选的采样概率，顺序与采样代码逐项累加的顺序相同</title>
+      <title>{T('每段长度等于该候选的采样概率，顺序与采样代码逐项累加的顺序相同')}</title>
       {strip.segments.map((s, i) =>
         s.end > s.start ? (
           <g key={s.name}>
@@ -444,11 +462,11 @@ export function StripDiagram({ strip }: { strip: Strip }) {
       >
         u = {fmt(strip.u, 4)} → {strip.segments[strip.chosen].name}
       </text>
-      <text x={left} y={y + h + 40} className="p1-svg-small">
+      <FitText x={left} y={y + h + 40} className="p1-svg-small" width={W - 2 * left} maxLines={1}>
         {empty.length
-          ? `${empty.map((s) => s.name).join('、')} 的区间长度为 0（已删去）`
-          : '三段长度之和为 1；窄段同样可能被抽中'}
-      </text>
+          ? T('{#0} 的区间长度为 0（已删去）', empty.map((s) => s.name).join(T('、')))
+          : T('三段长度之和为 1；窄段同样可能被抽中')}
+      </FitText>
     </svg>
   );
 }
@@ -474,19 +492,29 @@ export function ChainDiagram({ chain }: { chain: Chain }) {
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label={chain.rows
-        .map(
-          (row) =>
-            `${row.label}：初始 ${fmt(row.initial, 3)}，${row.steps
+        .map((row) =>
+          T(
+            '{#0}：初始 {#1}，{#2}',
+            row.label,
+            fmt(row.initial, 3),
+            row.steps
               .map((s, t) =>
                 ready(t)
-                  ? `t${t} 保留 ×${fmt(s.keep, 3)}、写入 ${fmt(s.drive, 3)}，得 ${fmt(s.state, 3)}`
-                  : `t${t} 待计算`,
+                  ? T(
+                      't{#0} 保留 ×{#1}、写入 {#2}，得 {#3}',
+                      t,
+                      fmt(s.keep, 3),
+                      fmt(s.drive, 3),
+                      fmt(s.state, 3),
+                    )
+                  : T('t{#0} 待计算', t),
               )
-              .join('；')}`,
+              .join(T('；')),
+          ),
         )
-        .join('。')}
+        .join(T('。'))}
     >
-      <title>每个方框只存一个数：上一状态乘保留系数，再加这一步的写入量</title>
+      <title>{T('每个方框只存一个数：上一状态乘保留系数，再加这一步的写入量')}</title>
       <defs>
         <marker
           id={arrow}
@@ -519,7 +547,7 @@ export function ChainDiagram({ chain }: { chain: Chain }) {
               className="p1-input-node"
             />
             <text x={cx(0)} y={boxTop + 16} textAnchor="middle" className="p1-svg-small">
-              初始 h
+              {T('初始 h')}
             </text>
             <text x={cx(0)} y={boxTop + 33} textAnchor="middle" className="p1-svg-number">
               {fmt(row.initial, 3)}
@@ -611,7 +639,7 @@ export function ChainDiagram({ chain }: { chain: Chain }) {
             y={rowHeight / 2 + 4 + 30 + 17}
             className="p1-svg-title"
           >
-            同一个 h
+            {T('同一个 h')}
           </text>
           <text
             x={cx(chain.rows[0].steps.length) + box / 2 + 30}

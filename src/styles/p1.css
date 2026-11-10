@@ -87,6 +87,13 @@
     monospace;
   fill: #59665c;
 }
+/* Figure notes sit below the drawing as HTML so longer translations can wrap. */
+.p1-svg-note {
+  margin: 4px 0 0;
+  color: #59665c;
+  font-size: 12px;
+  line-height: 1.55;
+}
 .p1-svg-number {
   font:
     12px Consolas,

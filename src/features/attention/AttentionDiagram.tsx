@@ -1,7 +1,10 @@
 import { useId } from 'react';
 import { SvgTex, Tex } from '../../components/Tex';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 import '../../styles/attention-diagram.css';
 import '../../styles/attention-interactions.css';
+import { FitText } from '../../components/FitText';
 
 export function AttentionDiagram({
   step,
@@ -32,7 +35,7 @@ export function AttentionDiagram({
         className={`diagram-node diagram-${tone} ${step === phase ? 'active' : ''}`}
         role="button"
         tabIndex={0}
-        aria-label={`图中步骤：${label}，${sublabel}`}
+        aria-label={T('图中步骤：{#0}，{#1}', label, sublabel)}
         aria-pressed={step === phase}
         onClick={() => onStep(phase)}
         onKeyDown={(e) => {
@@ -46,27 +49,34 @@ export function AttentionDiagram({
         {tex ? (
           <SvgTex x={x} y={y - 3} tex={tex} size={15} width={width} />
         ) : (
-          <text x={x} y={y - 3} textAnchor="middle">
+          <FitText x={x} y={y - 3} textAnchor="middle" width={width - 10} maxLines={1}>
             {label}
-          </text>
+          </FitText>
         )}
-        <text className="diagram-node-sub" x={x} y={y + 14} textAnchor="middle">
+        <FitText
+          className="diagram-node-sub"
+          x={x}
+          y={y + 14}
+          textAnchor="middle"
+          width={width - 10}
+          maxLines={1}
+        >
           {sublabel}
-        </text>
+        </FitText>
       </g>
     );
   }
   return (
     <div className="diagram-panel">
       <div className="diagram-caption">
-        <strong>放大：一个头的内部</strong>
-        <span>↑ 沿箭头从下往上读</span>
+        <strong>{T('放大：一个头的内部')}</strong>
+        <span>{T('↑ 沿箭头从下往上读')}</span>
       </div>
-      <p className="figure-interaction-hint">点选计算节点，跳到对应步骤</p>
+      <p className="figure-interaction-hint">{T('点选计算节点，跳到对应步骤')}</p>
       <svg
         viewBox="0 0 540 665"
         role="group"
-        aria-label="Attention 内部架构图：Q 和 K 打分，V 绕过打分链进入最后的加权求和"
+        aria-label={T('Attention 内部架构图：Q 和 K 打分，V 绕过打分链进入最后的加权求和')}
       >
         <defs>
           {['base', 'q', 'k', 'v', 'p'].map((tone, i) => (
@@ -119,24 +129,24 @@ export function AttentionDiagram({
           ),
         )}
         <text x="355" y="303" textAnchor="middle" className="diagram-bypass-label">
-          V 不参与打分
+          {T('V 不参与打分')}
         </text>
         <text x="350" y="326" textAnchor="middle" className="diagram-bypass-note">
-          留到最后，按比例取内容
+          {T('留到最后，按比例取内容')}
         </text>
-        {node(270, 611, 194, 'X', '各位置当前的表示', 0)}
-        {node(85, 530, 119, '× W_Q', '生成 Query', 0, 'query', '\\times W_Q')}
-        {node(245, 530, 119, '× W_K', '生成 Key', 0, 'key', '\\times W_K')}
-        {node(425, 530, 119, '× W_V', '生成 Value', 0, 'value', '\\times W_V')}
-        {node(85, 460, 100, 'Q', '要找什么', 0, 'query')}
-        {node(245, 460, 100, 'K', '用什么来匹配', 0, 'key')}
-        {node(425, 460, 100, 'V', '实际取出的内容', 0, 'value')}
+        {node(270, 611, 194, 'X', T('各位置当前的表示'), 0)}
+        {node(85, 530, 119, '× W_Q', T('生成 Query'), 0, 'query', '\\times W_Q')}
+        {node(245, 530, 119, '× W_K', T('生成 Key'), 0, 'key', '\\times W_K')}
+        {node(425, 530, 119, '× W_V', T('生成 Value'), 0, 'value', '\\times W_V')}
+        {node(85, 460, 100, 'Q', T('要找什么'), 0, 'query')}
+        {node(245, 460, 100, 'K', T('用什么来匹配'), 0, 'key')}
+        {node(425, 460, 100, 'V', T('实际取出的内容'), 0, 'value')}
         {node(
           185,
           385,
           198,
           'MatMul · QKᵀ',
-          '逐对打分',
+          T('逐对打分'),
           1,
           'neutral',
           '\\mathrm{MatMul}\\cdot QK^{\\top}',
@@ -145,8 +155,8 @@ export function AttentionDiagram({
           185,
           322,
           198,
-          scaled ? 'Scale · ÷ √d_k' : 'Scale · 对照关闭',
-          scaled ? '缩放分数' : '保留未缩放分数',
+          scaled ? 'Scale · ÷ √d_k' : T('Scale · 对照关闭'),
+          scaled ? T('缩放分数') : T('保留未缩放分数'),
           1,
           'neutral',
           scaled ? '\\mathrm{Scale}\\cdot\\div\\sqrt{d_k}' : undefined,
@@ -155,36 +165,38 @@ export function AttentionDiagram({
           185,
           262,
           198,
-          causal ? 'Mask' : 'Mask · 当前关闭',
-          causal ? '挡住未来位置' : '双向读取对照',
+          causal ? 'Mask' : T('Mask · 当前关闭'),
+          causal ? T('挡住未来位置') : T('双向读取对照'),
           2,
         )}
-        {node(185, 202, 198, 'Softmax → P', '分配取用比例', 3, 'probability')}
+        {node(185, 202, 198, 'Softmax → P', T('分配取用比例'), 3, 'probability')}
         {node(
           185,
           130,
           198,
           'MatMul · P × V',
-          '按比例混合内容',
+          T('按比例混合内容'),
           4,
           'probability',
           '\\mathrm{MatMul}\\cdot P\\times V',
         )}
-        {node(185, 65, 198, '单头输出 O', '新的上下文向量', 4, 'probability')}
+        {node(185, 65, 198, T('单头输出 O'), T('新的上下文向量'), 4, 'probability')}
       </svg>
       <div className="diagram-multihead">
-        <strong>放回完整 MHA</strong>
+        <strong>{T('放回完整 MHA')}</strong>
         <p>
-          投影 → 拆成多个头 → <em>每头执行上图</em> → Concat 拼接 → <Tex tex="W_O" /> 输出投影 →
-          返回残差连接
+          {Tx(
+            '投影 → 拆成多个头 → {#0} → Concat 拼接 → {#1} 输出投影 → 返回残差连接',
+            <em>{T('每头执行上图')}</em>,
+            <Tex tex="W_O" />,
+          )}
         </p>
         <small>
-          上图只演算一个头；拆头、拼接、
-          <Tex tex="W_O" /> 的数值演算在“多头注意力”。
+          {Tx('上图只演算一个头；拆头、拼接、{#0} 的数值演算在“多头注意力”。', <Tex tex="W_O" />)}
         </small>
         {onOpenHeads && (
           <button className="diagram-heads-link" onClick={onOpenHeads}>
-            看多头怎样切分与合并 →
+            {T('看多头怎样切分与合并 →')}
           </button>
         )}
       </div>

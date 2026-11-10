@@ -9,6 +9,7 @@ import {
   type Computation,
   type Parameters,
 } from './shared';
+import { T } from '../../i18n';
 export const FFN_W1 = [
     [1, -1, 0.5],
     [0.5, 1, -1],
@@ -47,51 +48,53 @@ export function ffn(x: number[], p: Parameters, seed: number): Computation {
   );
   return {
     frames: [
-      frame('逐 token 升维：二维输入变成三维特征', [
+      frame(T('逐 token 升维：二维输入变成三维特征'), [
         tensor('X [4, 2]', X),
         tensor('W₁ [2, 3]', FFN_W1),
         tensor('H = XW₁ [4, 3]', h),
       ]),
       frame(
-        '非线性决定哪些坐标继续传递',
-        [tensor('H', h), tensor(p.nonlinear ? 'ReLU(H)' : '旁路：H', nonlinear)],
-        [['ReLU 开关', p.nonlinear ? '启用' : '关闭']],
-        '关闭 ReLU 后，两次线性变换可合并；启用后一般不成立。',
+        T('非线性决定哪些坐标继续传递'),
+        [tensor('H', h), tensor(p.nonlinear ? 'ReLU(H)' : T('旁路：H'), nonlinear)],
+        [[T('ReLU 开关'), p.nonlinear ? T('启用') : T('关闭')]],
+        T('关闭 ReLU 后，两次线性变换可合并；启用后一般不成立。'),
       ),
-      frame('独立的降维投影回到残差维度', [
-        tensor('激活 [4, 3]', nonlinear),
+      frame(T('独立的降维投影回到残差维度'), [
+        tensor(T('激活 [4, 3]'), nonlinear),
         tensor('W₂ [3, 2]', FFN_W2),
         tensor('F(X) [4, 2]', f),
       ]),
       frame(
-        '残差把原输入逐项加回来',
+        T('残差把原输入逐项加回来'),
         [
-          tensor('原 X', X),
-          tensor('分支 F(X)', f),
+          tensor(T('原 X'), X),
+          tensor(T('分支 F(X)'), f),
           tensor('X + F(X)', residual),
-          tensor('t0 的 Jacobian I + J_F', derivative[0]),
+          tensor(T('t0 的 Jacobian I + J_F'), derivative[0]),
         ],
         [],
-        '梯度包含恒等支路 I；这不保证总梯度永不消失，其他支路可能抵消。此 Jacobian 针对未加 Dropout 的残差。',
+        T(
+          '梯度包含恒等支路 I；这不保证总梯度永不消失，其他支路可能抵消。此 Jacobian 针对未加 Dropout 的残差。',
+        ),
       ),
       frame(
-        '训练随机屏蔽并补偿；推理直接通过',
+        T('训练随机屏蔽并补偿；推理直接通过'),
         [
-          tensor('固定种子的 Mask', mask),
+          tensor(T('固定种子的 Mask'), mask),
           tensor('Dropout(F)', dropped),
-          tensor('最终 X + Dropout(F)', y),
+          tensor(T('最终 X + Dropout(F)'), y),
         ],
         [
-          ['丢弃率 p', p.dropout],
-          ['模式', p.training ? '训练' : '推理'],
+          [T('丢弃率 p'), p.dropout],
+          [T('模式'), p.training ? T('训练') : T('推理')],
         ],
-        '采用 inverted Dropout：训练保留项除以 1−p，残差支路不丢弃。固定种子只为复现。',
+        T('采用 inverted Dropout：训练保留项除以 1−p，残差支路不丢弃。固定种子只为复现。'),
       ),
       frame(
-        '两层线性可以合并，非线性通常不能',
-        [tensor('X(W₁W₂)', collapsed), tensor('当前 F(X)', f), tensor('当前残差输出', y)],
-        [['ReLU', p.nonlinear ? '启用' : '旁路']],
-        '切换 ReLU 与运行模式；不是所有输入都一定能暴露非线性差异。',
+        T('两层线性可以合并，非线性通常不能'),
+        [tensor('X(W₁W₂)', collapsed), tensor(T('当前 F(X)'), f), tensor(T('当前残差输出'), y)],
+        [['ReLU', p.nonlinear ? T('启用') : T('旁路')]],
+        T('切换 ReLU 与运行模式；不是所有输入都一定能暴露非线性差异。'),
       ),
     ].map((item, index) =>
       index >= 2
@@ -99,8 +102,8 @@ export function ffn(x: number[], p: Parameters, seed: number): Computation {
         : item,
     ),
     checks: [
-      check('线性支路的两种计算次序等价', flat(matmul(h, FFN_W2)), flat(collapsed)),
-      ...(!p.training ? [check('推理 Dropout 为恒等', flat(dropped), flat(f))] : []),
+      check(T('线性支路的两种计算次序等价'), flat(matmul(h, FFN_W2)), flat(collapsed)),
+      ...(!p.training ? [check(T('推理 Dropout 为恒等'), flat(dropped), flat(f))] : []),
     ],
     signature: flat(y),
   };

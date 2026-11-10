@@ -1,4 +1,5 @@
 import { KV_OPTIONS, Q_HEADS, TOKENS, type KVHeads } from '../math/kv';
+import { T } from '../i18n';
 
 /** 缓存账本 → 共享 KV 头 → MLA 压缩 → 解耦 RoPE → 矩阵吸收 → 对照 */
 export const KV_STEP_COUNT = 6;
@@ -19,11 +20,11 @@ export interface CalcConfig {
 /** Configurations whose numbers the book works through (chapters 22 and 23). */
 export const CALC_PRESETS: Record<'book23' | 'llama7b', { label: string; config: CalcConfig }> = {
   book23: {
-    label: '原书第 23 章：32 层、1024 token',
+    label: T('原书第 23 章：32 层、1024 token'),
     config: { batch: 1, layers: 32, tokens: 1024, qHeads: 32, kvHeads: 32, dHead: 128, bytes: 2 },
   },
   llama7b: {
-    label: '原书第 22 章：Llama 2 7B、4096 token',
+    label: T('原书第 22 章：Llama 2 7B、4096 token'),
     config: { batch: 1, layers: 32, tokens: 4096, qHeads: 32, kvHeads: 32, dHead: 128, bytes: 2 },
   },
 };
@@ -133,7 +134,7 @@ export function restoreKVState(hash: string): { state: KVState; warning: string 
   } catch {
     /* Invalid links fall back to the complete default example. */
   }
-  return { state: initialKVState(), warning: '分享链接无效或版本不受支持，已恢复默认示例。' };
+  return { state: initialKVState(), warning: T('分享链接无效或版本不受支持，已恢复默认示例。') };
 }
 
 export function moveKVStep(state: KVState, delta: number): KVState {

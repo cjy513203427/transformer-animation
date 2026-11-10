@@ -413,6 +413,10 @@
   margin: 17px 0;
   font-size: 12px;
 }
+/* English and German words (“learning”, “Lernen”) need a wider word column. */
+html:not([lang='zh-CN']) .lesson-proportion {
+  grid-template-columns: 64px 1fr 65px;
+}
 .lesson-proportion > strong {
   font:
     14px Consolas,

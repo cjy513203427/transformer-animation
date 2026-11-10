@@ -3,7 +3,7 @@ import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
 import { Rich, Tex } from '../../components/Tex';
 import { bookNotes, positionSources, positionSteps } from '../../content/position';
-import { BOOK_URL } from '../../content/topics';
+import { chapterUrl } from '../../content/book';
 import {
   initialPositionState,
   MAX_POS,
@@ -24,19 +24,35 @@ import {
   SinusoidalWidget,
   SummaryWidget,
 } from './PositionWidgets';
+import { localePath, T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 import '../../styles/lesson.css';
 import '../../styles/attention-diagram.css';
 import '../../styles/position.css';
 import '../../styles/editorial.css';
 
 const explanations = [
-  'Attention 打分只用到两个向量的点积。如果输入只有词嵌入，“我”放在第 0 位还是第 2 位都是同一个向量；把句子倒过来，每个词看到的仍是同一组向量，只是排列不同。结果是：模型分不清“我爱你”和“你爱我”。',
-  '原始 Transformer 用 $\\sin$ 和 $\\cos$ 给每个位置造一个向量：第 $i$ 对维度按频率 $\\omega_i = 10000^{-2i/d_{\\mathrm{model}}}$ 转动。低维转得快，能区分相邻位置；高维转得慢，能区分相隔很远的位置。所有值都在 $[-1, 1]$ 之间，不会像整数编号那样越加越大。',
-  '位置向量与词嵌入逐维相加（不是拼接），维度仍是 $d_{\\mathrm{model}}$。这一步发生在第一个 Block 之前：之后的 $W_Q$、$W_K$、$W_V$ 都作用在相加后的 X 上，所以 Q、K、V 都带位置。正弦表是固定的，嵌入表会在训练中更新。',
-  'RoPE（LLaMA 等模型使用）不再把位置加到 X 上。投影得到 Q、K 之后，把它们每两维一组，按位置旋转 $m\\theta_i$。旋转只改变方向、不改变长度；V 不旋转。',
-  '两个向量各自转了 $m\\theta_i$ 与 $n\\theta_i$，它们的点积只与夹角有关，而夹角的改变量只取决于 $(n-m)\\theta_i$。所以同时平移两个位置，分数不变：这就是“相对位置”。',
-  'ALiBi（BLOOM、MPT 等使用）连 Q、K 都不动：算出 $QK^{\\top}/\\sqrt{d}$ 之后，每个 Key 按与 Query 的距离扣掉 $m\\times\\text{距离}$，再做 Softmax。不同的头用不同的斜率 $m$，有的头只看附近，有的头几乎不受距离影响。',
-  '三种方法回答同一个问题“模型怎样知道顺序”，但加在计算的不同位置：加法在最底部改 X，RoPE 在中间改 Q、K，ALiBi 在 Softmax 前改分数。',
+  T(
+    'Attention 打分只用到两个向量的点积。如果输入只有词嵌入，“我”放在第 0 位还是第 2 位都是同一个向量；把句子倒过来，每个词看到的仍是同一组向量，只是排列不同。结果是：模型分不清“我爱你”和“你爱我”。',
+  ),
+  T(
+    '原始 Transformer 用 $\\sin$ 和 $\\cos$ 给每个位置造一个向量：第 $i$ 对维度按频率 $\\omega_i = 10000^{-2i/d_{\\mathrm{model}}}$ 转动。低维转得快，能区分相邻位置；高维转得慢，能区分相隔很远的位置。所有值都在 $[-1, 1]$ 之间，不会像整数编号那样越加越大。',
+  ),
+  T(
+    '位置向量与词嵌入逐维相加（不是拼接），维度仍是 $d_{\\mathrm{model}}$。这一步发生在第一个 Block 之前：之后的 $W_Q$、$W_K$、$W_V$ 都作用在相加后的 X 上，所以 Q、K、V 都带位置。正弦表是固定的，嵌入表会在训练中更新。',
+  ),
+  T(
+    'RoPE（LLaMA 等模型使用）不再把位置加到 X 上。投影得到 Q、K 之后，把它们每两维一组，按位置旋转 $m\\theta_i$。旋转只改变方向、不改变长度；V 不旋转。',
+  ),
+  T(
+    '两个向量各自转了 $m\\theta_i$ 与 $n\\theta_i$，它们的点积只与夹角有关，而夹角的改变量只取决于 $(n-m)\\theta_i$。所以同时平移两个位置，分数不变：这就是“相对位置”。',
+  ),
+  T(
+    'ALiBi（BLOOM、MPT 等使用）连 Q、K 都不动：算出 $QK^{\\top}/\\sqrt{d}$ 之后，每个 Key 按与 Query 的距离扣掉 $m\\times\\text{距离}$，再做 Softmax。不同的头用不同的斜率 $m$，有的头只看附近，有的头几乎不受距离影响。',
+  ),
+  T(
+    '三种方法回答同一个问题“模型怎样知道顺序”，但加在计算的不同位置：加法在最底部改 X，RoPE 在中间改 Q、K，ALiBi 在 Softmax 前改分数。',
+  ),
 ];
 
 /** One tick of the in-step position animation; returns the same object at the boundary. */
@@ -141,7 +157,7 @@ export default function PositionLab() {
       setState(next.state);
       setRecallOpen(false);
       setManualLink('');
-      setNotice(next.warning ?? '已从链接恢复实验。');
+      setNotice(next.warning ?? T('已从链接恢复实验。'));
     };
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onMotion = () => {
@@ -159,15 +175,15 @@ export default function PositionLab() {
   }, []);
 
   async function copyLink() {
-    const url = new URL('/position', window.location.origin);
+    const url = new URL(localePath('/position'), window.location.origin);
     url.hash = serializePositionState(state);
     try {
       await navigator.clipboard.writeText(url.href);
       setManualLink('');
-      setNotice('已复制当前实验状态的链接。');
+      setNotice(T('已复制当前实验状态的链接。'));
     } catch {
       setManualLink(url.href);
-      setNotice('浏览器未允许剪贴板访问，请从下方选择并复制链接。');
+      setNotice(T('浏览器未允许剪贴板访问，请从下方选择并复制链接。'));
     }
   }
 
@@ -183,50 +199,52 @@ export default function PositionLab() {
   ][state.step];
 
   return (
-    <AppShell active="position" crumb="位置编码" indicator="浏览器内计算" title="位置编码">
+    <AppShell
+      active="position"
+      crumb={T('位置编码')}
+      indicator={T('浏览器内计算')}
+      title={T('位置编码')}
+    >
       <section className="page-heading">
         <div>
-          <div className="eyebrow">
-            原书导读 <span>·</span> 第 5、14、25 章
-          </div>
-          <h1>
-            位置编码：顺序从<span>哪里</span>进入计算
-          </h1>
+          <div className="eyebrow">{Tx('原书导读 {#0} 第 5、14、25 章', <span>·</span>)}</div>
+          <h1>{Tx('位置编码：顺序从{#0}进入计算', <span>{T('哪里')}</span>)}</h1>
           <p>
-            在同一条 Attention 计算链上，对照加法位置编码、RoPE 与 ALiBi
-            各自加在哪一步、改了哪些数。
+            {T(
+              '在同一条 Attention 计算链上，对照加法位置编码、RoPE 与 ALiBi 各自加在哪一步、改了哪些数。',
+            )}
           </p>
         </div>
         <button className="button secondary share-button" onClick={() => void copyLink()}>
-          <span aria-hidden="true">↗</span> 复制实验链接
+          {Tx('{#0} 复制实验链接', <span aria-hidden="true">↗</span>)}
         </button>
       </section>
       {notice && (
         <div className="notice" role="status">
           {notice}
-          <button aria-label="关闭提示" onClick={() => setNotice('')}>
+          <button aria-label={T('关闭提示')} onClick={() => setNotice('')}>
             ×
           </button>
         </div>
       )}
       {manualLink && (
         <label className="manual-share">
-          手动复制链接
+          {T('手动复制链接')}
           <input readOnly value={manualLink} onFocus={(event) => event.target.select()} />
         </label>
       )}
 
-      <section className="lesson-panel pos-panel" aria-label="位置编码逐步实验">
+      <section className="lesson-panel pos-panel" aria-label={T('位置编码逐步实验')}>
         <div className="lesson-panel-heading">
           <div>
-            <span className="lesson-eyebrow">同一个问题：模型怎样知道“谁在谁前面”</span>
-            <h2>一条计算链，三个可以加入位置的入口。</h2>
+            <span className="lesson-eyebrow">{T('同一个问题：模型怎样知道“谁在谁前面”')}</span>
+            <h2>{T('一条计算链，三个可以加入位置的入口。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {POSITION_STEP_COUNT}
           </span>
         </div>
-        <div className="lesson-steps pos-steps" aria-label="位置编码步骤">
+        <div className="lesson-steps pos-steps" aria-label={T('位置编码步骤')}>
           {positionSteps.map((item, i) => (
             <button
               key={item.name}
@@ -244,7 +262,7 @@ export default function PositionLab() {
           </div>
           <div className="lesson-reading">
             <div className="lesson-reading-top">
-              <span>这一步</span>
+              <span>{T('这一步')}</span>
               <button
                 onClick={() =>
                   edit({
@@ -253,13 +271,13 @@ export default function PositionLab() {
                   })
                 }
               >
-                {hide ? '显示说明' : '隐藏说明'}
+                {hide ? T('显示说明') : T('隐藏说明')}
               </button>
             </div>
             <h3>{step.title}</h3>
             {hide ? (
               <div className="lesson-recall">
-                <strong>先自己说一遍</strong>
+                <strong>{T('先自己说一遍')}</strong>
                 <p>
                   <Rich text={step.prompt} />
                 </p>
@@ -271,22 +289,22 @@ export default function PositionLab() {
             )}
             {widget}
             <div className="lesson-takeaway">
-              <strong>这一步，记住一句话</strong>
+              <strong>{T('这一步，记住一句话')}</strong>
               <p>
-                <Rich text={hide ? '先自己复述，再点击“显示说明”核对。' : step.takeaway} />
+                <Rich text={hide ? T('先自己复述，再点击“显示说明”核对。') : step.takeaway} />
               </p>
             </div>
             <details className="lesson-formula">
-              <summary>需要时再看公式</summary>
+              <summary>{T('需要时再看公式')}</summary>
               <Formula expression={step.formula} />
             </details>
             <a
               className="lesson-source"
-              href={BOOK_URL + step.chapter[1]}
+              href={chapterUrl(step.chapter[1])}
               target="_blank"
               rel="noreferrer"
             >
-              对应原书：{step.chapter[0]} ↗
+              {Tx('对应原书：{#0} ↗', step.chapter[0])}
             </a>
           </div>
         </div>
@@ -297,7 +315,7 @@ export default function PositionLab() {
               disabled={state.step === 0}
               onClick={() => jump(state.step - 1)}
             >
-              ← 上一步
+              {T('← 上一步')}
             </button>
             <button
               className="button primary"
@@ -305,35 +323,35 @@ export default function PositionLab() {
               onClick={() => jump(state.step + 1)}
             >
               {state.step === POSITION_STEP_COUNT - 1
-                ? '已到最后一步'
-                : `下一步：${positionSteps[state.step + 1].name} →`}
+                ? T('已到最后一步')
+                : T('下一步：{#0} →', positionSteps[state.step + 1].name)}
             </button>
           </div>
           <div>
             <button className="lesson-text-button" onClick={() => jump(0)}>
-              从头看
+              {T('从头看')}
             </button>
             <button
               className="lesson-text-button"
               onClick={() => {
                 stopAll();
                 setState({ ...initialPositionState(), view: state.view });
-                setNotice('已恢复默认示例。');
+                setNotice(T('已恢复默认示例。'));
               }}
             >
-              恢复默认示例
+              {T('恢复默认示例')}
             </button>
             <button
               className="lesson-text-button"
-              aria-label={playing ? '暂停自动逐步' : '播放自动逐步'}
+              aria-label={playing ? T('暂停自动逐步') : T('播放自动逐步')}
               onClick={toggleStepPlay}
             >
-              {playing ? 'Ⅱ 暂停' : '▶ 自动逐步'}
+              {playing ? T('Ⅱ 暂停') : T('▶ 自动逐步')}
             </button>
             <label>
-              速度
+              {T('速度')}
               <select
-                aria-label="播放速度"
+                aria-label={T('播放速度')}
                 value={state.view.speed}
                 onChange={(e) =>
                   edit({ ...state, view: { ...state.view, speed: Number(e.target.value) } })
@@ -348,18 +366,19 @@ export default function PositionLab() {
         </div>
         {reducedMotion && (
           <p className="lesson-motion">
-            已遵循减少动态效果偏好；指针和向量直接跳到新角度，不做转动动画。
+            {T('已遵循减少动态效果偏好；指针和向量直接跳到新角度，不做转动动画。')}
           </p>
         )}
       </section>
 
       <section className="recall-card">
         <div>
-          <span className="section-kicker">离开之前 · 试着复述</span>
-          <h2>不看图，说出三种位置编码分别加在哪一步。</h2>
+          <span className="section-kicker">{T('离开之前 · 试着复述')}</span>
+          <h2>{T('不看图，说出三种位置编码分别加在哪一步。')}</h2>
           <p>
-            再解释：没有位置编码时为什么分不清“我爱你”和“你爱我”？RoPE
-            的分数为什么只看相对距离？ALiBi 能直接算更长的序列，这又不保证什么？
+            {T(
+              '再解释：没有位置编码时为什么分不清“我爱你”和“你爱我”？RoPE 的分数为什么只看相对距离？ALiBi 能直接算更长的序列，这又不保证什么？',
+            )}
           </p>
         </div>
         <button
@@ -370,35 +389,34 @@ export default function PositionLab() {
             setState((s) => ({ ...s, view: { ...s.view, explanations: false } }));
           }}
         >
-          {recallOpen ? '收起参考解释' : '查看参考解释'}
+          {recallOpen ? T('收起参考解释') : T('查看参考解释')}
         </button>
         {recallOpen && (
           <p className="recall-answer">
-            没有位置信息时，Attention
-            只看到一组向量，交换顺序只会让输出跟着换行。加法位置编码在投影前把 PE 加到 X 上，所以
-            Q、K、V 都带位置；RoPE 在投影后按位置旋转 Q、K，内容固定时 (R_m q)·(R_n k) = q·(R_
-            {'{n−m}'} k)，只取决于距离；ALiBi 在 Softmax 前给分数加上 −m × 距离，不改
-            Q、K、V。偏置公式对任何长度都能计算，但不保证模型能可靠利用超出训练长度的上下文。
+            {T(
+              '没有位置信息时，Attention 只看到一组向量，交换顺序只会让输出跟着换行。加法位置编码在投影前把 PE 加到 X 上，所以 Q、K、V 都带位置；RoPE 在投影后按位置旋转 Q、K，内容固定时 (R_m q)·(R_n k) = q·(R_{n−m} k)，只取决于距离；ALiBi 在 Softmax 前给分数加上 −m × 距离，不改 Q、K、V。偏置公式对任何长度都能计算，但不保证模型能可靠利用超出训练长度的上下文。',
+            )}
           </p>
         )}
       </section>
 
       <details className="details-panel source-panel">
         <summary>
-          <span>适用条件、与原书对照与来源</span>
-          <span className="summary-hint">简化假设 · 书中说法的修正 · 参考文献</span>
+          <span>{T('适用条件、与原书对照与来源')}</span>
+          <span className="summary-hint">{T('简化假设 · 书中说法的修正 · 参考文献')}</span>
         </summary>
         <div className="details-body">
           <p>
-            所有数值由浏览器实时计算，均为教学数字而不是训练好的模型参数；行向量约定，单头，忽略
-            batch。位置盲与四项分解令 <Tex tex="W_Q = W_K = W_V = I" />（
-            <Tex tex="d_{\mathrm{model}} = 4" />
-            ）。“L”的嵌入取书中第 5 章列出的前 4 维。RoPE 演示取 <Tex tex="d = 8" />、
-            <Tex tex="\mathrm{base} = 10000" />
-            的固定内容向量。ALiBi 演示取 6 个 token、8 个头的标准斜率 <Tex tex="2^{-h}" />
-            ，并带因果 Mask；示例内容分数为人为设定。
+            {Tx(
+              '所有数值由浏览器实时计算，均为教学数字而不是训练好的模型参数；行向量约定，单头，忽略 batch。位置盲与四项分解令 {#0}（{#1}）。“L”的嵌入取书中第 5 章列出的前 4 维。RoPE 演示取 {#2}、{#3}的固定内容向量。ALiBi 演示取 6 个 token、8 个头的标准斜率 {#4}，并带因果 Mask；示例内容分数为人为设定。',
+              <Tex tex="W_Q = W_K = W_V = I" />,
+              <Tex tex="d_{\mathrm{model}} = 4" />,
+              <Tex tex="d = 8" />,
+              <Tex tex="\mathrm{base} = 10000" />,
+              <Tex tex="2^{-h}" />,
+            )}
           </p>
-          <strong className="pos-notes-title">与原书说法的对照</strong>
+          <strong className="pos-notes-title">{T('与原书说法的对照')}</strong>
           <ul>
             {bookNotes.map((note) => (
               <li key={note}>
@@ -416,8 +434,9 @@ export default function PositionLab() {
             ))}
           </ul>
           <p className="subtle">
-            核对：2026-11-06。原书内容对照 GitHub 源文件（commit
-            4a77788）；公式按论文记法编写，本次环境无法访问 arXiv，未在线复核论文原文。
+            {T(
+              '核对：2026-11-06。原书内容对照 GitHub 源文件（commit 4a77788）；公式按论文记法编写，本次环境无法访问 arXiv，未在线复核论文原文。',
+            )}
           </p>
         </div>
       </details>

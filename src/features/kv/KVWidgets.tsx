@@ -35,6 +35,8 @@ import {
   type CalcConfig,
   type KVState,
 } from '../../state/kv';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 
 interface WidgetProps {
   state: KVState;
@@ -115,8 +117,8 @@ export function CalcWidget({ state, onChange }: WidgetProps) {
 
   return (
     <div className="exp-widget">
-      <div className="exp-segment" role="group" aria-label="预设">
-        <span>预设</span>
+      <div className="exp-segment" role="group" aria-label={T('预设')}>
+        <span>{T('预设')}</span>
         {(Object.keys(CALC_PRESETS) as (keyof typeof CALC_PRESETS)[]).map((key) => (
           <button
             key={key}
@@ -129,35 +131,35 @@ export function CalcWidget({ state, onChange }: WidgetProps) {
       </div>
       <div className="kv-fields">
         <NumberField
-          label="批大小 B"
+          label={T('批大小 B')}
           value={c.batch}
           min={1}
           max={LIMITS.batch}
           onCommit={(v) => set({ batch: v })}
         />
         <NumberField
-          label="层数 L"
+          label={T('层数 L')}
           value={c.layers}
           min={1}
           max={LIMITS.layers}
           onCommit={(v) => set({ layers: v })}
         />
         <NumberField
-          label="token 数 T"
+          label={T('token 数 T')}
           value={c.tokens}
           min={1}
           max={LIMITS.tokens}
           onCommit={(v) => set({ tokens: v })}
         />
         <NumberField
-          label="Query 头数"
+          label={T('Query 头数')}
           value={c.qHeads}
           min={1}
           max={LIMITS.qHeads}
           onCommit={(v) => set({ qHeads: v })}
         />
         <NumberField
-          label="每头维度 d"
+          label={T('每头维度 d')}
           value={c.dHead}
           min={1}
           max={LIMITS.dHead}
@@ -165,18 +167,18 @@ export function CalcWidget({ state, onChange }: WidgetProps) {
         />
       </div>
       <Segment
-        label="KV 头数"
+        label={T('KV 头数')}
         options={kvHeadChoices(c.qHeads).slice(0, 8)}
         value={c.kvHeads}
         onSelect={(value) => set({ kvHeads: value })}
-        render={(g) => `${g}（${kindOf(g, c.qHeads)}）`}
+        render={(g) => T('{#0}（{#1}）', g, kindOf(g, c.qHeads))}
       />
       <Segment
-        label="每个数的字节"
+        label={T('每个数的字节')}
         options={BYTE_OPTIONS}
         value={c.bytes}
         onSelect={(value) => set({ bytes: value })}
-        render={(b) => (b === 4 ? '4（FP32）' : b === 2 ? '2（FP16/BF16）' : '1（FP8）')}
+        render={(b) => (b === 4 ? T('4（FP32）') : b === 2 ? T('2（FP16/BF16）') : T('1（FP8）'))}
       />
       <div className="kv-result" role="status">
         <Tex
@@ -184,14 +186,19 @@ export function CalcWidget({ state, onChange }: WidgetProps) {
         />
         <strong>= {formatBytes(bytes)}</strong>
         <span>
-          每个 token {formatBytes(perToken)}；是同配置 MHA（{c.qHeads} 个 KV 头）的{' '}
-          {pct(bytes / mha)}。
+          {Tx(
+            '每个 token {#0}；是同配置 MHA（{#1} 个 KV 头）的 {#2}。',
+            formatBytes(perToken),
+            c.qHeads,
+            pct(bytes / mha),
+          )}
         </span>
       </div>
       <p className="exp-caption">
-        只统计 KV 缓存：不含模型权重、激活值和显存分配器的开销。
-        <Tex tex="d_k=d_v=d" />
-        ；没有 batch 维的场景取 B = 1。
+        {Tx(
+          '只统计 KV 缓存：不含模型权重、激活值和显存分配器的开销。{#0}；没有 batch 维的场景取 B = 1。',
+          <Tex tex="d_k=d_v=d" />,
+        )}
       </p>
     </div>
   );
@@ -201,9 +208,9 @@ export function CalcWidget({ state, onChange }: WidgetProps) {
 
 type ScoreGuess = 'less' | 'same' | 'more';
 const SCORE_OPTIONS: { value: ScoreGuess; label: string }[] = [
-  { value: 'less', label: '变成原来的 1/4' },
-  { value: 'same', label: '不变' },
-  { value: 'more', label: '变多' },
+  { value: 'less', label: T('变成原来的 1/4') },
+  { value: 'same', label: T('不变') },
+  { value: 'more', label: T('变多') },
 ];
 
 export function GroupWidget({ state, onChange }: WidgetProps) {
@@ -228,38 +235,45 @@ export function GroupWidget({ state, onChange }: WidgetProps) {
   return (
     <div className="exp-widget">
       <Segment
-        label="KV 头数 G"
+        label={T('KV 头数 G')}
         options={KV_OPTIONS}
         value={kvHeads}
         onSelect={(value: KVHeads) => set({ kvHeads: value })}
-        render={(option) => `${option}（${kindOf(option, Q_HEADS)}）`}
+        render={(option) => T('{#0}（{#1}）', option, kindOf(option, Q_HEADS))}
       />
       <Segment
-        label="看哪个 Query 头"
+        label={T('看哪个 Query 头')}
         options={headOptions}
         value={head}
         onSelect={(value) => set({ head: value })}
         render={(h) => `Q${h}`}
       />
       <Segment
-        label="Query 位置 t"
+        label={T('Query 位置 t')}
         options={tokenOptions}
         value={query}
         onSelect={(value) => set({ query: value })}
         render={(t) => `t${t}`}
       />
       <p className="exp-caption">
-        Q{head} 读第 {g} 组 K/V；同组的 Query 头：{mates.map((h) => `Q${h}`).join('、')}。
-        它们查的是同一份 K，但各自的 Query 不同，权重也就不同。
+        {Tx(
+          'Q{#0} 读第 {#1} 组 K/V；同组的 Query 头：{#2}。 它们查的是同一份 K，但各自的 Query 不同，权重也就不同。',
+          head,
+          g,
+          mates.map((h) => `Q${h}`).join(T('、')),
+        )}
       </p>
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label={`第 ${g} 组各 Query 头在位置 t${query} 的权重`}>
+        <table
+          className="exp-table"
+          aria-label={T('第 {#0} 组各 Query 头在位置 t{#1} 的权重', g, query)}
+        >
           <thead>
             <tr>
-              <th>Key 位置</th>
+              <th>{T('Key 位置')}</th>
               {mates.map((h) => (
                 <th key={h} className={h === head ? 'kv-col-on' : undefined}>
-                  Q{h} 的权重
+                  {Tx('Q{#0} 的权重', h)}
                 </th>
               ))}
             </tr>
@@ -270,7 +284,7 @@ export function GroupWidget({ state, onChange }: WidgetProps) {
                 <th scope="row">t{j}</th>
                 {mates.map((h) => (
                   <td key={h} className={h === head ? 'kv-col-on' : undefined}>
-                    {j > query ? '屏蔽' : pct(result.probs[h][query][j])}
+                    {j > query ? T('屏蔽') : pct(result.probs[h][query][j])}
                   </td>
                 ))}
               </tr>
@@ -279,21 +293,15 @@ export function GroupWidget({ state, onChange }: WidgetProps) {
         </table>
       </div>
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="KV 头数改变了什么">
+        <table className="exp-table" aria-label={T('KV 头数改变了什么')}>
           <thead>
             <tr>
-              <th>设计</th>
-              <th>
-                <Tex tex="W_Q" /> 参数
-              </th>
-              <th>
-                <Tex tex="W_K,W_V" /> 参数
-              </th>
-              <th>
-                <Tex tex="W_O" /> 参数
-              </th>
-              <th>打分次数</th>
-              <th>缓存/token</th>
+              <th>{T('设计')}</th>
+              <th>{Tx('{#0} 参数', <Tex tex="W_Q" />)}</th>
+              <th>{Tx('{#0} 参数', <Tex tex="W_K,W_V" />)}</th>
+              <th>{Tx('{#0} 参数', <Tex tex="W_O" />)}</th>
+              <th>{T('打分次数')}</th>
+              <th>{T('缓存/token')}</th>
             </tr>
           </thead>
           <tbody>
@@ -319,20 +327,22 @@ export function GroupWidget({ state, onChange }: WidgetProps) {
         </table>
       </div>
       <Prediction
-        question="KV 头从 4 减到 1，打分次数会怎样？"
+        question={T('KV 头从 4 减到 1，打分次数会怎样？')}
         options={SCORE_OPTIONS}
         choice={choice}
         onChoose={setChoice}
       />
       <div className="exp-actions">
         <button className="button primary" disabled={revealed} onClick={() => setRevealed(true)}>
-          核对打分次数 →
+          {T('核对打分次数 →')}
         </button>
       </div>
       {revealed && (
         <p className="exp-verdict ok" role="status">
-          每个 Query 头仍要和每个可见 Key 打一次分：4 个头 × 10 个可见配对 = {all[0].scorePairs}{' '}
-          次，与 KV 头数无关。
+          {Tx(
+            '每个 Query 头仍要和每个可见 Key 打一次分：4 个头 × 10 个可见配对 = {#0} 次，与 KV 头数无关。',
+            all[0].scorePairs,
+          )}
           <PredictionResult
             label={choice && SCORE_OPTIONS.find((o) => o.value === choice)!.label}
             holds={choice === scoreAnswer}
@@ -340,9 +350,10 @@ export function GroupWidget({ state, onChange }: WidgetProps) {
         </p>
       )}
       <p className="exp-verdict" role="status">
-        按组查表的结果与“把每组 K/V 显式复制给每个 Query 头”的参考计算相比，输出最大差为{' '}
-        {diffText(diff)}（容差 1e-12）。复制只用来核对正确性，真实实现不存这些副本。共享的 K/V
-        投影由组内各头取平均得到；论文在此之后还会继续训练，本页没有。
+        {Tx(
+          '按组查表的结果与“把每组 K/V 显式复制给每个 Query 头”的参考计算相比，输出最大差为 {#0}（容差 1e-12）。复制只用来核对正确性，真实实现不存这些副本。共享的 K/V 投影由组内各头取平均得到；论文在此之后还会继续训练，本页没有。',
+          diffText(diff),
+        )}
       </p>
     </div>
   );
@@ -359,7 +370,7 @@ export function CompressWidget({ state, onChange }: WidgetProps) {
   return (
     <div className="exp-widget">
       <Segment
-        label="看哪个位置 t"
+        label={T('看哪个位置 t')}
         options={tokenOptions}
         value={query}
         onSelect={(value) => set({ query: value })}
@@ -367,21 +378,30 @@ export function CompressWidget({ state, onChange }: WidgetProps) {
       />
       <div className="kv-result" role="status">
         <span>
-          缓存 <Tex tex={`c_{${query}}=h_{${query}}W_{DKV}`} /> = {vec(latent[query])}（{D_LATENT}{' '}
-          个数）
+          {Tx(
+            '缓存 {#0} = {#1}（{#2} 个数）',
+            <Tex tex={`c_{${query}}=h_{${query}}W_{DKV}`} />,
+            vec(latent[query]),
+            D_LATENT,
+          )}
         </span>
         <span>
-          另存 <Tex tex={`k^R_{${query}}`} /> = {vec(ropeKey[query])}（{D_ROPE} 个数，下一步讲）
+          {Tx(
+            '另存 {#0} = {#1}（{#2} 个数，下一步讲）',
+            <Tex tex={`k^R_{${query}}`} />,
+            vec(ropeKey[query]),
+            D_ROPE,
+          )}
         </span>
       </div>
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label={`由 c_${query} 还原的各头 K、V`}>
+        <table className="exp-table" aria-label={T('由 c_{#0} 还原的各头 K、V', query)}>
           <caption>
-            用时由同一个 <Tex tex={`c_{${query}}`} /> 还原各头的内容 K 和 V
+            {Tx('用时由同一个 {#0} 还原各头的内容 K 和 V', <Tex tex={`c_{${query}}`} />)}
           </caption>
           <thead>
             <tr>
-              <th>头</th>
+              <th>{T('头')}</th>
               <th>
                 <Tex tex={`k^C=c\\,W_{UK}^{(i)}`} />
               </th>
@@ -399,7 +419,7 @@ export function CompressWidget({ state, onChange }: WidgetProps) {
                     aria-pressed={i === head}
                     onClick={() => set({ head: i })}
                   >
-                    头 {i}
+                    {Tx('头 {#0}', i)}
                   </button>
                 </th>
                 <td>{vec(expanded.kC[i][query])}</td>
@@ -410,9 +430,14 @@ export function CompressWidget({ state, onChange }: WidgetProps) {
         </table>
       </div>
       <p className="exp-verdict ok" role="status">
-        4 个头的 K 各不相同，但都由同一个 {D_LATENT} 维的 c 算出；MQA 里 4 个头读的是同一个 K。每个
-        token 每层：MHA 存 {Q_HEADS * 2 * D_HEAD} 个数，MLA 存 {D_LATENT} + {D_ROPE} ={' '}
-        {D_LATENT + D_ROPE} 个。
+        {Tx(
+          '4 个头的 K 各不相同，但都由同一个 {#0} 维的 c 算出；MQA 里 4 个头读的是同一个 K。每个 token 每层：MHA 存 {#1} 个数，MLA 存 {#2} + {#3} = {#4} 个。',
+          D_LATENT,
+          Q_HEADS * 2 * D_HEAD,
+          D_LATENT,
+          D_ROPE,
+          D_LATENT + D_ROPE,
+        )}
       </p>
     </div>
   );
@@ -422,9 +447,9 @@ export function CompressWidget({ state, onChange }: WidgetProps) {
 
 type ExactWhere = 'diagonal' | 'all' | 'none';
 const WHERE_OPTIONS: { value: ExactWhere; label: string }[] = [
-  { value: 'diagonal', label: '只有 j = t' },
-  { value: 'all', label: '所有位置' },
-  { value: 'none', label: '没有位置' },
+  { value: 'diagonal', label: T('只有 j = t') },
+  { value: 'all', label: T('所有位置') },
+  { value: 'none', label: T('没有位置') },
 ];
 
 export function RopeWidget({ state, onChange }: WidgetProps) {
@@ -459,40 +484,44 @@ export function RopeWidget({ state, onChange }: WidgetProps) {
   return (
     <div className="exp-widget">
       <Segment
-        label="RoPE 放在"
+        label={T('RoPE 放在')}
         options={[true, false].map(String)}
         value={String(coupled)}
         onSelect={(value) => set({ coupled: value === 'true' })}
-        render={(option) => (option === 'true' ? '还原出的 K 上（不解耦）' : '单独一支（解耦）')}
+        render={(option) =>
+          option === 'true' ? T('还原出的 K 上（不解耦）') : T('单独一支（解耦）')
+        }
       />
       <Segment
-        label="头"
+        label={T('头')}
         options={headOptions}
         value={head}
         onSelect={(value) => set({ head: value })}
-        render={(i) => `头 ${i}`}
+        render={(i) => T('头 {#0}', i)}
       />
       <Segment
-        label="Query 位置 t"
+        label={T('Query 位置 t')}
         options={tokenOptions}
         value={query}
         onSelect={(value) => set({ query: value })}
         render={(t) => `t${t}`}
       />
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="精确分数与吸收后分数的对照">
+        <table className="exp-table" aria-label={T('精确分数与吸收后分数的对照')}>
           <caption>
             {coupled
-              ? '精确值：RoPE 旋转后的 q 与还原并旋转后的 k 点积；吸收值：用同一个矩阵 W_UKᵀ 直接乘 c_j'
-              : '精确值：先还原 K 再打分；吸收值：吸收后的 Query 乘 c_j，加上 q^R 与缓存的 k^R'}
+              ? T(
+                  '精确值：RoPE 旋转后的 q 与还原并旋转后的 k 点积；吸收值：用同一个矩阵 W_UKᵀ 直接乘 c_j',
+                )
+              : T('精确值：先还原 K 再打分；吸收值：吸收后的 Query 乘 c_j，加上 q^R 与缓存的 k^R')}
           </caption>
           <thead>
             <tr>
-              <th>Key 位置 j</th>
-              <th>距离 t − j</th>
-              <th>精确 q·k</th>
-              <th>吸收后</th>
-              <th>误差</th>
+              <th>{T('Key 位置 j')}</th>
+              <th>{T('距离 t − j')}</th>
+              <th>{T('精确 q·k')}</th>
+              <th>{T('吸收后')}</th>
+              <th>{T('误差')}</th>
             </tr>
           </thead>
           <tbody>
@@ -516,21 +545,24 @@ export function RopeWidget({ state, onChange }: WidgetProps) {
         </table>
       </div>
       <Prediction
-        question="不解耦时，同一个吸收矩阵在哪些位置还能算对？"
+        question={T('不解耦时，同一个吸收矩阵在哪些位置还能算对？')}
         options={WHERE_OPTIONS}
         choice={choice}
         onChoose={setChoice}
       />
       <div className="exp-actions">
         <button className="button primary" disabled={revealed} onClick={() => setRevealed(true)}>
-          核对 →
+          {T('核对 →')}
         </button>
       </div>
       {revealed && (
         <p className="exp-verdict ok" role="status">
-          不解耦时（头 {head}，t = {query}），误差为 0 的位置：
-          {exactAt.map((j) => `t${j}`).join('、') || '无'}。距离 t − j = 0
-          时两次旋转相互抵消；其他距离需要不同的矩阵。
+          {Tx(
+            '不解耦时（头 {#0}，t = {#1}），误差为 0 的位置：{#2}。距离 t − j = 0 时两次旋转相互抵消；其他距离需要不同的矩阵。',
+            head,
+            query,
+            exactAt.map((j) => `t${j}`).join(T('、')) || T('无'),
+          )}
           <PredictionResult
             label={choice && WHERE_OPTIONS.find((o) => o.value === choice)!.label}
             holds={choice === answer}
@@ -539,10 +571,12 @@ export function RopeWidget({ state, onChange }: WidgetProps) {
       )}
       {!coupled && (
         <p className="exp-verdict" role="status">
-          解耦后每个位置的误差都在 1e-12 以内：内容部分用吸收后的 Query 直接乘缓存的{' '}
-          <Tex tex="c_j" />
-          ，位置部分用缓存的 <Tex tex="k^R_j" />
-          。代价是缓存每个 token 多存 {D_ROPE} 个数。
+          {Tx(
+            '解耦后每个位置的误差都在 1e-12 以内：内容部分用吸收后的 Query 直接乘缓存的 {#0}，位置部分用缓存的 {#1}。代价是缓存每个 token 多存 {#2} 个数。',
+            <Tex tex="c_j" />,
+            <Tex tex="k^R_j" />,
+            D_ROPE,
+          )}
         </p>
       )}
     </div>
@@ -562,14 +596,14 @@ export function AbsorbWidget({ state, onChange }: WidgetProps) {
   return (
     <div className="exp-widget">
       <Segment
-        label="头"
+        label={T('头')}
         options={headOptions}
         value={head}
         onSelect={(value) => set({ head: value })}
-        render={(i) => `头 ${i}`}
+        render={(i) => T('头 {#0}', i)}
       />
       <Segment
-        label="Query 位置 t"
+        label={T('Query 位置 t')}
         options={tokenOptions}
         value={query}
         onSelect={(value) => set({ query: value })}
@@ -577,26 +611,35 @@ export function AbsorbWidget({ state, onChange }: WidgetProps) {
       />
       <div className="kv-result" role="status">
         <span>
-          <Tex tex={`\\tilde W_Q^{(${head})}=W_{QC}^{(${head})}{W_{UK}^{(${head})}}^{\\top}`} />： [
-          {D_MODEL}, {D_LATENT}]，
-          <Tex tex={`\\tilde W_O^{(${head})}=W_{UV}^{(${head})}W_O^{(${head})}`} />
-          ：[{D_LATENT}, {D_MODEL}]
+          {Tx(
+            '{#0}： [{#1}, {#2}]，{#3}：[{#4}, {#5}]',
+            <Tex tex={`\\tilde W_Q^{(${head})}=W_{QC}^{(${head})}{W_{UK}^{(${head})}}^{\\top}`} />,
+            D_MODEL,
+            D_LATENT,
+            <Tex tex={`\\tilde W_O^{(${head})}=W_{UV}^{(${head})}W_O^{(${head})}`} />,
+            D_LATENT,
+            D_MODEL,
+          )}
         </span>
         <span>
-          <Tex tex={`\\tilde q_{${query}}=h_{${query}}\\tilde W_Q^{(${head})}`} /> ={' '}
-          {vec(absorbed.qLatent[head][query])}（{D_LATENT} 维，直接和缓存的 c 打分）
+          {Tx(
+            '{#0} = {#1}（{#2} 维，直接和缓存的 c 打分）',
+            <Tex tex={`\\tilde q_{${query}}=h_{${query}}\\tilde W_Q^{(${head})}`} />,
+            vec(absorbed.qLatent[head][query]),
+            D_LATENT,
+          )}
         </span>
       </div>
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="展开路径与吸收路径的打分对照">
+        <table className="exp-table" aria-label={T('展开路径与吸收路径的打分对照')}>
           <thead>
             <tr>
-              <th>Key 位置</th>
-              <th>缓存 c_j</th>
-              <th>缓存 kᴿ_j</th>
-              <th>展开路径</th>
-              <th>吸收路径</th>
-              <th>权重</th>
+              <th>{T('Key 位置')}</th>
+              <th>{T('缓存 c_j')}</th>
+              <th>{T('缓存 kᴿ_j')}</th>
+              <th>{T('展开路径')}</th>
+              <th>{T('吸收路径')}</th>
+              <th>{T('权重')}</th>
             </tr>
           </thead>
           <tbody>
@@ -614,13 +657,20 @@ export function AbsorbWidget({ state, onChange }: WidgetProps) {
         </table>
       </div>
       <p className="exp-caption">
-        打分已除以 <Tex tex="\sqrt{d+d_R}=2" />
-        。位置 t{query} 的最终输出：展开 {vec(expanded.output[query])}，吸收{' '}
-        {vec(absorbed.output[query])}。
+        {Tx(
+          '打分已除以 {#0}。位置 t{#1} 的最终输出：展开 {#2}，吸收 {#3}。',
+          <Tex tex="\sqrt{d+d_R}=2" />,
+          query,
+          vec(expanded.output[query]),
+          vec(absorbed.output[query]),
+        )}
       </p>
       <p className="exp-verdict ok" role="status">
-        4 个位置、4 个头的输出，两条路径的最大差为 {diffText(outputDiff)}（容差
-        1e-12）。吸收路径没有还原任何 K、V，每个历史 token 只读缓存里的 {D_LATENT + D_ROPE} 个数。
+        {Tx(
+          '4 个位置、4 个头的输出，两条路径的最大差为 {#0}（容差 1e-12）。吸收路径没有还原任何 K、V，每个历史 token 只读缓存里的 {#1} 个数。',
+          diffText(outputDiff),
+          D_LATENT + D_ROPE,
+        )}
       </p>
     </div>
   );
@@ -644,43 +694,43 @@ export function CompareWidget({ state, onChange }: WidgetProps) {
   const mla = mlaCacheBytes({ batch: 1, layers, tokens, latent, ropeDim, bytesPerElement: 2 });
   const rows = [
     {
-      name: `MHA（${heads} 个 KV 头）`,
+      name: T('MHA（{#0} 个 KV 头）', heads),
       perLayer: 2 * heads * dHead,
       bytes: kv(heads),
-      cost: '每个头各存 K、V，缓存最大。',
+      cost: T('每个头各存 K、V，缓存最大。'),
     },
     {
       name: 'GQA-8',
       perLayer: 2 * 8 * dHead,
       bytes: kv(8),
-      cost: '组内共享 K、V；转换后需继续训练。',
+      cost: T('组内共享 K、V；转换后需继续训练。'),
     },
-    { name: 'MQA', perLayer: 2 * dHead, bytes: kv(1), cost: '所有头共享一组 K、V。' },
+    { name: 'MQA', perLayer: 2 * dHead, bytes: kv(1), cost: T('所有头共享一组 K、V。') },
     {
-      name: 'MLA（DeepSeek-V2）',
+      name: T('MLA（DeepSeek-V2）'),
       perLayer: latent + ropeDim,
       bytes: mla,
-      cost: '每头仍有自己的 K、V；需要上投影或吸收后的更大 Query，RoPE 单独一支。',
+      cost: T('每头仍有自己的 K、V；需要上投影或吸收后的更大 Query，RoPE 单独一支。'),
     },
   ];
   return (
     <div className="exp-widget">
       <Segment
-        label="token 数"
+        label={T('token 数')}
         options={COMPARE_TOKENS}
         value={tokens}
         onSelect={(value) => onChange({ ...state, compare: { tokens: value } })}
         render={(t) => `${t / 1024}K`}
       />
       <div className="exp-table-wrap">
-        <table className="exp-table" aria-label="四种设计的 KV 缓存对照">
+        <table className="exp-table" aria-label={T('四种设计的 KV 缓存对照')}>
           <thead>
             <tr>
-              <th>设计</th>
-              <th>每 token 每层（个）</th>
-              <th>每 token（{layers} 层）</th>
+              <th>{T('设计')}</th>
+              <th>{T('每 token 每层（个）')}</th>
+              <th>{Tx('每 token（{#0} 层）', layers)}</th>
               <th>{thousands(tokens)} token</th>
-              <th>相对 MHA</th>
+              <th>{T('相对 MHA')}</th>
             </tr>
           </thead>
           <tbody>
@@ -689,7 +739,7 @@ export function CompareWidget({ state, onChange }: WidgetProps) {
                 <th scope="row">{row.name}</th>
                 <td>
                   {row.perLayer}
-                  {row.name.startsWith('MLA') && `（${latent} + ${ropeDim}）`}
+                  {row.name.startsWith('MLA') && T('（{#0} + {#1}）', latent, ropeDim)}
                 </td>
                 <td>{formatBytes(row.bytes / tokens)}</td>
                 <td>{formatBytes(row.bytes)}</td>
@@ -700,20 +750,26 @@ export function CompareWidget({ state, onChange }: WidgetProps) {
         </table>
       </div>
       <p className="exp-verdict ok" role="status">
-        MLA 每 token 每层 {latent + ropeDim} 个数 = {(latent + ropeDim) / (2 * dHead)} 组 GQA
-        的量。只算 latent 会少算 {ropeDim} 个，占 {pct(ropeDim / (latent + ropeDim))}。
+        {Tx(
+          'MLA 每 token 每层 {#0} 个数 = {#1} 组 GQA 的量。只算 latent 会少算 {#2} 个，占 {#3}。',
+          latent + ropeDim,
+          (latent + ropeDim) / (2 * dHead),
+          ropeDim,
+          pct(ropeDim / (latent + ropeDim)),
+        )}
       </p>
       <ul className="kv-costs">
         {rows.map((row) => (
-          <li key={row.name}>
-            <strong>{row.name}</strong>：{row.cost}
-          </li>
+          <li key={row.name}>{Tx('{#0}：{#1}', <strong>{row.name}</strong>, row.cost)}</li>
         ))}
       </ul>
       <p className="exp-caption">
-        MHA、GQA-8、MQA 三行是按 DeepSeek-V2 的头数（{heads}）、头维（{dHead}）和层数（{layers}
-        ）套公式得到的假想配置，只用来对照缓存；DeepSeek-V2 实际使用 MLA。BF16 每个数 2 字节，batch
-        = 1。参数取自 DeepSeek-V2 论文 §3.1.2 与表 1。效果对比依赖具体训练与评测，本页不做排行。
+        {Tx(
+          'MHA、GQA-8、MQA 三行是按 DeepSeek-V2 的头数（{#0}）、头维（{#1}）和层数（{#2}）套公式得到的假想配置，只用来对照缓存；DeepSeek-V2 实际使用 MLA。BF16 每个数 2 字节，batch = 1。参数取自 DeepSeek-V2 论文 §3.1.2 与表 1。效果对比依赖具体训练与评测，本页不做排行。',
+          heads,
+          dHead,
+          layers,
+        )}
       </p>
     </div>
   );

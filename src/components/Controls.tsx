@@ -1,3 +1,5 @@
+import { T } from '../i18n';
+import { Tx } from '../i18n/jsx';
 /** Small controls shared by the experiments (styles in styles/experiment.css). */
 
 export function Segment<T extends string | number>({
@@ -39,7 +41,7 @@ export function Prediction<T extends string>({
 }) {
   return (
     <div className="exp-predict" role="group" aria-label={question}>
-      <strong>先预测：{question}</strong>
+      <strong>{Tx('先预测：{#0}', question)}</strong>
       <div>
         {options.map((option) => (
           <button
@@ -60,8 +62,11 @@ export function PredictionResult({ label, holds }: { label: string | null; holds
   if (!label) return null;
   return (
     <>
-      {' '}
-      你的预测是“{label}”，{holds ? '与计算一致。' : '与计算不同，对照左图再想一想。'}
+      {Tx(
+        ' 你的预测是“{#0}”，{#1}',
+        label,
+        holds ? T('与计算一致。') : T('与计算不同，对照左图再想一想。'),
+      )}
     </>
   );
 }

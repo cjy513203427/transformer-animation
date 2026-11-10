@@ -1,5 +1,6 @@
 import { inputRange, type TopicDefinition } from '../content/p1/types';
 import type { Parameters } from '../math/p1/shared';
+import { T } from '../i18n';
 export interface LabState {
   version: 1;
   topic: string;
@@ -82,5 +83,8 @@ export function restoreLabState(
   } catch {
     /* Restore a complete example. */
   }
-  return { state: initialLabState(topic), warning: '分享链接无效或版本不受支持，已恢复默认示例。' };
+  return {
+    state: initialLabState(topic),
+    warning: T('分享链接无效或版本不受支持，已恢复默认示例。'),
+  };
 }

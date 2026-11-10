@@ -10,7 +10,7 @@ import memory from './memory';
 import ssm from './ssm';
 import { explain, inputRange, lessonContext, type TopicDefinition } from './types';
 import { initialLabState } from '../../state/p1';
-import { BOOK_URL } from '../topics';
+import { BOOK_URL } from '../book';
 
 const topics: TopicDefinition[] = [
   normalization,

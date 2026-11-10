@@ -1,4 +1,5 @@
 import { MAX_DECODE_STEPS, VOCAB } from '../math/inference';
+import { T } from '../i18n';
 
 /** 训练并行 → 无缓存基线 → Prefill → Decode 一步 → 缓存对照重算 → 缓存何时失效 */
 export const INFERENCE_STEP_COUNT = 6;
@@ -96,7 +97,7 @@ export function restoreInferenceState(hash: string): {
   }
   return {
     state: initialInferenceState(),
-    warning: '分享链接无效或版本不受支持，已恢复默认示例。',
+    warning: T('分享链接无效或版本不受支持，已恢复默认示例。'),
   };
 }
 

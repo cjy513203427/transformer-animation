@@ -3,6 +3,8 @@ import { Formula } from '../../components/Formula';
 import { Tex } from '../../components/Tex';
 import { computeExperiment, formatNumber as fmt } from '../../math/attention';
 import { presetState, type ExperimentState } from '../../state/experiment';
+import { T } from '../../i18n';
+import { Tx } from '../../i18n/jsx';
 import '../../styles/guided-attention.css';
 
 interface Props {
@@ -12,8 +14,8 @@ interface Props {
   onExit: () => void;
 }
 
-const words = ['我', '喜欢', '学习'];
-const goals = ['选一个位置', '先预测', '改一个量', '核对变化'];
+const words = [T('我'), T('喜欢'), T('学习')];
+const goals = [T('选一个位置'), T('先预测'), T('改一个量'), T('核对变化')];
 const vector = (values: number[]) => `[${values.map((value) => fmt(value)).join(', ')}]`;
 
 /** A short real experiment. Only executed numerical state is passed back to the lab. */
@@ -68,7 +70,9 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
       setSelectionHint('');
       setStage(1);
     } else {
-      setSelectionHint(`当前在观察“${words[nextQuery]}”。这次先点“喜欢”，让它读取前两个位置。`);
+      setSelectionHint(
+        T('当前在观察“{#0}”。这次先点“喜欢”，让它读取前两个位置。', words[nextQuery]),
+      );
     }
   }
 
@@ -115,19 +119,19 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
   }
 
   return (
-    <section className="guided-attention" aria-label="Attention 操作引导">
+    <section className="guided-attention" aria-label={T('Attention 操作引导')}>
       <header className="guided-heading">
         <div>
-          <span className="section-kicker">跟着做一次 · 只改变 V</span>
-          <h2>改动内容，会改变注意力权重吗？</h2>
-          <p>用三个位置做一次小实验。完成后，带着这组结果继续探索。</p>
+          <span className="section-kicker">{T('跟着做一次 · 只改变 V')}</span>
+          <h2>{T('改动内容，会改变注意力权重吗？')}</h2>
+          <p>{T('用三个位置做一次小实验。完成后，带着这组结果继续探索。')}</p>
         </div>
         <button className="guided-exit" onClick={onExit}>
-          退出引导，自由探索
+          {T('退出引导，自由探索')}
         </button>
       </header>
 
-      <ol className="guided-progress" aria-label="引导进度">
+      <ol className="guided-progress" aria-label={T('引导进度')}>
         {goals.map((goal, i) => (
           <li key={goal} aria-current={stage === i ? 'step' : undefined}>
             <span aria-hidden="true">{i < stage ? '✓' : i + 1}</span>
@@ -139,45 +143,49 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
       <div className="guided-layout">
         <div className="guided-task">
           <div className="guided-task-position">
-            <span>当前任务</span>
-            <output className="guided-progress-count" aria-label="当前引导步骤">
+            <span>{T('当前任务')}</span>
+            <output className="guided-progress-count" aria-label={T('当前引导步骤')}>
               {stage + 1} / 4
             </output>
           </div>
           <h3 ref={headingRef} tabIndex={-1}>
             {
               [
-                '点一下“喜欢”，选择观察位置',
-                '先猜一猜：P 会不会变？',
-                '拖动 V 的偏移，再验证预测',
-                '对照结果，解释变化',
+                T('点一下“喜欢”，选择观察位置'),
+                T('先猜一猜：P 会不会变？'),
+                T('拖动 V 的偏移，再验证预测'),
+                T('对照结果，解释变化'),
               ][stage]
             }
           </h3>
 
           {stage === 0 && (
             <>
-              <p>三个词块分别对应 t0、t1、t2。这次让“喜欢”作为 Query，观察它取用哪些位置的信息。</p>
+              <p>
+                {T(
+                  '三个词块分别对应 t0、t1、t2。这次让“喜欢”作为 Query，观察它取用哪些位置的信息。',
+                )}
+              </p>
               <div
                 className="guided-target guided-token-picker"
                 role="group"
-                aria-label="引导：选择观察位置"
+                aria-label={T('引导：选择观察位置')}
               >
                 {words.map((word, i) => (
                   <button
                     key={word}
-                    aria-label={`观察“${word}”`}
+                    aria-label={T('观察“{#0}”', word)}
                     aria-pressed={query === i}
                     onClick={() => selectQuery(i)}
                   >
                     <small>t{i}</small>
                     <strong>{word}</strong>
-                    <span>{query === i ? '当前观察' : '点选观察'}</span>
+                    <span>{query === i ? T('当前观察') : T('点选观察')}</span>
                   </button>
                 ))}
               </div>
               <p className="guided-hint" role="status">
-                {selectionHint || '请点“喜欢”，“当前已计算结果”会随观察位置更新。'}
+                {selectionHint || T('请点“喜欢”，“当前已计算结果”会随观察位置更新。')}
               </p>
             </>
           )}
@@ -185,30 +193,34 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
           {stage === 1 && (
             <>
               <p>
-                保持 Q、K 和因果 Mask 不变，只改投影后的 <Tex tex="V_{1,0}" />
-                。你认为取用比例 P 会怎样？
+                {Tx(
+                  '保持 Q、K 和因果 Mask 不变，只改投影后的 {#0}。你认为取用比例 P 会怎样？',
+                  <Tex tex="V_{1,0}" />,
+                )}
               </p>
               <div
                 className="guided-target guided-prediction"
                 role="group"
-                aria-label="引导：预测注意力权重变化"
+                aria-label={T('引导：预测注意力权重变化')}
               >
-                <button onClick={() => predict('same')}>P 不会变</button>
-                <button onClick={() => predict('change')}>P 会变</button>
+                <button onClick={() => predict('same')}>{T('P 不会变')}</button>
+                <button onClick={() => predict('change')}>{T('P 会变')}</button>
               </div>
-              <p className="guided-hint">选一个预测后，亲手改动 V，再看实际计算。</p>
+              <p className="guided-hint">{T('选一个预测后，亲手改动 V，再看实际计算。')}</p>
             </>
           )}
 
           {stage === 2 && (
             <>
               <p>
-                你的预测：<strong>{prediction === 'same' ? 'P 不会变' : 'P 会变'}</strong>。
-                拖动滑杆，给“喜欢”提供的内容设置一个非零偏移。
+                {Tx(
+                  '你的预测：{#0}。 拖动滑杆，给“喜欢”提供的内容设置一个非零偏移。',
+                  <strong>{prediction === 'same' ? T('P 不会变') : T('P 会变')}</strong>,
+                )}
               </p>
               <div className="guided-target guided-input">
                 <div className="guided-range-label">
-                  <label htmlFor="guided-value-delta">引导：V[1,0] 的偏移 ΔV</label>
+                  <label htmlFor="guided-value-delta">{T('引导：V[1,0] 的偏移 ΔV')}</label>
                   <output htmlFor="guided-value-delta">{fmt(draftDelta)}</output>
                 </div>
                 <input
@@ -228,15 +240,19 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
                 </div>
                 <p id="guided-draft-note" className="guided-hint" role="status">
                   {draftDelta === 0
-                    ? '请选择一个非零偏移，才能比较改动前后的结果。'
-                    : `待验证：V[1,0] 将从 ${fmt(baseline.v[1][0])} 变为 ${fmt(baseline.v[1][0] + draftDelta)}。图中仍是上次已计算结果。`}
+                    ? T('请选择一个非零偏移，才能比较改动前后的结果。')
+                    : T(
+                        '待验证：V[1,0] 将从 {#0} 变为 {#1}。图中仍是上次已计算结果。',
+                        fmt(baseline.v[1][0]),
+                        fmt(baseline.v[1][0] + draftDelta),
+                      )}
                 </p>
                 <button className="button primary" disabled={draftDelta === 0} onClick={verify}>
-                  验证预测
+                  {T('验证预测')}
                 </button>
               </div>
               <p className="guided-hint">
-                范围限制在 [−4, 4]，方便手算；Q、K 和参数矩阵 W 保持固定。
+                {T('范围限制在 [−4, 4]，方便手算；Q、K 和参数矩阵 W 保持固定。')}
               </p>
             </>
           )}
@@ -244,23 +260,23 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
           {stage === 3 && (
             <>
               <p className="guided-verdict" role="status">
-                {prediction === 'same' ? '预测正确。' : '实际结果和你的预测不同。'}
+                {prediction === 'same' ? T('预测正确。') : T('实际结果和你的预测不同。')}
                 {probabilityDifference <= 1e-12
-                  ? ' P 保持不变，O 发生变化。'
-                  : ' 请对照下方实际数值。'}
+                  ? T(' P 保持不变，O 发生变化。')
+                  : T(' 请对照下方实际数值。')}
               </p>
               <div className="guided-comparison">
-                <table aria-label="引导：P 与 O 的前后对照">
+                <table aria-label={T('引导：P 与 O 的前后对照')}>
                   <thead>
                     <tr>
-                      <th scope="col">观察 t{query}</th>
-                      <th scope="col">改动前</th>
-                      <th scope="col">改动后</th>
+                      <th scope="col">{Tx('观察 t{#0}', query)}</th>
+                      <th scope="col">{T('改动前')}</th>
+                      <th scope="col">{T('改动后')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <th scope="row">权重 P[{query}]</th>
+                      <th scope="row">{Tx('权重 P[{#0}]', query)}</th>
                       <td data-testid="guided-probability-before">
                         {vector(baseline.probabilities[query])}
                       </td>
@@ -269,7 +285,7 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
                       </td>
                     </tr>
                     <tr>
-                      <th scope="row">输出 O[{query}]</th>
+                      <th scope="row">{Tx('输出 O[{#0}]', query)}</th>
                       <td data-testid="guided-output-before">{vector(baseline.output[query])}</td>
                       <td data-testid="guided-output-after" className="guided-changed">
                         {vector(result.output[query])}
@@ -279,18 +295,23 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
                 </table>
               </div>
               <p>
-                P 只由 Q、K 和 Mask 决定。V 提供被取出的内容，因此 O[{query},0] 变化了{' '}
-                <strong>{fmt(outputDifference)}</strong>；第二个输出分量不变。
+                {Tx(
+                  'P 只由 Q、K 和 Mask 决定。V 提供被取出的内容，因此 O[{#0},0] 变化了 {#1}；第二个输出分量不变。',
+                  query,
+                  <strong>{fmt(outputDifference)}</strong>,
+                )}
               </p>
               <Formula
                 expression={`\\Delta O_{${query},0}=P_{${query},1}\\,\\Delta V=${fmt(result.probabilities[query][1])}\\times(${fmt(state.input.valueDelta)})\\approx ${fmt(outputDifference)}`}
               />
               <div className="guided-recall">
-                <strong>试着复述</strong>
-                <p>为什么“取多少”没有变，“取出的内容”却变了？在自由探索中，试试改 K 作对照。</p>
+                <strong>{T('试着复述')}</strong>
+                <p>
+                  {T('为什么“取多少”没有变，“取出的内容”却变了？在自由探索中，试试改 K 作对照。')}
+                </p>
               </div>
               <button className="button primary" onClick={onFinish}>
-                保留结果，自由探索
+                {T('保留结果，自由探索')}
               </button>
             </>
           )}
@@ -298,15 +319,13 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
 
         <figure className="guided-figure">
           <figcaption>
-            <strong>当前已计算结果</strong>
-            <span>
-              观察 t{query}“{words[query]}”
-            </span>
+            <strong>{T('当前已计算结果')}</strong>
+            <span>{Tx('观察 t{#0}“{#1}”', query, words[query])}</span>
           </figcaption>
           <svg
             viewBox="0 0 520 205"
             role="img"
-            aria-label="固定 Q 和 K 计算权重 P，再用 P 对 V 加权得到输出 O"
+            aria-label={T('固定 Q 和 K 计算权重 P，再用 P 对 V 加权得到输出 O')}
           >
             <defs>
               <marker
@@ -328,10 +347,10 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
             />
             <rect x="18" y="28" width="129" height="55" rx="3" className="guided-node-fixed" />
             <text x="82" y="51" textAnchor="middle">
-              Q、K 固定
+              {T('Q、K 固定')}
             </text>
             <text x="82" y="70" textAnchor="middle" className="guided-svg-small">
-              匹配与打分
+              {T('匹配与打分')}
             </text>
             <rect
               x="193"
@@ -342,17 +361,17 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
               className="guided-node-probability"
             />
             <text x="262" y="51" textAnchor="middle">
-              权重 P[{query}]
+              {Tx('权重 P[{#0}]', query)}
             </text>
             <text x="262" y="70" textAnchor="middle" className="guided-svg-small">
-              从哪里取多少
+              {T('从哪里取多少')}
             </text>
             <rect x="387" y="28" width="116" height="55" rx="3" className="guided-node-output" />
             <text x="445" y="51" textAnchor="middle">
-              输出 O[{query}]
+              {Tx('输出 O[{#0}]', query)}
             </text>
             <text x="445" y="70" textAnchor="middle" className="guided-svg-small">
-              加权求和
+              {T('加权求和')}
             </text>
             <rect
               x="193"
@@ -365,17 +384,17 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
               }
             />
             <text x="262" y="135" textAnchor="middle">
-              内容 V
+              {T('内容 V')}
             </text>
             <text x="262" y="154" textAnchor="middle" className="guided-svg-small">
-              这次只改这一项
+              {T('这次只改这一项')}
             </text>
             <text x="385" y="186" textAnchor="middle" className="guided-svg-small">
-              P 决定比例，V 提供内容
+              {T('P 决定比例，V 提供内容')}
             </text>
           </svg>
           <div className="guided-weight-row">
-            <strong>取用比例 P[{query}]</strong>
+            <strong>{Tx('取用比例 P[{#0}]', query)}</strong>
             {result.probabilities[query].map((value, j) => (
               <div key={j}>
                 <span>
@@ -387,34 +406,37 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
           </div>
           <div className="guided-values">
             <div>
-              <span>已计算的 V[1,0]</span>
+              <span>{T('已计算的 V[1,0]')}</span>
               <strong>{fmt(result.v[1][0])}</strong>
               <small>
-                偏移 ΔV ={' '}
-                <output data-testid="guided-applied-delta">{fmt(state.input.valueDelta)}</output>
+                {Tx(
+                  '偏移 ΔV = {#0}',
+                  <output data-testid="guided-applied-delta">{fmt(state.input.valueDelta)}</output>,
+                )}
               </small>
             </div>
             <div>
-              <span>输出 O[{query}]</span>
+              <span>{Tx('输出 O[{#0}]', query)}</span>
               <strong>{vector(result.output[query])}</strong>
-              <small>二维向量 · 非词表概率</small>
+              <small>{T('二维向量 · 非词表概率')}</small>
             </div>
           </div>
           <p className="guided-figure-note">
-            教学示例：3 个位置、2 维行向量。因果 Mask 开启；固定 Q/K，只在投影后干预
-            V。显示时舍入，计算保留精度。
+            {T(
+              '教学示例：3 个位置、2 维行向量。因果 Mask 开启；固定 Q/K，只在投影后干预 V。显示时舍入，计算保留精度。',
+            )}
           </p>
         </figure>
       </div>
 
       <footer className="guided-controls">
         <button className="button secondary" onClick={back} disabled={stage === 0}>
-          ← 上一步
+          {T('← 上一步')}
         </button>
         <button className="guided-restart" onClick={restart}>
-          从头再做
+          {T('从头再做')}
         </button>
-        <span>从头再做会恢复这组教学示例。</span>
+        <span>{T('从头再做会恢复这组教学示例。')}</span>
       </footer>
     </section>
   );

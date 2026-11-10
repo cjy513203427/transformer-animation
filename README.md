@@ -15,12 +15,15 @@ npm run dev
 
 P1 的八个入口见下表；顶部“学习目录”按阶段展开，当前实验与所在位置始终显示。用“上一实验 / 下一实验”按顺序推进，不需要横向滚动寻找入口。
 
+界面有中文、英文、德文三种语言：中文在根路径（`/attention`），英文、德文加前缀（`/en/attention`、`/de/attention`），页头可切换并保留当前实验状态。英德页面的原书链接指向英文版原书。代码里的中文原文写在 `T(…)` / `Tx(…)` 中，译文在 `src/i18n/catalog/`；新增或修改文案的流程见 [界面语言](docs/i18n.md)。
+
 ```powershell
 npm run check             # 类型检查、数值与状态测试、生产构建
 npm run test:e2e          # 本机 Chrome：桌面与手机尺寸交互测试
 npm run preview          # 预览 dist，http://127.0.0.1:4173
 npm run build:cloudflare  # 生成并校验 Cloudflare Build Output，不发布
 npm run format           # 格式化项目源码
+npm run i18n -- check    # 核对英文、德文翻译目录（todo / merge 见 docs/i18n.md）
 ```
 
 推送到 `main` 后由 Cloudflare Workers Builds 自动检查并部署（公开 workers.dev），配置见 `wrangler.jsonc`；本地可用 `npx wrangler deploy --dry-run` 检查。

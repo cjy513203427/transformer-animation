@@ -1,6 +1,7 @@
 import { SvgRich } from '../../components/Tex';
 import { formatNumber as fmt, type Matrix } from '../../math/attention';
 import { MH_WEIGHTS, MH_X, type MultiHeadResult } from '../../math/multihead';
+import { T } from '../../i18n';
 
 export const HEAD_COLORS = ['#4d622f', '#c0507a', '#5262c4', '#a8741f'];
 const CW = 34;
@@ -251,19 +252,19 @@ export function MultiHeadDiagram({
     matrix.map((row) => row.slice(h * dKey, (h + 1) * dKey));
   const shape = (dims: number[]) => `[${dims.join(', ')}]`;
   const titles = [
-    `一次投影：X ${shape([3, 4])} × W ${shape([4, 4])}`,
-    `切分多头：${shape([3, 4])} → ${shape([3, numHeads, dKey])}`,
-    `矩阵变形：→ ${shape([numHeads, 3, dKey])}`,
-    `每个头独立计算：P_h ${shape([3, 3])}，A_h ${shape([3, dKey])}`,
-    `Concatenate：→ A ${shape([3, 4])}`,
-    `输出投影：A × W_O → Output ${shape([3, 4])}`,
+    T('一次投影：X {#0} × W {#1}', shape([3, 4]), shape([4, 4])),
+    T('切分多头：{#0} → {#1}', shape([3, 4]), shape([3, numHeads, dKey])),
+    T('矩阵变形：→ {#0}', shape([numHeads, 3, dKey])),
+    T('每个头独立计算：P_h {#0}，A_h {#1}', shape([3, 3]), shape([3, dKey])),
+    T('Concatenate：→ A {#0}', shape([3, 4])),
+    T('输出投影：A × W_O → Output {#0}', shape([3, 4])),
   ];
   return (
     <svg
       className="mh-diagram"
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       role="img"
-      aria-label={`多头注意力第 ${step + 1} 步，${titles[step]}`}
+      aria-label={T('多头注意力第 {#0} 步，{#1}', step + 1, titles[step])}
     >
       <defs>
         <pattern
@@ -385,10 +386,16 @@ export function MultiHeadDiagram({
           {`$A=\\operatorname{Concat}(${heads.map((h) => `A_{${h + 1}}`).join(',\\,')})$  [3, 4]`}
         </Label>
         <Label x={WIDTH / 2} y={ROW_Y[1] + 3 * CH + 30} anchor="middle">
-          {`[${numHeads}, 3, ${dKey}] → 转置 [3, ${numHeads}, ${dKey}] → view [3, 4]`}
+          {T(
+            '[{#0}, 3, {#1}] → 转置 [3, {#2}, {#3}] → view [3, 4]',
+            numHeads,
+            dKey,
+            numHeads,
+            dKey,
+          )}
         </Label>
         <Label x={WIDTH / 2} y={ROW_Y[1] + 3 * CH + 52} anchor="middle" tone="#6f6c65">
-          拼接只是并排摆放，头与头之间还没有交流
+          {T('拼接只是并排摆放，头与头之间还没有交流')}
         </Label>
       </g>
       <g className="mh-overlay" style={{ opacity: step === 5 ? 1 : 0 }} aria-hidden="true">
@@ -402,10 +409,10 @@ export function MultiHeadDiagram({
           = Output [3, 4]
         </Label>
         <Label x={WIDTH / 2} y={310} anchor="middle" tone="#6f6c65">
-          {'$W_O$ 的每一列都读取 A 的全部列：每个输出数都混合了所有头'}
+          {T('$W_O$ 的每一列都读取 A 的全部列：每个输出数都混合了所有头')}
         </Label>
         <Label x={WIDTH / 2} y={332} anchor="middle" tone="#6f6c65">
-          {'$W_O$ 左侧色条：这几行只与对应头的 A 列相乘'}
+          {T('$W_O$ 左侧色条：这几行只与对应头的 A 列相乘')}
         </Label>
       </g>
 
