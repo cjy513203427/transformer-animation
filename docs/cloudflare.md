@@ -16,8 +16,18 @@
 本地检查部署配置（会构建，但不上传、不需要登录）：
 
 ```powershell
-npx wrangler deploy --dry-run
+npm run deploy -- --dry-run
 ```
+
+手动发布到同一个 Worker：
+
+```powershell
+npm run deploy
+```
+
+这两个命令都会先运行 `predeploy`，仅清理项目内生成的 `.cloudflare/output/`，再调用 Wrangler。清理可重复执行，不会删除 `cloudflare.config.ts`、`wrangler.jsonc` 或源代码。
+
+如果之前运行过 `npm run build:cloudflare`，直接执行 `npx wrangler deploy` 会因检测到 Cloudflare Build Output 而拒绝发布。使用上面的 npm 命令即可清理旧产物并重新构建 `dist/`。本项目生产发布仍使用 `wrangler.jsonc`；不要仅因为报错提示就改用 `cf deploy`，后者使用 `cloudflare.config.ts` 的另一套构建与配置。
 
 ## 访问范围
 
@@ -42,6 +52,7 @@ npx wrangler deploy --dry-run
 - `cloudflare.config.ts`：供新的 `cf` CLI 使用，名称与 URL 设置需和 `wrangler.jsonc` 保持一致。
 - `vite.config.ts`：仅 `--mode cloudflare` 加载 Cloudflare Vite 插件，生成 `.cloudflare/output/v0/`；普通开发、`npm run build` 和 wrangler 部署（`--mode deploy`）都不加载该插件，输出 `dist/`。
 - `cf` 与 Cloudflare Vite 插件采用官方 beta 版本，配置 API 仍可能变化。
+- 这项构建会留下 `.cloudflare/output/`；之后本地发布请使用 `npm run deploy`，由 `predeploy` 清理该目录。
 
 ```powershell
 npm run build:cloudflare
@@ -57,4 +68,4 @@ GitHub Actions（`.github/workflows/check.yml`）只做检查和构建，不部�
 - [workers.dev 路由与访问范围](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
 - [Cloudflare CLI 构建与发布](https://developers.cloudflare.com/cf/projects/)
 
-核对日期：2026-11-09。
+核对日期：2026-11-10。

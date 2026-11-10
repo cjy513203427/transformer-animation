@@ -26,7 +26,7 @@ npm run format           # 格式化项目源码
 npm run i18n -- check    # 核对英文、德文翻译目录（todo / merge 见 docs/i18n.md）
 ```
 
-推送到 `main` 后由 Cloudflare Workers Builds 自动检查并部署（公开 workers.dev），配置见 `wrangler.jsonc`；本地可用 `npx wrangler deploy --dry-run` 检查。
+推送到 `main` 后由 Cloudflare Workers Builds 自动检查并部署（公开 workers.dev），配置见 `wrangler.jsonc`；本地用 `npm run deploy -- --dry-run` 检查，`npm run deploy` 手动发布。这两个命令会先清理 `cf build` 留下的 `.cloudflare/output/`，避免与 Wrangler 冲突；详见 [部署说明](docs/cloudflare.md)。
 
 浏览器测试默认使用已安装的 Google Chrome。若环境没有 Chrome，可先运行 `npx playwright install chrome`。CI 包含该安装步骤。移动测试为 Chrome 触摸/窄屏模拟，并启用 reduced-motion，不代表真实 iOS Safari 测试。
 

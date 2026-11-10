@@ -12,6 +12,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "build:deploy": "tsc --noEmit && vitest run && vite build --mode deploy",
     "build:cloudflare": "tsc --noEmit && cf build --mode cloudflare",
+    "predeploy": "node -e \"require('node:fs').rmSync('.cloudflare/output', { recursive: true, force: true })\"",
+    "deploy": "wrangler deploy",
     "format": "prettier --write src tests *.config.ts *.json index.html README.md docs .github",
     "i18n": "node scripts/i18n.mjs",
     "typecheck": "tsc --noEmit",
