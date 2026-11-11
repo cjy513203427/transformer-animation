@@ -128,7 +128,7 @@ export default function MoELab() {
           <h1>{Tx('MoE：一个 token {#0}', <span>{T('怎样经过多个专家')}</span>)}</h1>
           <p>
             {T(
-              '4 个 token、4 个专家，从 Router 打分到加权合并逐步手算。 试着改变输入与 Top-K，观察谁被选中、哪些参数参与计算，以及跨设备传了什么。',
+              'MoE 模型里有很多个“专家”网络，但每个 token 只会被送到其中几个。这里有 4 个 token、4 个专家，你可以一步步手算：Router 怎样打分、怎样选出 Top-K、结果怎样加权合并。改一改输入和 Top-K，看看谁被选中、哪些参数真的参与了计算，以及多张卡之间要传些什么。',
             )}
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function MoELab() {
         <div className="lesson-panel-heading">
           <div>
             <span className="lesson-eyebrow">{T('动手验证：只改专家的输出，会改变路由吗？')}</span>
-            <h2>{T('打分 → 选专家 → 计算 → 按原 token 合并。')}</h2>
+            <h2>{T('先给专家打分、选出几个，让它们各自计算，最后按原来的 token 合并回去。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {MOE_STEP_COUNT}

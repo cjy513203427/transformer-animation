@@ -425,11 +425,11 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
       <section className="recall-card">
         <div>
           <span className="section-kicker">{T('离开之前 · 试着复述')}</span>
-          <h2>{Tx('把这 {#0} 步连成一条计算链。', topic.steps.length)}</h2>
+          <h2>{Tx('合上说明，把这 {#0} 步从头讲一遍。', topic.steps.length)}</h2>
           <p>
             {Tx(
-              '{#0}。改变哪个输入会影响什么？哪些结论有条件？',
-              topic.steps.map((s) => s.name).join(' → '),
+              '用自己的话串起{#0}：每一步为什么需要？改动一个输入，会影响后面哪些数？哪些结论只在特定条件下才成立？',
+              topic.steps.map((s) => s.name).join(T('、')),
             )}
           </p>
         </div>

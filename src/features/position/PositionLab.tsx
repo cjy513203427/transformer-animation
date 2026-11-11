@@ -211,7 +211,7 @@ export default function PositionLab() {
           <h1>{Tx('位置编码：顺序从{#0}进入计算', <span>{T('哪里')}</span>)}</h1>
           <p>
             {T(
-              '在同一条 Attention 计算链上，对照加法位置编码、RoPE 与 ALiBi 各自加在哪一步、改了哪些数。',
+              'Attention 本身分不清词的先后顺序。这一页沿着同一条 Attention 计算，看看三种常见做法分别在哪一步把位置加进去：加在输入上的位置编码、旋转 Q 和 K 的 RoPE、直接修改分数的 ALiBi，以及它们各自改动了哪些数。',
             )}
           </p>
         </div>
@@ -237,8 +237,8 @@ export default function PositionLab() {
       <section className="lesson-panel pos-panel" aria-label={T('位置编码逐步实验')}>
         <div className="lesson-panel-heading">
           <div>
-            <span className="lesson-eyebrow">{T('同一个问题：模型怎样知道“谁在谁前面”')}</span>
-            <h2>{T('一条计算链，三个可以加入位置的入口。')}</h2>
+            <span className="lesson-eyebrow">{T('这一页想弄明白：模型怎样知道“谁在谁前面”')}</span>
+            <h2>{T('同一条计算链上，有三个地方可以把位置加进去。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {POSITION_STEP_COUNT}

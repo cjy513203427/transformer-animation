@@ -137,7 +137,7 @@ export default function KVLab() {
           <h1>{Tx('KV 架构对照：缓存里{#0}', <span>{T('到底存什么')}</span>)}</h1>
           <p>
             {T(
-              '同一个缓存公式：MHA、GQA、MQA 通过减少 KV 头缩小它；MLA 改为缓存一个低维 latent 和一个共享的 RoPE Key。所有数值在浏览器内实际计算。',
+              '生成时，每一层都要把历史 token 的 K 和 V 存起来，这就是 KV 缓存，它常常比你想的大得多。这一页用同一个公式算缓存大小：MHA、GQA、MQA 靠减少 KV 头来缩小它；MLA 换了一种思路，只存一个低维的 latent 和一个共享的 RoPE Key。所有数字都在浏览器里实际算出。',
             )}
           </p>
         </div>
@@ -165,9 +165,9 @@ export default function KVLab() {
         <div className="lesson-panel-heading">
           <div>
             <span className="lesson-eyebrow">
-              {T('同一个问题：每个 token 要在缓存里留下多少个数')}
+              {T('这一页想弄明白：每个 token 要在缓存里留下多少个数')}
             </span>
-            <h2>{T('从缓存公式出发，对照四种 KV 设计。')}</h2>
+            <h2>{T('先列出缓存公式，再看四种 KV 设计分别改动了其中哪一项。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {KV_STEP_COUNT}

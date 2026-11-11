@@ -149,7 +149,7 @@ export default function FlashLab() {
           <h1>{Tx('FlashAttention：{#0}', <span>{T('分块，为什么结果不变？')}</span>)}</h1>
           <p>
             {T(
-              '4 个位置、2 维向量。逐块读取 K / V，跟踪在线最大值、归一化总量和输出累积，再与完整 Attention 核对。',
+              'FlashAttention 算的还是同一个 Attention 公式，只是换了计算顺序：一块一块地读 K 和 V，从不把完整的分数矩阵存下来。这里有 4 个位置、每个 2 维，你会跟踪三个随读随更新的量：目前的最大值、归一化总量和输出累积。最后和一次算完的 Attention 对照，看结果是否一致。',
             )}
           </p>
         </div>

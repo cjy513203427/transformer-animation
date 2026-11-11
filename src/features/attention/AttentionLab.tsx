@@ -301,7 +301,9 @@ export default function AttentionLab() {
           <div className="eyebrow">{Tx('模型原理 {#0} 第 3、9–12 章', <span>{T('／')}</span>)}</div>
           <h1>{Tx('{#0}：信息怎样在词之间流动', <span>Attention</span>)}</h1>
           <p>
-            {T('一个词如何读取上下文？从 Transformer 架构到 Q、K、V，用三个位置核对完整计算。')}
+            {T(
+              '一个词怎样“读”到上下文里的其他词？先看 Attention 在整个模型里的位置，再把它拆成 Q、K、V，用三个词、每个词两个数，把整条计算亲手核对一遍。第一次来的话，点下面的“跟着做一次”。',
+            )}
           </p>
         </div>
         <button className="button secondary share-button" onClick={() => void copyLink()}>

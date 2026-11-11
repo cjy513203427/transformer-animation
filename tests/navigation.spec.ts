@@ -34,7 +34,10 @@ test('学习目录分四阶段，14个实验顺序明确，当前项与键盘关
     await expect(directory.getByRole('heading', { name: new RegExp(group) })).toBeVisible();
   }
   const links = directory.getByRole('link');
-  await expect(links).toHaveCount(14);
+  // 14 experiments, then the introduction linked from the note below them.
+  await expect(links).toHaveCount(15);
+  await expect(links.nth(14)).toHaveAccessibleName('00 导读');
+  await expect(links.nth(14)).toHaveAttribute('href', '/');
   for (const [i, title] of orderedTitles.entries()) {
     await expect(links.nth(i)).toHaveAccessibleName(title);
     await expect(links.nth(i)).toContainText(String(i + 1).padStart(2, '0'));
@@ -72,6 +75,7 @@ test('上一与下一实验跨阶段衔接，首尾边界明确，目录可直�
   await directory.getByRole('link', { name: '跟图理解 Attention', exact: true }).click();
   await expect(page).toHaveURL(/\/attention$/);
   await expect(header.getByRole('link', { name: /^上一实验：/ })).toHaveCount(0);
+  await expect(header.getByRole('link', { name: /^回到导读：/ })).toHaveAttribute('href', '/');
   await expect(header.getByRole('link', { name: '下一实验：位置编码', exact: true })).toBeVisible();
 
   const lastDirectory = await openDirectory(page);
@@ -98,4 +102,38 @@ test('目录选择当前实验只收起目录，保留已分享的参数和步�
   expect(new URL(page.url()).hash).toBe(hash);
   await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
   await expect(page.locator('.flash-inputs')).toContainText('当前 ΔK[3,0] = 1');
+});
+
+test('根路径是导读：接词演示用 Softmax 实际计算，学习路径链接到各实验', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.locator('h1')).toHaveText('开始之前：大语言模型到底在做什么？');
+  await expect(page.locator('.course-location')).toContainText('导读');
+  await expect(page.locator('.site-brand')).toHaveAttribute('href', '/');
+
+  // Scores 2.1, 1.5, 0.4, −0.3 → softmax ≈ 54.9%, 30.1%, 10.0%, 5.0%; the shares sum to 100%.
+  const demo = page.locator('.intro-demo');
+  const shares = await demo.locator('.intro-candidates strong').allTextContents();
+  expect(shares).toEqual(['54.9%', '30.1%', '10.0%', '5.0%']);
+  await demo.getByRole('button', { name: /^选择“咖啡”/ }).click();
+  await expect(demo.locator('.intro-sentence')).toContainText('早上我想来一杯咖啡');
+  // Choosing the full stop ends the sentence before the third round.
+  await demo.getByRole('button', { name: /^选择“。（句号）”/ }).click();
+  await expect(demo.locator('.intro-sentence')).toContainText('早上我想来一杯咖啡。');
+  await expect(demo.locator('.intro-candidates')).toHaveCount(0);
+  await demo.getByRole('button', { name: '重新开始', exact: true }).click();
+  await expect(demo.locator('.intro-candidates button')).toHaveCount(4);
+
+  await expect(page.locator('.intro-path a')).toHaveCount(14);
+  await expect(page.getByRole('link', { name: /^从 跟图理解 Attention 开始/ })).toHaveAttribute(
+    'href',
+    '/attention',
+  );
+  const continued = page.getByRole('navigation', { name: '按顺序继续学习', exact: true });
+  await expect(
+    continued.getByRole('link', { name: '下一实验：跟图理解 Attention', exact: true }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  expect(errors).toEqual([]);
 });

@@ -7,7 +7,7 @@ const AttentionLab = lazy(() => import('./features/attention/AttentionLab'));
 
 /** Each experiment loads only when its path is opened. Paths exclude the /en or /de prefix. */
 const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
-  '/': AttentionLab,
+  '/': lazy(() => import('./features/intro/IntroPage')),
   '/attention': AttentionLab,
   '/position': lazy(() => import('./features/position/PositionLab')),
   '/inference-cache': lazy(() => import('./features/inference/InferenceLab')),

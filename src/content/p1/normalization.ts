@@ -11,10 +11,10 @@ export default {
   title: T('归一化：缩放和概率是一回事吗？'),
   chapter: T('第 6 章'),
   intro: T(
-    '从原书 6.2.4 的 [22, 5, 6, 8] 出发，手算均值、方差、LayerNorm、RMSNorm 与 Softmax，再验证整行平移会改变哪些结果。',
+    '这一页从原书 6.2.4 的四个数 [22, 5, 6, 8] 出发。你会亲手算出平均值和方差，用它们做 LayerNorm 和 RMSNorm，再让 Softmax 把分数变成概率。最后给整行加上同一个数，看看哪些结果会变、哪些不会。',
   ),
-  question: T('同一个问题：一行数字怎样被整理到合适的尺度，或变成概率'),
-  headline: T('统计 → LayerNorm → RMSNorm → γ、β → Softmax → 平移对照。'),
+  question: T('这一页想弄明白：一行数字怎样被整理到合适的尺度，或变成概率'),
+  headline: T('先把一行数字拉回统一的尺度，再把分数变成概率。'),
   why: {
     question: T('为什么需要 LayerNorm 和 Softmax？'),
     points: [

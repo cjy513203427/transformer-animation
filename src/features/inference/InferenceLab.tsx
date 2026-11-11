@@ -224,7 +224,7 @@ export default function InferenceLab() {
           <h1>{Tx('训练、生成与缓存：哪些结果{#0}', <span>{T('可以复用')}</span>)}</h1>
           <p>
             {T(
-              '同一个两层小模型：训练时一次算出所有位置；生成时先 Prefill，再一步一个 Decode，并用 KV 缓存跳过重复计算。',
+              '训练时整句话都已知，模型可以一次算出所有位置；真正生成时，却只能一个词一个词地往外出。这一页用一个两层的小模型把两种情况放在一起看：先用 Prefill 读入提示，再一步一个 Decode，最后看看 KV 缓存怎样省掉重复的计算。',
             )}
           </p>
         </div>
@@ -250,8 +250,10 @@ export default function InferenceLab() {
       <section className="lesson-panel inf-panel" aria-label={T('训练、生成与缓存逐步实验')}>
         <div className="lesson-panel-heading">
           <div>
-            <span className="lesson-eyebrow">{T('同一个问题：哪些计算必须做，哪些可以复用')}</span>
-            <h2>{T('从训练到生成，一个两层小模型的完整账本。')}</h2>
+            <span className="lesson-eyebrow">
+              {T('这一页想弄明白：哪些计算必须做，哪些可以复用')}
+            </span>
+            <h2>{T('从训练到生成，跟着一个两层小模型，把每一笔计算都记下来。')}</h2>
           </div>
           <span className="lesson-progress">
             {state.step + 1} / {INFERENCE_STEP_COUNT}

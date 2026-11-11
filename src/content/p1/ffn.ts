@@ -11,10 +11,10 @@ export default {
   title: T('FFN 与残差：一行向量怎样被变换？'),
   chapter: T('第 7、13 章'),
   intro: T(
-    '四个 token、每个两维：经过升维、ReLU 和降维，再加回原输入。切换训练与推理，查看固定种子的 Dropout 掩码。',
+    '这里有四个 token，每个只有两个数。你会看到 FFN 先把它们拉宽到更多维、经过 ReLU、再压回两维，然后把原来的输入加回去，这就是残差。最后切换训练和推理模式，看看 Dropout 什么时候才起作用。',
   ),
-  question: T('同一个问题：Attention 读完上下文之后，每个位置还要怎样加工'),
-  headline: T('升维 → ReLU → 降维 → 残差相加 → Dropout → 运行对照。'),
+  question: T('这一页想弄明白：Attention 读完上下文之后，每个位置还要怎样加工'),
+  headline: T('每个位置单独加工一遍，再把原来的输入加回去。'),
   why: {
     question: T('为什么每个 Block 里还要有 FFN、残差和 Dropout？'),
     points: [

@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-打开 <http://127.0.0.1:5173/attention>（根路径也显示同一实验）、<http://127.0.0.1:5173/position>、<http://127.0.0.1:5173/inference-cache>、<http://127.0.0.1:5173/kv-architectures>、<http://127.0.0.1:5173/moe> 与 <http://127.0.0.1:5173/flash-attention>。
+打开 <http://127.0.0.1:5173/>（导读：大模型在做什么、各实验在流水线上的位置、怎么使用这些实验）、<http://127.0.0.1:5173/attention>、<http://127.0.0.1:5173/position>、<http://127.0.0.1:5173/inference-cache>、<http://127.0.0.1:5173/kv-architectures>、<http://127.0.0.1:5173/moe> 与 <http://127.0.0.1:5173/flash-attention>。
 
 P1 的八个入口见下表；顶部“学习目录”按阶段展开，当前实验与所在位置始终显示。用“上一实验 / 下一实验”按顺序推进，不需要横向滚动寻找入口。
 
@@ -161,6 +161,7 @@ P0 六个主题与 P1 八组主题均已有可计算实验，共14个入口。�
 
 ```text
 src/
+  features/intro/       根路径导读：接词演示、流水线、术语与学习路径
   features/attention/   Attention 实验：架构导读、单头、动手核对、多头
   features/position/    位置编码实验：计算链入口图与各步骤组件
   features/inference/   训练、生成与缓存实验：缓存概念图与各步骤组件

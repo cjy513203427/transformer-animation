@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BOOK_URL } from '../content/book';
-import { ROADMAP, TOPICS, TOPIC_GROUPS, type TopicId } from '../content/topics';
+import { INTRO, ROADMAP, TOPICS, TOPIC_GROUPS, type TopicId } from '../content/topics';
 import {
   HTML_LANG,
   LOCALE,
@@ -50,7 +50,8 @@ export function AppShell({
   title,
   children,
 }: {
-  active: TopicId;
+  /** The current experiment, or the introduction that precedes them. */
+  active: TopicId | 'intro';
   crumb: string;
   indicator: string;
   title: string;
@@ -58,11 +59,15 @@ export function AppShell({
 }) {
   const [directoryOpen, setDirectoryOpen] = useState(false);
   const directoryButton = useRef<HTMLButtonElement>(null);
+  const intro = active === 'intro';
   const activeIndex = TOPICS.findIndex((topic) => topic.id === active);
-  const current = TOPICS[activeIndex],
-    previous = TOPICS[activeIndex - 1],
+  const current = intro ? INTRO : TOPICS[activeIndex];
+  // The first experiment leads back to the introduction; the introduction leads into it.
+  const previous = intro ? undefined : activeIndex === 0 ? INTRO : TOPICS[activeIndex - 1],
     next = TOPICS[activeIndex + 1];
-  const groupIndex = TOPIC_GROUPS.findIndex((group) => group.id === current.group);
+  const previousIsIntro = previous === INTRO;
+  const group = intro ? undefined : TOPICS[activeIndex].group;
+  const groupIndex = TOPIC_GROUPS.findIndex((g) => g.id === group);
   useEffect(() => {
     document.title = T('{#0} · LLM 原理实验室', title);
   }, [title]);
@@ -94,11 +99,7 @@ export function AppShell({
       </a>
       <header className="site-header">
         <div className="masthead">
-          <a
-            className="site-brand"
-            href={localePath('/attention')}
-            aria-label={T('LLM 原理实验室首页')}
-          >
+          <a className="site-brand" href={localePath('/')} aria-label={T('LLM 原理实验室首页')}>
             <span className="site-brand-mark" aria-hidden="true">
               <i />
               <i />
@@ -117,12 +118,14 @@ export function AppShell({
           <div className="course-toolbar">
             <div className="course-location">
               <span>
-                {Tx(
-                  '学习顺序 · 阶段 {#0} / {#1} · {#2}',
-                  groupIndex + 1,
-                  TOPIC_GROUPS.length,
-                  TOPIC_GROUPS[groupIndex].title,
-                )}
+                {intro
+                  ? T('学习顺序 · 开始之前')
+                  : Tx(
+                      '学习顺序 · 阶段 {#0} / {#1} · {#2}',
+                      groupIndex + 1,
+                      TOPIC_GROUPS.length,
+                      TOPIC_GROUPS[groupIndex].title,
+                    )}
               </span>
               <strong>
                 <span className="course-position">
@@ -134,8 +137,15 @@ export function AppShell({
             <div className="course-actions">
               <div className="course-arrows" aria-label={T('相邻实验')}>
                 {previous ? (
-                  <a href={previous.href} aria-label={T('上一实验：{#0}', previous.title)}>
-                    ← <span>{T('上一实验')}</span>
+                  <a
+                    href={previous.href}
+                    aria-label={
+                      previousIsIntro
+                        ? T('回到导读：{#0}', previous.subtitle)
+                        : T('上一实验：{#0}', previous.title)
+                    }
+                  >
+                    ← <span>{previousIsIntro ? INTRO.title : T('上一实验')}</span>
                   </a>
                 ) : (
                   <span className="course-arrow-disabled" aria-disabled="true">
@@ -222,6 +232,22 @@ export function AppShell({
             <p className="course-directory-note">
               {T(
                 '编号表示建议学习顺序，与原书章节编号不同；可按顺序学习，也可直接跳到需要的实验。',
+              )}{' '}
+              {Tx(
+                '第一次来？先读 {#0}。',
+                <a
+                  href={INTRO.href}
+                  aria-current={intro ? 'page' : undefined}
+                  onClick={(event) => {
+                    if (intro) {
+                      event.preventDefault();
+                      setDirectoryOpen(false);
+                      directoryButton.current?.focus();
+                    }
+                  }}
+                >
+                  {Tx('{#0} 导读', INTRO.number)}
+                </a>,
               )}
             </p>
           </nav>
@@ -233,8 +259,15 @@ export function AppShell({
           {children}
           <nav className="course-pagination" aria-label={T('按顺序继续学习')}>
             {previous ? (
-              <a href={previous.href} aria-label={T('上一实验：{#0}', previous.title)}>
-                <span>{T('← 上一实验')}</span>
+              <a
+                href={previous.href}
+                aria-label={
+                  previousIsIntro
+                    ? T('回到导读：{#0}', previous.subtitle)
+                    : T('上一实验：{#0}', previous.title)
+                }
+              >
+                <span>{previousIsIntro ? T('← 开始之前') : T('← 上一实验')}</span>
                 <strong>
                   {previous.number} · {previous.title}
                 </strong>

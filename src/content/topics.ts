@@ -142,4 +142,12 @@ export const TOPICS: Topic[] = TOPIC_DEFINITIONS.map((topic, index) => ({
   number: String(index + 1).padStart(2, '0'),
 }));
 
+/** The introduction at the site root; it comes before the numbered experiments. */
+export const INTRO = {
+  href: localePath('/'),
+  number: '00',
+  title: T('导读'),
+  subtitle: T('大模型在做什么，这里怎么学'),
+};
+
 export const ROADMAP = ['Tokenization / BPE', T('学习率与 Scaling Law'), T('提示与推理预算')];

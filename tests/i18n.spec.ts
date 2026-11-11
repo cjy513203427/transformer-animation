@@ -305,6 +305,38 @@ for (const locale of ['en', 'de'] as const)
       });
   });
 
+for (const locale of ['en', 'de'] as const)
+  test(`${locale} introduction is fully translated, fits the screen and links in its language`, async ({
+    page,
+  }) => {
+    const problems: string[] = [];
+    page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+    page.on('console', (message) => {
+      if (message.text().includes('[i18n] missing')) problems.push(message.text());
+    });
+    await page.goto(`/${locale}/`);
+    await expect(page.locator('h1').first()).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('lang', locale);
+    const check = async (label: string) => {
+      expect(await chineseLeftovers(page), label).toEqual([]);
+      expect(await overflow(page), `${label} horizontal overflow`).toBeLessThanOrEqual(1);
+      expect(await spilledText(page), `${label} text outside its box`).toEqual([]);
+      expect(await overlappingText(page), `${label} overlapping text`).toEqual([]);
+    };
+    await check('introduction');
+    // Three rounds of the next-word demo, always taking the first candidate.
+    for (let round = 0; round < 3; round++) {
+      await page.locator('.intro-candidates button').first().click();
+      await check(`introduction, round ${round + 1}`);
+    }
+    await expect(page.locator('.intro-candidates')).toHaveCount(0);
+    for (const href of await page
+      .locator('.intro-page a[href^="/"]')
+      .evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
+      expect(href, 'intro links stay in the page language').toMatch(new RegExp(`^/${locale}/`));
+    expect(problems).toEqual([]);
+  });
+
 test('the language switch keeps the experiment and its state', async ({ page }) => {
   await page.goto('/en/moe#lab=probe');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');

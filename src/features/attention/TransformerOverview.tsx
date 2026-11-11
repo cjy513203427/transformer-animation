@@ -360,17 +360,17 @@ export function TransformerOverview({
           <h3>{current.title}</h3>
           <dl>
             <div>
-              <dt>{T('输入')}</dt>
+              <dt>{T('进来的是')}</dt>
               <dd>{current.input}</dd>
             </div>
             <div>
-              <dt>{T('计算')}</dt>
+              <dt>{T('这里做什么')}</dt>
               <dd>
                 <Rich text={current.action} />
               </dd>
             </div>
             <div>
-              <dt>{T('输出')}</dt>
+              <dt>{T('交出去的是')}</dt>
               <dd>{current.output}</dd>
             </div>
           </dl>

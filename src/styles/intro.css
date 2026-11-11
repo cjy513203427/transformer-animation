@@ -1,0 +1,362 @@
+/* The introduction reads like an article: one comfortable text column, small figures inside it. */
+:root {
+  .intro-page {
+    max-width: 860px;
+  }
+  .intro-heading {
+    margin-bottom: 18px;
+  }
+  .intro-section {
+    padding: 26px 0 8px;
+    border-top: 1px solid var(--line);
+  }
+  .intro-section > h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 10px;
+    font-size: 23px;
+    font-weight: 650;
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .intro-section > h2 > span {
+    flex-shrink: 0;
+    font: 600 14px var(--mono);
+    color: var(--teal);
+  }
+  .intro-section > p,
+  .intro-how li {
+    font-size: 16px;
+    line-height: 1.9;
+    color: #3b4245;
+  }
+  .intro-section small[lang='en'] {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  /* Next-word demo */
+  .intro-demo {
+    margin: 18px 0 20px;
+    padding: 18px 20px 14px;
+    background: var(--surface, #f6f8f7);
+    border-left: 3px solid #69a82b;
+  }
+  .intro-demo-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+  .intro-demo-head h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+  }
+  .intro-demo-head span {
+    font: 12px var(--mono);
+    color: var(--muted);
+  }
+  .intro-sentence {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    margin: 14px 0 6px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .intro-sentence-label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .intro-blank {
+    color: #69a82b;
+    font-weight: 600;
+  }
+  .intro-demo-question,
+  .intro-demo-done {
+    margin: 12px 0 8px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #3b4245;
+  }
+  .intro-candidates {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .intro-candidates button {
+    display: grid;
+    /* Fixed outer columns keep every bar starting and ending at the same x. */
+    grid-template-columns: 8.5em 5.5em minmax(60px, 1fr) 4.2em 5.5em;
+    align-items: center;
+    gap: 6px 14px;
+    width: 100%;
+    padding: 9px 12px;
+    text-align: left;
+    border: 1px solid #cbd2d0;
+    background: #fff;
+  }
+  .intro-candidate-token {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .intro-candidate-score {
+    font: 12px var(--mono);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .intro-candidate-bar {
+    height: 10px;
+    background: #e6ebe4;
+  }
+  .intro-candidate-bar i {
+    display: block;
+    height: 100%;
+    background: #69a82b;
+  }
+  .intro-candidates strong {
+    font: 600 13px var(--mono);
+    text-align: right;
+    color: #315e18;
+  }
+  .intro-candidates em {
+    font-style: normal;
+    font-size: 11px;
+    color: #527c34;
+    white-space: nowrap;
+  }
+  .intro-demo-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .intro-demo-actions:empty {
+    display: none;
+  }
+  .intro-demo-note,
+  .intro-note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  /* Pipeline */
+  .intro-stations {
+    list-style: none;
+    margin: 18px 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+  .intro-stations > li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 14px;
+    padding-bottom: 16px;
+  }
+  /* The line between station numbers shows the order of the pipeline. */
+  .intro-stations > li:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 34px;
+    bottom: 0;
+    width: 2px;
+    background: #d5e2cb;
+  }
+  .intro-station-number {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #edf4e7;
+    border: 1px solid #b9d0a8;
+    font: 600 14px var(--mono);
+    color: #315e18;
+  }
+  .intro-stations h3 {
+    margin: 4px 0 2px;
+    font-size: 16px;
+    font-weight: 650;
+    color: var(--ink);
+  }
+  .intro-stations p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #3b4245;
+  }
+  .intro-station-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin-top: 4px !important;
+    font-size: 14px !important;
+  }
+  .intro-station-later {
+    color: var(--muted) !important;
+  }
+
+  /* Glossary */
+  .intro-glossary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 28px;
+    margin: 12px 0 10px;
+  }
+  .intro-glossary > div {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  /* Glossary terms are lower case mid-sentence in English; a heading starts with a capital. */
+  .intro-glossary dt::first-letter {
+    text-transform: uppercase;
+  }
+  .intro-glossary dt {
+    font-size: 15px;
+    font-weight: 650;
+    color: var(--ink);
+  }
+  .intro-glossary dd {
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #3b4245;
+  }
+
+  /* How to use */
+  .intro-how {
+    margin: 10px 0;
+    padding-left: 1.4em;
+  }
+  .intro-how li {
+    margin: 4px 0;
+    padding-left: 4px;
+  }
+
+  /* Learning path */
+  .intro-path {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 28px;
+    margin: 16px 0 24px;
+  }
+  .intro-path h3 {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+  }
+  .intro-path h3 span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--teal);
+  }
+  .intro-path > section > p {
+    margin: 4px 0 8px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #535c60;
+  }
+  .intro-path ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .intro-path li {
+    padding: 6px 0;
+    border-top: 1px solid #edf0ee;
+  }
+  .intro-path li a {
+    display: inline-flex;
+    gap: 9px;
+    align-items: baseline;
+    text-decoration: none;
+  }
+  .intro-path li a span {
+    font: 12px var(--mono);
+    color: #73836a;
+  }
+  .intro-path li a strong {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .intro-path li a:hover strong {
+    text-decoration: underline;
+  }
+  .intro-path li small {
+    display: block;
+    margin-left: calc(2ch + 9px);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .intro-start {
+    margin-bottom: 8px;
+    text-decoration: none;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    .intro-section > h2 {
+      font-size: 20px;
+    }
+    .intro-section > p,
+    .intro-how li {
+      font-size: 15px;
+    }
+    .intro-demo {
+      padding: 14px 14px 12px;
+    }
+    .intro-sentence {
+      font-size: 17px;
+    }
+    /* Token and probability on the first line, score and bar below. */
+    .intro-candidates button {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 4px 10px;
+    }
+    .intro-candidate-token {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .intro-candidates strong {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .intro-candidates em {
+      grid-column: 3;
+      grid-row: 1;
+    }
+    .intro-candidate-score {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .intro-candidate-bar {
+      grid-column: 2 / -1;
+      grid-row: 2;
+    }
+    .intro-glossary,
+    .intro-path {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

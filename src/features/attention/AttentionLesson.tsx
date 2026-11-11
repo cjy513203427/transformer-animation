@@ -104,7 +104,7 @@ export function AttentionLesson({
     <section className="lesson-panel" aria-label={T('跟图理解 Attention')}>
       <div className="lesson-panel-heading">
         <div>
-          <span className="lesson-eyebrow">{T('Block → MHA → 一个头')}</span>
+          <span className="lesson-eyebrow">{T('从整个 Block 放大到一个头')}</span>
           <h2>{T('沿着两条支路，看懂信息怎样汇合。')}</h2>
         </div>
         <span className="lesson-progress">{state.step + 1} / 5</span>
