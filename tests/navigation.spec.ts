@@ -33,11 +33,18 @@ test('学习目录分四阶段，14个实验顺序明确，当前项与键盘关
   for (const group of ['基础计算', '生成与效率', '架构扩展', '训练与部署']) {
     await expect(directory.getByRole('heading', { name: new RegExp(group) })).toBeVisible();
   }
-  const links = directory.getByRole('link');
-  // 14 experiments, then the introduction linked from the note below them.
-  await expect(links).toHaveCount(15);
-  await expect(links.nth(14)).toHaveAccessibleName('00 导读');
-  await expect(links.nth(14)).toHaveAttribute('href', '/');
+  const links = directory.locator('ol a');
+  // 14 numbered experiments; the architecture guide and introduction have separate links.
+  await expect(links).toHaveCount(14);
+  await expect(directory.getByRole('link')).toHaveCount(16);
+  await expect(directory.getByRole('link', { name: '00 导读', exact: true })).toHaveAttribute(
+    'href',
+    '/',
+  );
+  await expect(directory.locator('.course-architecture-guide')).toHaveAttribute(
+    'href',
+    '/chapters/32#family-rwkv',
+  );
   for (const [i, title] of orderedTitles.entries()) {
     await expect(links.nth(i)).toHaveAccessibleName(title);
     await expect(links.nth(i)).toContainText(String(i + 1).padStart(2, '0'));
@@ -94,6 +101,12 @@ test('目录选择当前实验只收起目录，保留已分享的参数和步�
   state.input.keyDelta = 1;
   const hash = serializeFlashState(state);
   await page.goto('/flash-attention' + hash);
+  await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
+  await page
+    .getByRole('navigation', { name: '学习入口', exact: true })
+    .getByRole('link', { name: '按机制实验', exact: true })
+    .click();
+  expect(new URL(page.url()).hash).toBe(hash);
   await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
   const directory = await openDirectory(page);
   await directory.getByRole('link', { name: 'FlashAttention', exact: true }).click();

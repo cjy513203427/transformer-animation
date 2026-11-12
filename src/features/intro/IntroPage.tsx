@@ -4,7 +4,7 @@ import { Rich } from '../../components/Tex';
 import { GLOSSARY, GROUP_STORY, HOW_TO, PROMPT, ROUNDS, STATIONS } from '../../content/intro';
 import { TOPICS, TOPIC_GROUPS } from '../../content/topics';
 import { softmax } from '../../math/attention';
-import { LOCALE, T } from '../../i18n';
+import { LOCALE, localePath, T } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
 import '../../styles/editorial.css';
 import '../../styles/intro.css';
@@ -119,6 +119,12 @@ export default function IntroPage() {
             </p>
           </div>
         </header>
+
+        <aside className="intro-chapter-entry">
+          <strong>{T('正在跟着原书学习？')}</strong>
+          <p>{T('按章节查看核心问题、前置知识、已有实验与尚待补充的内容。')}</p>
+          <a href={localePath('/chapters')}>{T('打开 32 章与 3 个附录的知识主线 →')}</a>
+        </aside>
 
         <section className="intro-section" aria-labelledby="intro-guess">
           <h2 id="intro-guess">

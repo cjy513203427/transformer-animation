@@ -72,7 +72,7 @@ export const STATIONS: Station[] = [
     title: T('各自消化一下'),
     english: 'Feed Forward',
     text: T(
-      '每个词再单独把拿到的信息加工一遍。旁边还有归一化和残差连接：前者让数字保持在合适的大小，后者保证原来的信息不会丢。',
+      '每个词再单独把拿到的信息加工一遍。旁边还有归一化和残差连接：前者调整特征尺度，后者为原来的表示保留一条直连路径。',
     ),
     topics: ['normalization', 'ffn'],
   },

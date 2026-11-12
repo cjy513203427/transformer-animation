@@ -17,6 +17,9 @@ interface Props {
   tokenColumns?: boolean;
   parameter?: boolean;
   onSelect?: (row: number, column: number) => void;
+  columnLabels?: readonly string[];
+  rowLabels?: readonly string[];
+  axesLabel?: string;
 }
 
 export function Matrix({
@@ -29,6 +32,9 @@ export function Matrix({
   tokenColumns,
   parameter,
   onSelect,
+  columnLabels,
+  rowLabels,
+  axesLabel,
 }: Props) {
   const hintId = useId();
   return (
@@ -59,10 +65,12 @@ export function Matrix({
         >
           <thead>
             <tr>
-              <th scope="col">{parameter ? 'in ↓ out →' : tokenColumns ? 'Q ↓ K →' : 'token'}</th>
+              <th scope="col">
+                {axesLabel ?? (parameter ? 'in ↓ out →' : tokenColumns ? 'Q ↓ K →' : 'token')}
+              </th>
               {data[0].map((_, j) => (
                 <th key={j} scope="col">
-                  {tokenColumns ? `t${j}` : `d${j}`}
+                  {columnLabels?.[j] ?? (tokenColumns ? `t${j}` : `d${j}`)}
                 </th>
               ))}
             </tr>
@@ -70,10 +78,7 @@ export function Matrix({
           <tbody>
             {data.map((values, i) => (
               <tr key={i} className={i === row ? 'selected-row' : ''}>
-                <th scope="row">
-                  {parameter ? 'd' : 't'}
-                  {i}
-                </th>
+                <th scope="row">{rowLabels?.[i] ?? `${parameter ? 'd' : 't'}${i}`}</th>
                 {values.map((value, j) => (
                   <td key={j}>
                     {onSelect ? (

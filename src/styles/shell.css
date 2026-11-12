@@ -1,4 +1,20 @@
 /* A technical publication frame; interactive controls stay inside the article. */
+.study-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 6px 0 10px;
+  font-size: 12px;
+}
+.study-views a {
+  padding: 5px 0;
+  text-decoration: none;
+}
+.study-views a[aria-current] {
+  color: #265c12;
+  box-shadow: inset 0 -2px #69a82b;
+  font-weight: 600;
+}
 :root .editorial-shell {
   display: block;
   min-height: 100vh;
@@ -276,6 +292,10 @@
   border-left-color: #69a82b;
   background: #edf4e7;
   color: #315e18;
+}
+:root .editorial-shell .course-group .course-architecture-guide {
+  margin-top: 8px;
+  border-top: 1px dashed #d9e0d4;
 }
 :root .editorial-shell .course-current-mark {
   font-size: 9px;

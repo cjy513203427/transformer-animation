@@ -9,9 +9,11 @@ import '../styles/formula.css';
 export function Formula({
   expression,
   symbols,
+  showSymbols = true,
 }: {
   expression: string;
   symbols: readonly FormulaSymbol[];
+  showSymbols?: boolean;
 }) {
   const html = useMemo(
     () =>
@@ -21,21 +23,23 @@ export function Formula({
   return (
     <div className="formula-block">
       <div className="formula" dangerouslySetInnerHTML={{ __html: html }} />
-      <div className="formula-symbols">
-        <strong className="formula-symbols-title">{T('本式符号')}</strong>
-        <dl aria-label={T('本式符号说明')}>
-          {symbols.map(([tex, meaning]) => (
-            <div className="formula-symbol" key={tex}>
-              <dt>
-                <Tex tex={tex} />
-              </dt>
-              <dd>
-                <Rich text={meaning} />
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+      {showSymbols && (
+        <div className="formula-symbols">
+          <strong className="formula-symbols-title">{T('本式符号')}</strong>
+          <dl aria-label={T('本式符号说明')}>
+            {symbols.map(([tex, meaning]) => (
+              <div className="formula-symbol" key={tex}>
+                <dt>
+                  <Tex tex={tex} />
+                </dt>
+                <dd>
+                  <Rich text={meaning} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
     </div>
   );
 }
