@@ -1,3 +1,4 @@
+import { valueChangeSymbols } from '../../content/notation/attention';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Formula } from '../../components/Formula';
 import { Tex } from '../../components/Tex';
@@ -302,6 +303,7 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
                 )}
               </p>
               <Formula
+                symbols={valueChangeSymbols}
                 expression={`\\Delta O_{${query},0}=P_{${query},1}\\,\\Delta V=${fmt(result.probabilities[query][1])}\\times(${fmt(state.input.valueDelta)})\\approx ${fmt(outputDifference)}`}
               />
               <div className="guided-recall">

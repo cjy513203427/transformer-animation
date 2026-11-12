@@ -1,3 +1,5 @@
+import type { FormulaSymbol } from './notation/shared';
+import { kvSymbols } from './notation/kv';
 import type { WhyContent } from '../components/WhyIntro';
 import { chapterUrl } from './book';
 import { T } from '../i18n';
@@ -14,6 +16,7 @@ export const kvSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
+  symbols: FormulaSymbol[];
   /** Paper section used to check the formula; absent when the book is the reference. */
   source?: [string, string];
   /** The book section that explains this step. */
@@ -29,6 +32,7 @@ export const kvSteps: {
       'KV 缓存与层数、token 数、KV 头数和每头维度成正比；改架构时能动的主要是 KV 头数和每头存的维度。',
     ),
     prompt: T('KV 缓存的公式里有哪几个乘数？把 KV 头从 32 减到 8，缓存变成原来的多少？'),
+    symbols: kvSymbols[0],
     formula:
       '\\text{bytes}=B\\times L\\times T\\times H_{KV}\\times\\left(d_k+d_v\\right)\\times b',
     book: [T('第 22.4.4 节 · KV Cache 内存计算公式'), CH22],
@@ -45,6 +49,7 @@ export const kvSteps: {
     prompt: T(
       'KV 头从 4 减到 1，哪些量变小，哪些不变？同组的两个 Query 头，注意力权重一定相同吗？',
     ),
+    symbols: kvSymbols[1],
     formula:
       '\\text{head}_h=\\operatorname{softmax}\\!\\left(\\frac{Q_hK_{g(h)}^{\\top}}{\\sqrt{d}}+M\\right)V_{g(h)},\\qquad g(h)=\\left\\lfloor\\frac{h}{H/G}\\right\\rfloor',
     book: [T('第 23.4.2 节 · GQA 的数学表达'), CH23],
@@ -60,6 +65,7 @@ export const kvSteps: {
     prompt: T(
       'MLA 的缓存里存的是什么？每个头的 K、V 从哪里来？它和 MQA 的“所有头共享一组 K、V”有什么不同？',
     ),
+    symbols: kvSymbols[2],
     formula:
       'c_t=h_tW_{DKV},\\qquad k^{C}_{t,i}=c_tW_{UK}^{(i)},\\qquad v^{C}_{t,i}=c_tW_{UV}^{(i)}',
     source: [T('DeepSeek-V2 论文 §2.1.2 · Low-Rank Key-Value Joint Compression'), DEEPSEEK_V2],
@@ -77,6 +83,7 @@ export const kvSteps: {
     prompt: T(
       '如果把 RoPE 直接加在由 latent 还原出的 K 上，同一个吸收矩阵在哪些位置还能算对？解耦之后缓存里多了什么？',
     ),
+    symbols: kvSymbols[3],
     formula:
       'q_{t,i}=\\left[q^{C}_{t,i};\\,q^{R}_{t,i}\\right],\\quad k_{j,i}=\\left[k^{C}_{j,i};\\,k^{R}_{j}\\right],\\quad k^{R}_j=\\operatorname{RoPE}_j\\!\\left(h_jW_{KR}\\right)',
     source: [T('DeepSeek-V2 论文 §2.1.3 · Decoupled Rotary Position Embedding'), DEEPSEEK_V2],
@@ -90,6 +97,7 @@ export const kvSteps: {
     ),
     takeaway: T('吸收不改变结果，改变的是计算顺序：推理时只读缓存里的 latent 与 RoPE Key。'),
     prompt: T('吸收之后，内容 Query 的维度变成多少？为什么 RoPE 那一支不能一起吸收？'),
+    symbols: kvSymbols[4],
     formula:
       'q^{C}_{t,i}\\,{k^{C}_{j,i}}^{\\top}=\\Big(h_tW_{QC}^{(i)}{W_{UK}^{(i)}}^{\\top}\\Big)c_j^{\\top},\\qquad \\Big(\\sum_j p_j\\,c_jW_{UV}^{(i)}\\Big)W_O^{(i)}=\\Big(\\sum_j p_j\\,c_j\\Big)W_{UV}^{(i)}W_O^{(i)}',
     source: [T('DeepSeek-V2 论文 §2.1.2（推理时的矩阵吸收）'), DEEPSEEK_V2],
@@ -105,6 +113,7 @@ export const kvSteps: {
     prompt: T(
       'MLA 的缓存为什么不能只算 latent？同样的头数和头维，MHA、GQA-8、MQA、MLA 每个 token 各存多少？',
     ),
+    symbols: kvSymbols[5],
     formula: T(
       '\\text{每 token 每层：}\\ \\text{MHA}\\ 2Hd_h,\\quad\\text{GQA}\\ 2Gd_h,\\quad\\text{MQA}\\ 2d_h,\\quad\\text{MLA}\\ d_c+d_h^R',
     ),

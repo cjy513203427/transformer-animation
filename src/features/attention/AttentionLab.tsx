@@ -1,3 +1,8 @@
+import {
+  projectionCellSymbols,
+  scoreCellSymbols,
+  outputCellSymbols,
+} from '../../content/notation/attention';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
@@ -562,6 +567,7 @@ export default function AttentionLab() {
                           </div>
                         )}
                         <Formula
+                          symbols={projectionCellSymbols}
                           expression={`Q_{${query},0}=(${fmt(state.input.x[query][0])})\\times1+(${fmt(state.input.x[query][1])})\\times0=${fmt(result.q[query][0])}`}
                         />
                       </>
@@ -598,7 +604,7 @@ export default function AttentionLab() {
                             </span>
                           </div>
                         </div>
-                        <Formula expression={scoreExpression} />
+                        <Formula expression={scoreExpression} symbols={scoreCellSymbols} />
                       </>
                     ) : (
                       <>
@@ -659,7 +665,9 @@ export default function AttentionLab() {
                             )}
                           </div>
                         )}
-                        {state.step === 4 && <Formula expression={outputExpression} />}
+                        {state.step === 4 && (
+                          <Formula expression={outputExpression} symbols={outputCellSymbols} />
+                        )}
                       </>
                     )}
                     <p className="precision-note">
@@ -697,6 +705,9 @@ export default function AttentionLab() {
                         </p>
                         <div className="step-formula">
                           <Formula
+                            symbols={step.symbols.filter(
+                              ([tex]) => state.step !== 1 || state.config.scaled || tex !== 'd_k',
+                            )}
                             expression={
                               state.step === 1 && !state.config.scaled
                                 ? T('S=QK^\\top\\quad\\text{（关闭缩放的对照）}')

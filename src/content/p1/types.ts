@@ -1,3 +1,4 @@
+import type { FormulaSymbol } from '../notation/shared';
 import type { WhyContent } from '../../components/WhyIntro';
 import { formatNumber } from '../../math/attention';
 import type { BookLink } from '../book';
@@ -31,6 +32,7 @@ export interface Lesson {
   /** Plain-language heading that states what this step answers. */
   title: string;
   formula: string;
+  symbols: FormulaSymbol[];
   explanation: LessonText;
   prompt: string;
   takeaway: string;

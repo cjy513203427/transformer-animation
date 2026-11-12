@@ -1,12 +1,41 @@
 import { useMemo } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import type { FormulaSymbol } from '../content/notation/shared';
+import { T } from '../i18n';
+import { Rich, Tex } from './Tex';
+import '../styles/formula.css';
 
-export function Formula({ expression }: { expression: string }) {
+export function Formula({
+  expression,
+  symbols,
+}: {
+  expression: string;
+  symbols: readonly FormulaSymbol[];
+}) {
   const html = useMemo(
     () =>
       katex.renderToString(expression, { throwOnError: false, displayMode: true, trust: false }),
     [expression],
   );
-  return <div className="formula" dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div className="formula-block">
+      <div className="formula" dangerouslySetInnerHTML={{ __html: html }} />
+      <div className="formula-symbols">
+        <strong className="formula-symbols-title">{T('本式符号')}</strong>
+        <dl aria-label={T('本式符号说明')}>
+          {symbols.map(([tex, meaning]) => (
+            <div className="formula-symbol" key={tex}>
+              <dt>
+                <Tex tex={tex} />
+              </dt>
+              <dd>
+                <Rich text={meaning} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  );
 }

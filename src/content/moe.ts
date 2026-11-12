@@ -1,3 +1,5 @@
+import type { FormulaSymbol } from './notation/shared';
+import { moeSymbols } from './notation/moe';
 import { chapterUrl } from './book';
 import type { WhyContent } from '../components/WhyIntro';
 import { T } from '../i18n';
@@ -19,6 +21,7 @@ export const moeSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
+  symbols: FormulaSymbol[];
   /** Paper or official code used to check the formula; absent when the book is the reference. */
   source?: [string, string];
   /** The book section that explains this step. */
@@ -32,6 +35,7 @@ export const moeSteps: {
     ),
     takeaway: T('路由器的输入是隐藏状态，输出是对各专家的分数；分数来自计算。'),
     prompt: T('这一行有几个分数？Softmax 沿哪个轴？只改 t1 的输入，t0 的路由会变吗？'),
+    symbols: moeSymbols[0],
     formula: String.raw`Z=XW_R\in\mathbb{R}^{T\times E},\qquad p_{t,e}=\frac{\exp(z_{t,e}-m_t)}{\sum_j\exp(z_{t,j}-m_t)},\quad m_t=\max_j z_{t,j}`,
     source: [T('Switch Transformers §2.1 · Router 分数与概率'), SWITCH],
     book: [T('第 30.2.3 节 · Router（路由器）的作用'), CH30],
@@ -44,6 +48,7 @@ export const moeSteps: {
     ),
     takeaway: T('先选集合，再按本例规则重新归一化；Top-K 的选择和门值是两件事。'),
     prompt: T('只保留两个专家，原概率的和一定是 1 吗？为什么本例 Top-1 的门值恒为 1？'),
+    symbols: moeSymbols[1],
     formula: String.raw`A_t=\operatorname{TopK}(p_t,K),\qquad g_{t,e}=\begin{cases}p_{t,e}/\sum_{j\in A_t}p_{t,j},&e\in A_t\\0,&e\notin A_t\end{cases}`,
     source: [T('Transformers · MixtralTopKRouter 的选中后归一化'), MIXTRAL_CODE],
     book: [T('第 30.2.5 节 · Top-K 选择机制'), CH30],
@@ -56,6 +61,7 @@ export const moeSteps: {
     ),
     takeaway: T('Router 负责选路，专家负责变换输入；门值在之后的合并中使用。'),
     prompt: T('每个专家的两块权重是什么形状？只把 E0 的输出乘以 2，路由概率为什么不变？'),
+    symbols: moeSymbols[2],
     formula: String.raw`f_e(x_t)=\operatorname{ReLU}(x_tW_{1,e})W_{2,e},\qquad [1,2]\,[2,3]\to[1,3]\,[3,2]\to[1,2]`,
     source: [T('Shazeer et al. §2、§3.2 · 独立的前馈专家'), SPARSE_MOE],
     book: [T('第 30.2.4 节 · Expert（专家）网络'), CH30],
@@ -68,6 +74,7 @@ export const moeSteps: {
     ),
     takeaway: T('合并的是同一个 token 的多条专家分支，token 的身份和原始顺序都要保留。'),
     prompt: T('t1 被两个专家处理，会产生两个输出 token 吗？返回顺序改变后怎样恢复正确结果？'),
+    symbols: moeSymbols[3],
     formula: String.raw`y_t=\sum_{e\in A_t}g_{t,e}f_e(x_t)\in\mathbb{R}^{1\times D},\qquad Y\in\mathbb{R}^{T\times D}`,
     source: [T('GShard §3.1 · Dispatch 与 Combine'), GSHARD],
     book: [T('第 30.2.2 节 · MoE 层的内部结构'), CH30],
@@ -80,6 +87,7 @@ export const moeSteps: {
     ),
     takeaway: T('总参数决定要保存多少权重；激活参数和任务数描述本次计算，负载描述任务分布。'),
     prompt: T('K 从 1 变成 2，哪些参数账单不变？任务集中在一个专家，会自动变得更快吗？'),
+    symbols: moeSymbols[4],
     formula: String.raw`N_{\mathrm{all}}=DE+E(2DF),\quad N_{\mathrm{active/token}}=DE+K(2DF),\quad \sum_e n_e=TK`,
     book: [T('第 30.2.6 节 · 负载均衡问题'), CH30],
   },
@@ -93,6 +101,7 @@ export const moeSteps: {
     prompt: T(
       '同一个 token 选到本地和远端两个专家，各需要传什么？为什么箭头数量不能表示实际耗时？',
     ),
+    symbols: moeSymbols[5],
     formula: String.raw`B_{\mathrm{dispatch}}=RDb,\qquad B_{\mathrm{return}}=RDb,\qquad B_{\mathrm{total}}=2RDb`,
     source: ['Switch Transformers §5.4 · Expert Parallelism', SWITCH],
     book: [T('第 30.5.3 节 · 通信开销'), CH30],

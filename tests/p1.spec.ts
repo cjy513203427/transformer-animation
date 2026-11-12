@@ -41,9 +41,11 @@ for (const topic of topics)
       await expect(page.locator('.lesson-progress')).toHaveText(`${i + 1} / 6`);
       await expect(page.locator('.lesson-reading table').first()).toBeVisible();
       await expect(page.locator('.diagram-panel svg')).toBeVisible();
-      await page.getByText('需要时再看公式', { exact: true }).click();
+      await page.getByText('公式与符号说明', { exact: true }).click();
+      await expect(page.getByLabel('本式符号说明')).toBeVisible();
+      expect(await page.locator('.formula-symbols dd').count()).toBeGreaterThan(0);
       await expect(page.locator('.katex-error')).toHaveCount(0);
-      await page.getByText('需要时再看公式', { exact: true }).click();
+      await page.getByText('公式与符号说明', { exact: true }).click();
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(
         false,
       );

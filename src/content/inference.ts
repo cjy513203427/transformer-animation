@@ -1,3 +1,5 @@
+import type { FormulaSymbol } from './notation/shared';
+import { inferenceSymbols } from './notation/inference';
 import { chapterUrl } from './book';
 import { T } from '../i18n';
 
@@ -11,6 +13,7 @@ export const inferenceSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
+  symbols: FormulaSymbol[];
   chapter: [string, string];
 }[] = [
   {
@@ -21,6 +24,7 @@ export const inferenceSteps: {
     ),
     takeaway: T('训练能并行，是因为整条序列事先已知；不会偷看，是因为因果 Mask。两件事同时成立。'),
     prompt: T('为什么训练能一次算出所有位置？把第 2 个输入换掉，第 0、1 行的输出会不会变？'),
+    symbols: inferenceSymbols[0],
     formula:
       '\\mathcal{L}=\\frac{1}{T}\\sum_{t=0}^{T-1}-\\log p\\left(y_t\\mid x_0,\\dots,x_t\\right),\\qquad y_t=x_{t+1}',
     chapter: [T('第 16.2 节 · Teacher Forcing 与 Causal Mask'), CH16],
@@ -35,6 +39,7 @@ export const inferenceSteps: {
       '生成必须一步一步来，因为下一个输入要等这一步的输出。不用缓存时，每一步都在重算前面早已算完的行。',
     ),
     prompt: T('不用缓存时，第 3 步重算的那些行里，哪些在上一步已经算过？它们的值会不会变？'),
+    symbols: inferenceSymbols[1],
     formula: T(
       'x_n=\\arg\\max_{v}\\ p\\left(v\\mid x_0,\\dots,x_{n-1}\\right),\\qquad \\text{只用最后一行 } h_{n-1}',
     ),
@@ -48,6 +53,7 @@ export const inferenceSteps: {
     ),
     takeaway: T('Prefill 并行处理已有上下文，写好每一层的 K、V 缓存，并给出第一个新 token。'),
     prompt: T('Prefill 之后，缓存里一共有几组 K、V？为什么每一层都要各存一份？'),
+    symbols: inferenceSymbols[2],
     formula:
       'K^{(\\ell)}=H^{(\\ell-1)}W_K^{(\\ell)},\\quad V^{(\\ell)}=H^{(\\ell-1)}W_V^{(\\ell)},\\qquad \\ell=1,\\dots,L',
     chapter: [T('第 16.3.1 节 · Prefill 和 Decode'), CH16],
@@ -60,6 +66,7 @@ export const inferenceSteps: {
     ),
     takeaway: T('缓存存的是每层每个位置的 K、V，不存 Q。新 Query 仍要读完全部可见历史。'),
     prompt: T('一次 Decode 里，每层新算了几组向量？读了几组？为什么不缓存旧的 Q？'),
+    symbols: inferenceSymbols[3],
     formula:
       'q_n=h_nW_Q,\\ \\ k_n=h_nW_K,\\ \\ v_n=h_nW_V,\\qquad K\\leftarrow\\begin{bmatrix}K\\\\ k_n\\end{bmatrix},\\ \\ V\\leftarrow\\begin{bmatrix}V\\\\ v_n\\end{bmatrix},\\qquad o_n=\\operatorname{softmax}\\!\\left(\\frac{q_nK^{\\top}}{\\sqrt d}\\right)V',
     chapter: [T('第 22.2 节 · Cache 里存什么，每一步又算什么'), CH22],
@@ -74,6 +81,7 @@ export const inferenceSteps: {
       '缓存不改变结果，只省掉重复计算。新 Query 仍要访问全部可见历史，所以不能承诺固定的加速倍数。',
     ),
     prompt: T('为什么两条路线的 logits 一样？用缓存时，每一步的打分次数随什么增长？'),
+    symbols: inferenceSymbols[4],
     formula: T(
       '\\text{重算：}\\ L\\cdot\\frac{n(n+1)}{2}\\ \\text{次打分}\\qquad\\text{缓存：}\\ L\\cdot n\\ \\text{次打分}',
     ),
@@ -91,6 +99,7 @@ export const inferenceSteps: {
     prompt: T(
       '改动第 1 个 token，第 1 层和第 2 层分别有哪些位置的缓存失效？多轮对话为什么不会自动复用缓存？',
     ),
+    symbols: inferenceSymbols[5],
     formula: T(
       'h^{(1)}_t=f\\left(x_0,\\dots,x_t\\right)\\ \\Rightarrow\\ K^{(2)}_t,\\ V^{(2)}_t\\ \\text{依赖 } x_0,\\dots,x_t',
     ),

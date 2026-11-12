@@ -1,3 +1,4 @@
+import { multiheadSymbols } from '../../content/notation/multihead';
 import { chapterUrl } from '../../content/book';
 import { useMemo, useState } from 'react';
 import { Formula } from '../../components/Formula';
@@ -677,8 +678,8 @@ export function MultiHeadLesson({
               </p>
             </div>
             <details className="lesson-formula">
-              <summary>{T('需要时再看公式')}</summary>
-              <Formula expression={formulas[step]} />
+              <summary>{T('公式与符号说明')}</summary>
+              <Formula expression={formulas[step]} symbols={multiheadSymbols[step]} />
               {step === 3 && (
                 <p>
                   {Tx(

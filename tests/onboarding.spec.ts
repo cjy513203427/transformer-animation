@@ -68,6 +68,7 @@ test('实际操作完成短任务，权重不变而输出改变，并保留结�
   ]);
   const outputAfter = vectorFrom(await guide.getByTestId('guided-output-after').textContent());
   expectVector(outputAfter, [1 + 4 * selfWeight, 2 * (1 - selfWeight)]);
+  await expect(guide.getByLabel('本式符号说明')).toContainText('Δ 表示改动前后的差值');
   await expect(guide.getByTestId('guided-applied-delta')).toHaveText('3');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   await page.screenshot({

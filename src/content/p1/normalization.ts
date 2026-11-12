@@ -1,3 +1,4 @@
+import { normalizationSymbols } from '../notation/normalization';
 import { formatNumber as fmt } from '../../math/attention';
 import { normalization } from '../../math/p1/normalization';
 import { BOOK } from '../book';
@@ -63,6 +64,7 @@ export default {
     lesson({
       name: T('统计轴'),
       title: T('先在这一行里算平均值和分散程度'),
+      symbols: normalizationSymbols[0],
       formula: String.raw`\mu=\frac1D\sum_i x_i,\quad\sigma^2=\frac1D\sum_i(x_i-\mu)^2`,
       explanation: (c) =>
         T(
@@ -79,6 +81,7 @@ export default {
     lesson({
       name: 'LayerNorm',
       title: T('减去平均值，再除以标准差'),
+      symbols: normalizationSymbols[1],
       formula: String.raw`z_i=\frac{x_i-\mu}{\sqrt{\sigma^2+\epsilon}}`,
       explanation: (c) =>
         T(
@@ -94,6 +97,7 @@ export default {
     lesson({
       name: 'RMSNorm',
       title: T('RMSNorm：不减平均值，只除以均方根'),
+      symbols: normalizationSymbols[2],
       formula: String.raw`r_i=\frac{x_i}{\sqrt{\frac1D\sum_jx_j^2+\epsilon}}`,
       explanation: (c) =>
         T(
@@ -109,6 +113,7 @@ export default {
     lesson({
       name: T('仿射参数'),
       title: T('再乘 γ、加 β：让模型自己决定最终范围'),
+      symbols: normalizationSymbols[3],
       formula: String.raw`y_i^{LN}=\gamma_i z_i+\beta_i,\qquad y_i^{RMS}=\gamma_i r_i`,
       explanation: T(
         '归一化之后，每个特征维还会乘一个 γ、加一个 β，也就是原书公式末尾的“× γ + β”。它们是训练出来的参数，让模型可以把某些维度重新放大或移动。本例只开放第 0 维的 γ₀、β₀，其余维度固定为 1 和 0；RMSNorm 按常见定义只乘 γ、不加 β。',
@@ -120,6 +125,7 @@ export default {
     lesson({
       name: 'Softmax',
       title: T('把同一组数当作分数，变成加起来为 1 的概率'),
+      symbols: normalizationSymbols[4],
       formula: String.raw`p_i=\frac{\exp(s_i-m)}{\sum_j\exp(s_j-m)},\quad s_i=x_i/\tau+M_i`,
       explanation: (c) => {
         const m = c.metric(T('最大值 m'));
@@ -142,6 +148,7 @@ export default {
     lesson({
       name: T('平移对照'),
       title: T('整行加同一个数：谁变，谁不变？'),
+      symbols: normalizationSymbols[5],
       formula: String.raw`LN(x+c)=LN(x),\quad softmax(x+c)=softmax(x)`,
       explanation: (c) =>
         T(

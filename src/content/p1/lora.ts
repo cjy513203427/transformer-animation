@@ -1,3 +1,4 @@
+import { loraSymbols } from '../notation/lora';
 import { formatNumber as fmt } from '../../math/attention';
 import { lora } from '../../math/p1/lora';
 import { BOOK } from '../book';
@@ -40,6 +41,7 @@ export default {
     lesson({
       name: T('冻结底座'),
       title: T('原来的权重 W₀ 不动，但照样参与计算'),
+      symbols: loraSymbols[0],
       formula: String.raw`Y_0=XW_0`,
       explanation: (c) => {
         const base = c.values('XW₀');
@@ -56,6 +58,7 @@ export default {
     lesson({
       name: T('低秩旁路'),
       title: T('新增一条窄旁路：先压到 r 维，再还原'),
+      symbols: loraSymbols[1],
       formula: String.raw`A\in\mathbb R^{D\times r},\quad B\in\mathbb R^{r\times K},\quad\Delta W=\frac\alpha r AB`,
       explanation: (c) =>
         T(
@@ -70,6 +73,7 @@ export default {
     lesson({
       name: T('输出相加'),
       title: T('两条支路的输出逐项相加'),
+      symbols: loraSymbols[2],
       formula: String.raw`Y=XW_0+\frac\alpha r(XA)B`,
       explanation: (c) => {
         const base = c.values('XW₀'),
@@ -89,6 +93,7 @@ export default {
     lesson({
       name: T('rank 与合并'),
       title: T('训练完，可以把更新并回权重'),
+      symbols: loraSymbols[3],
       formula: String.raw`XW_0+X\Delta W=X(W_0+\Delta W)`,
       explanation: (c) =>
         T(
@@ -103,6 +108,7 @@ export default {
     lesson({
       name: T('QLoRA 数据流'),
       title: T('QLoRA：底座用 4 bit 存，适配器保持高精度'),
+      symbols: loraSymbols[4],
       formula: String.raw`Y=X\operatorname{dequant}(W_{0,q})+\frac\alpha r(XA)B`,
       explanation: T(
         'QLoRA 把冻结的底座压成 4 bit 存储，计算前再还原到计算精度；A、B 仍用高精度训练。左图的底座输出来自量化后还原的 $W_0$，所以和上一步略有差别。真实 QLoRA 用 NF4 格式，本页用均匀 4 bit 代替，只说明三种精度的分工。',
@@ -115,6 +121,7 @@ export default {
     lesson({
       name: T('账本与对照'),
       title: T('账本：底座、适配器与计算分开算'),
+      symbols: loraSymbols[5],
       formula: String.raw`N_{adapter}=r(D+K)`,
       explanation: T(
         '表中分别列出底座、量化底座与适配器的字节数。先预测：只改变 α，LoRA 输出会不会变？α 缩放的是更新旁路，所以输出通常会变；只有旁路恰好为 0 时才不变。',

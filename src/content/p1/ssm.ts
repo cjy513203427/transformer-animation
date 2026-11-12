@@ -1,3 +1,4 @@
+import { ssmSymbols } from '../notation/ssm';
 import { formatNumber as fmt } from '../../math/attention';
 import { ssm } from '../../math/p1/ssm';
 import { BOOK } from '../book';
@@ -54,6 +55,7 @@ export default {
     lesson({
       name: T('状态递推'),
       title: T('把过去折进一个数，再读出输出'),
+      symbols: ssmSymbols[0],
       formula: String.raw`h_t=\bar A h_{t-1}+\bar Bx_t,\qquad y_t=C h_t`,
       explanation: (c) =>
         T(
@@ -68,6 +70,7 @@ export default {
     lesson({
       name: T('选择性参数'),
       title: T('Mamba：步长 Δ、写入 B、读出 C 随输入变化'),
+      symbols: ssmSymbols[1],
       formula: String.raw`\Delta_t=\Delta\,softplus(0.5x_t),\ B_t=1+0.25x_t,\ C_t=1-0.1x_t`,
       explanation: (c) =>
         T(
@@ -82,6 +85,7 @@ export default {
     lesson({
       name: T('离散化'),
       title: T('离散化：Δ 同时决定留多少旧的、写多少新的'),
+      symbols: ssmSymbols[2],
       formula: String.raw`\bar A_t=e^{\Delta_tA},\qquad\bar B_t=\frac{e^{\Delta_t A}-1}{A}B_t`,
       explanation: (c) =>
         T(
@@ -96,6 +100,7 @@ export default {
     lesson({
       name: T('逐步扫描'),
       title: T('一步一步扫：每一步只用上一步的状态'),
+      symbols: ssmSymbols[3],
       formula: String.raw`h_t=\bar A_th_{t-1}+\bar B_tx_t`,
       explanation: (c) => {
         const states = c.values(T('已计算状态 h_t'));
@@ -115,6 +120,7 @@ export default {
     lesson({
       name: T('记忆衰减'),
       title: T('Δ 越大，旧状态忘得越快'),
+      symbols: ssmSymbols[4],
       formula: String.raw`A<0,\ \Delta\uparrow\ \Longrightarrow e^{\Delta A}\downarrow`,
       explanation: (c) =>
         T(
@@ -128,6 +134,7 @@ export default {
     lesson({
       name: T('历史访问对照'),
       title: T('固定大小的状态：不同的历史可能变成同一个数'),
+      symbols: ssmSymbols[5],
       formula: T(
         '[a,c]\\ \\text{与}\\ [a+\\delta,c-\\lambda\\delta]\\ \\Rightarrow h_2\\text{相同}',
       ),

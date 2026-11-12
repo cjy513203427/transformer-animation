@@ -1,3 +1,5 @@
+import type { FormulaSymbol } from './notation/shared';
+import { positionSymbols } from './notation/position';
 import { chapterUrl } from './book';
 import { T } from '../i18n';
 
@@ -10,6 +12,7 @@ export const positionSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
+  symbols: FormulaSymbol[];
   chapter: [string, string];
 }[] = [
   {
@@ -18,6 +21,7 @@ export const positionSteps: {
     insertion: [],
     takeaway: T('Attention 只看“有哪些向量”，不看“谁排第几”；顺序必须另外加进去。'),
     prompt: T('为什么两句话里“我”的输出完全一样？因果 Mask 能不能单独解决这个问题？'),
+    symbols: positionSymbols[0],
     formula:
       'O_i=\\sum_j \\operatorname{softmax}_j\\!\\left(\\frac{x_i\\cdot x_j}{\\sqrt d}\\right)x_j,\\qquad x_t=E[\\text{token}_t]',
     chapter: [T('第 5.1 节 · 为什么需要位置信息'), '第05章-Positional-Encoding-给文字加位置/'],
@@ -30,6 +34,7 @@ export const positionSteps: {
       '每对维度是一根转速不同的指针：低维转得快，高维转得慢，合起来给每个位置一组独特的“门牌号”。',
     ),
     prompt: T('第 $i$ 对维度每前进一个位置转多少？为什么同一对里的 $\\sin$ 和 $\\cos$ 频率相同？'),
+    symbols: positionSymbols[1],
     formula:
       'PE_{(\\mathrm{pos},2i)}=\\sin\\frac{\\mathrm{pos}}{10000^{2i/d_{\\mathrm{model}}}},\\qquad PE_{(\\mathrm{pos},2i+1)}=\\cos\\frac{\\mathrm{pos}}{10000^{2i/d_{\\mathrm{model}}}}',
     chapter: [T('第 5.3 节 · 正弦位置编码'), '第05章-Positional-Encoding-给文字加位置/'],
@@ -40,6 +45,7 @@ export const positionSteps: {
     insertion: ['add'],
     takeaway: T('加法发生在投影之前：X 变了，Q、K、V 三条支路都带上了位置。'),
     prompt: T('两个“L”的嵌入相同，为什么相加后不同？位置信息会不会进入 V？'),
+    symbols: positionSymbols[2],
     formula:
       'X_{\\mathrm{pos}}=E[\\text{token}]+PE_{\\mathrm{pos}},\\qquad (e_m+p_m)\\cdot(e_n+p_n)=e_m\\cdot e_n+e_m\\cdot p_n+p_m\\cdot e_n+p_m\\cdot p_n',
     chapter: [
@@ -53,6 +59,7 @@ export const positionSteps: {
     insertion: ['rope'],
     takeaway: T('RoPE 在投影之后旋转 Q 和 K；长度不变，V 不旋转。'),
     prompt: T('RoPE 作用在哪两个量上？旋转会改变向量长度吗？V 为什么不用转？'),
+    symbols: positionSymbols[3],
     formula:
       'q^{\\prime}_m=R_m\\,q,\\quad k^{\\prime}_n=R_n\\,k,\\quad R(\\alpha)=\\begin{bmatrix}\\cos\\alpha&-\\sin\\alpha\\\\\\sin\\alpha&\\cos\\alpha\\end{bmatrix},\\quad \\alpha=m\\theta_i,\\ \\theta_i=10000^{-2i/d}',
     chapter: [T('第 25.3 节 · RoPE 旋转位置编码'), '第25章-位置编码演进-Sinusoidal到RoPE到ALiBi/'],
@@ -65,6 +72,7 @@ export const positionSteps: {
       '内容固定时，$(R_m q)\\cdot(R_n k)$ 只取决于 $n-m$；但它会随距离起伏，并不单调下降。',
     ),
     prompt: T('为什么 $R_m^{\\top}R_n = R_{n-m}$？“分数只看相对距离”需要哪些条件？'),
+    symbols: positionSymbols[4],
     formula: '(R_m q)^{\\top}(R_n k)=q^{\\top}R_m^{\\top}R_n\\,k=q^{\\top}R_{n-m}\\,k',
     chapter: [
       T('第 25.3.7 节 · 为什么能编码相对位置'),
@@ -81,6 +89,7 @@ export const positionSteps: {
     prompt: T(
       'ALiBi 改的是哪个矩阵？为什么每个头的斜率不同？能算更长序列意味着什么、不意味着什么？',
     ),
+    symbols: positionSymbols[5],
     formula:
       'P=\\operatorname{softmax}\\!\\left(\\frac{QK^{\\top}}{\\sqrt d}+m\\cdot B+M\\right),\\qquad B_{ij}=-(i-j)\\quad(j\\le i)',
     chapter: [T('第 25.4 节 · ALiBi 线性偏置'), '第25章-位置编码演进-Sinusoidal到RoPE到ALiBi/'],
@@ -91,6 +100,7 @@ export const positionSteps: {
     insertion: ['add', 'rope', 'alibi'],
     takeaway: T('加法改 X（影响 Q、K、V），RoPE 改 Q、K，ALiBi 改分数。'),
     prompt: T('不看图，说出三种方法各自加在哪一步、改变了哪些量、V 是否带有位置。'),
+    symbols: positionSymbols[6],
     formula: T(
       '\\underbrace{X=E+PE}_{\\text{加法}}\\ \\to\\ \\underbrace{R_mq,\\ R_nk}_{\\text{RoPE}}\\ \\to\\ \\underbrace{\\tfrac{QK^\\top}{\\sqrt d}+mB}_{\\text{ALiBi}}\\ \\to\\ \\operatorname{softmax}\\ \\to\\ PV',
     ),

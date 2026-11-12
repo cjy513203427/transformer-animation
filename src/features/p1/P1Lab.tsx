@@ -332,8 +332,8 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               </p>
             </div>
             <details className="lesson-formula">
-              <summary>{T('需要时再看公式')}</summary>
-              <Formula expression={step.formula} />
+              <summary>{T('公式与符号说明')}</summary>
+              <Formula expression={step.formula} symbols={step.symbols} />
             </details>
             <StepSources book={step.book} source={step.source} />
           </div>

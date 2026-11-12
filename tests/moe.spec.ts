@@ -41,7 +41,7 @@ test('路由、Top-K、专家干预与按 token 合并形成完整计算链', as
   await page.getByRole('button', { name: '隐藏说明', exact: true }).click();
   await expect(page.getByText('先自己说一遍')).toBeVisible();
   await expect(page.locator('.lesson-explanation')).toHaveCount(0);
-  await page.getByText('需要时再看公式', { exact: true }).click();
+  await page.getByText('公式与符号说明', { exact: true }).click();
   await expect(page.locator('.lesson-formula .katex-error')).toHaveCount(0);
   await page.screenshot({
     path: 'test-results/' + testInfo.project.name + '-moe-combine.png',

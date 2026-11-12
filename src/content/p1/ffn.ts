@@ -1,3 +1,4 @@
+import { ffnSymbols } from '../notation/ffn';
 import { formatNumber as fmt } from '../../math/attention';
 import { ffn } from '../../math/p1/ffn';
 import { BOOK } from '../book';
@@ -62,6 +63,7 @@ export default {
     lesson({
       name: T('升维'),
       title: T('每个位置单独升维：2 维变成 3 维'),
+      symbols: ffnSymbols[0],
       formula: String.raw`H=XW_1,\quad[4,2][2,3]\to[4,3]`,
       explanation: (c) => {
         const x = c.values('X [4, 2]'),
@@ -79,6 +81,7 @@ export default {
     lesson({
       name: T('非线性'),
       title: T('ReLU：负数清零，正数照常通过'),
+      symbols: ffnSymbols[1],
       formula: String.raw`U=\operatorname{ReLU}(H)=\max(0,H)`,
       explanation: T(
         '对 H 的每个数做 ReLU：负数变成 0，正数保持不变。有了这一步，FFN 才能表示“折线”，而不只是直线。关掉 ReLU 时，两次矩阵乘法可以合成一次（最后一步会核对），等于白加一层。坐标 d0–d2 没有预先分配的含义。',
@@ -90,6 +93,7 @@ export default {
     lesson({
       name: T('降维'),
       title: T('降回原来的维度，才能和输入相加'),
+      symbols: ffnSymbols[2],
       formula: String.raw`F=UW_2,\quad[4,3][3,2]\to[4,2]`,
       explanation: T(
         '再乘 $W_2$，把 3 维中间特征投影回 2 维。左图的圆点是原输入 X，方块是 FFN 输出 F(X)，同一个 token 用线连起来。形状回到 [4, 2]，下一步才能和输入逐项相加。二维图只是教学数值，不代表真实语义空间。',
@@ -101,6 +105,7 @@ export default {
     lesson({
       name: T('残差与梯度'),
       title: T('残差：把原输入直接加回来'),
+      symbols: ffnSymbols[3],
       formula: String.raw`Y=X+F(X),\qquad J_Y=I+J_F`,
       explanation: (c) => {
         const x = c.values(T('原 X')),
@@ -120,6 +125,7 @@ export default {
     lesson({
       name: 'Dropout',
       title: T('训练时随机关掉一部分，推理时全部保留'),
+      symbols: ffnSymbols[4],
       formula: String.raw`D(F)_i=\frac{m_iF_i}{1-p},\quad m_i\sim Bernoulli(1-p)`,
       explanation: (c) =>
         c.config.training
@@ -138,6 +144,7 @@ export default {
     lesson({
       name: T('运行对照'),
       title: T('对照：线性能合并，非线性不能；训练与推理不同'),
+      symbols: ffnSymbols[5],
       formula: String.raw`XW_1W_2=X(W_1W_2)`,
       explanation: T(
         '表中并列 $X(W_1W_2)$ 与当前 F(X)：关掉 ReLU 时两者相等。再先预测：切到推理模式，残差输出会不会变？关掉 Dropout 后通常会变；若 p = 0，或 FFN 分支恰好为 0，则可能不变。',

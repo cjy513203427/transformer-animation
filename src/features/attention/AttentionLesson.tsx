@@ -381,8 +381,11 @@ export function AttentionLesson({
             </p>
           </div>
           <details className="lesson-formula">
-            <summary>{T('需要时再看公式与形状')}</summary>
+            <summary>{T('公式、符号与形状')}</summary>
             <Formula
+              symbols={steps[state.step].symbols.filter(
+                ([tex]) => state.step !== 1 || state.config.scaled || tex !== 'd_k',
+              )}
               expression={
                 state.step === 1 && !state.config.scaled ? 'S=QK^\\top' : steps[state.step].formula
               }

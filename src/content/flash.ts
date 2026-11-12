@@ -1,3 +1,5 @@
+import type { FormulaSymbol } from './notation/shared';
+import { flashSymbols } from './notation/flash';
 import type { WhyContent } from '../components/WhyIntro';
 import { chapterUrl } from './book';
 import { T } from '../i18n';
@@ -16,6 +18,7 @@ export const flashSteps: {
   takeaway: string;
   prompt: string;
   formula: string;
+  symbols: FormulaSymbol[];
   source: [string, string];
   /** The book section that explains this step. */
   book: [string, string];
@@ -28,6 +31,7 @@ export const flashSteps: {
     ),
     takeaway: T('分块前后要算同一个 Attention：Q、K、V、缩放和 Mask 都保持一致。'),
     prompt: T('一行 Query 对应几个分数？Softmax 沿哪个轴？因果 Mask 在归一化之前还是之后？'),
+    symbols: flashSymbols[0],
     formula: String.raw`S=QK^\top/\sqrt{d_k}\in\mathbb{R}^{T\times T},\quad P=\operatorname{softmax}(S+M,\mathrm{axis=key}),\quad O=PV\in\mathbb{R}^{T\times d_v}`,
     source: [T('FlashAttention §2.2 · 朴素 Attention'), PAPER],
     book: [T('第 21.2.1 节 · PyTorch 标准实现的问题'), CH21],
@@ -40,6 +44,7 @@ export const flashSteps: {
     ),
     takeaway: T('K 和 V 按 token 一起切块；分块改变读取顺序，没有改变可见 Key 集合。'),
     prompt: T('B 从 2 改成 3，最后一块有几行？每个块各自的概率和都是 1，能直接拼成整行 P 吗？'),
+    symbols: flashSymbols[1],
     formula: String.raw`q_t\in\mathbb{R}^{1\times d_k},\quad K_b\in\mathbb{R}^{B\times d_k},\quad V_b\in\mathbb{R}^{B\times d_v},\quad s_b=q_tK_b^\top/\sqrt{d_k}+M_{t,b}`,
     source: ['FlashAttention §3.1 · Tiling', PAPER],
     book: [T('第 21.3.1 节 · 分块策略的直觉'), CH21],
@@ -52,6 +57,7 @@ export const flashSteps: {
     ),
     takeaway: T('m 保证数值稳定，l 累积分母，向量 a 累积分子；三者一起更新。'),
     prompt: T('为什么只记一个已经归一化的输出还不够？还没读取的 Key 能提前出现在当前分母中吗？'),
+    symbols: flashSymbols[2],
     formula: String.raw`m'=\max(m,\max_j s_{b,j}),\quad \alpha=e^{m-m'},\quad r_j=e^{s_{b,j}-m'},\quad l'=\alpha l+\sum_jr_j,\quad a'=\alpha a+\sum_jr_jv_j,\quad o'=a'/l'`,
     source: [T('FlashAttention §3.1 · 分块归一化统计量'), PAPER],
     book: [T('第 21.4.2 节 · Online Softmax 的核心技巧'), CH21],
@@ -64,6 +70,7 @@ export const flashSteps: {
     ),
     takeaway: T('换尺度时，分母 l 与分子 a 一起缩放，才能保留旧 Key 的正确相对贡献。'),
     prompt: T('如果只缩放 l，不缩放 a，会发生什么？新块分数都更小时，α 应该是多少？'),
+    symbols: flashSymbols[3],
     formula: String.raw`m'>m\Longrightarrow 0\le\alpha=e^{m-m'}<1,\qquad l_{\mathrm{old,new\ scale}}=\alpha l,\quad a_{\mathrm{old,new\ scale}}=\alpha a`,
     source: [T('FlashAttention §3.1 · 统一最大值后的重缩放'), PAPER],
     book: [T('第 21.4.3 节 · 为什么需要跟踪最大值'), CH21],
@@ -76,6 +83,7 @@ export const flashSteps: {
     ),
     takeaway: T('Exact 表示没有改变完整 Softmax Attention，不承诺浮点结果逐比特相同。'),
     prompt: T('切块为什么不改变最终输出？因果 Mask 下，一个块没有任何有效 Key 时应该怎样更新？'),
+    symbols: flashSymbols[4],
     formula: String.raw`O_{t,:}=a_t/l_t\quad(l_t>0),\qquad \max_{t,d}\left|O^{\mathrm{online}}_{t,d}-O^{\mathrm{full}}_{t,d}\right|\le10^{-12}`,
     source: [T('FlashAttention §3.1 与官方实现 · Exact Attention'), OFFICIAL],
     book: [T('第 21.4.4 节 · 手算示例'), CH21],
@@ -90,6 +98,7 @@ export const flashSteps: {
     prompt: T(
       'S、P 不再写回，是否意味着 HBM 总读写为零？FlashAttention 会自动减少 Decode 的历史 KV 缓存吗？',
     ),
+    symbols: flashSymbols[5],
     formula: String.raw`N_{S,P}=2T^2,\quad N_{\mathrm{transfer},S,P}=4T^2\to0,\qquad \mathrm{work}=\Theta(T^2(d_k+d_v))`,
     source: [T('FlashAttention §2.2、§3.2 · 中间矩阵与 I/O 分析'), PAPER],
     book: [T('第 21.5.2 节 · IO 复杂度分析'), CH21],

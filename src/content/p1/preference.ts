@@ -1,3 +1,4 @@
+import { preferenceSymbols } from '../notation/preference';
 import { formatNumber as fmt } from '../../math/attention';
 import { preference } from '../../math/p1/preference';
 import { BOOK } from '../book';
@@ -49,6 +50,7 @@ export default {
     lesson({
       name: T('偏好概率'),
       title: T('两个回答谁更好：只看奖励差'),
+      symbols: preferenceSymbols[0],
       formula: String.raw`P(y_w\succ y_l)=\sigma(r_w-r_l)`,
       explanation: (c) => {
         const r = c.values(T('给定奖励 r'));
@@ -66,6 +68,7 @@ export default {
     lesson({
       name: 'DPO',
       title: T('DPO：不训练奖励模型，直接用偏好对算损失'),
+      symbols: preferenceSymbols[1],
       formula: String.raw`L=-\log\sigma\!\left(\beta\left[\log\frac{\pi_\theta(y_w)}{\pi_{ref}(y_w)}-\log\frac{\pi_\theta(y_l)}{\pi_{ref}(y_l)}\right]\right)`,
       explanation: (c) =>
         T(
@@ -81,6 +84,7 @@ export default {
     lesson({
       name: 'PPO-Clip',
       title: T('PPO：一次更新不要走得太远'),
+      symbols: preferenceSymbols[2],
       formula: String.raw`J=\min(\rho A,clip(\rho,1-\epsilon,1+\epsilon)A)`,
       explanation: (c) =>
         T(
@@ -97,6 +101,7 @@ export default {
     lesson({
       name: T('组内优势'),
       title: T('GRPO：同一道题的几个回答，和组平均比'),
+      symbols: preferenceSymbols[3],
       formula: String.raw`A_i=\frac{r_i-\bar r}{\sqrt{\frac1G\sum_j(r_j-\bar r)^2}}`,
       explanation: (c) =>
         T(
@@ -113,6 +118,7 @@ export default {
     lesson({
       name: T('GRPO 约束'),
       title: T('优势乘概率比，再扣掉离参考模型太远的部分'),
+      symbols: preferenceSymbols[4],
       formula: String.raw`J=\frac1G\sum_i\left[\min(\rho_iA_i,clip(\rho_i)A_i)-\beta k_i\right]`,
       explanation: (c) =>
         T(
@@ -128,6 +134,7 @@ export default {
     lesson({
       name: T('平移与蒸馏'),
       title: T('奖励整体平移不改优势；蒸馏是另一条路'),
+      symbols: preferenceSymbols[5],
       formula: String.raw`k_i=\frac{\pi_{ref,i}}{\pi_{\theta,i}}-\log\frac{\pi_{ref,i}}{\pi_{\theta,i}}-1`,
       explanation: (c) =>
         T(

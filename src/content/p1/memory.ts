@@ -1,3 +1,4 @@
+import { memorySymbols } from '../notation/memory';
 import { formatNumber as fmt } from '../../math/attention';
 import { memory } from '../../math/p1/memory';
 import { BOOK } from '../book';
@@ -54,6 +55,7 @@ export default {
     lesson({
       name: T('完整历史'),
       title: T('基线：每个位置读取全部可见历史'),
+      symbols: memorySymbols[0],
       formula: String.raw`P=softmax(QK^T/\sqrt{d_k}+M),\quad O=PV`,
       explanation: T(
         '先固定一份 Q、K、V：Q 是输入的四个二维行，K 把这两维交换，V 就是输入本身（教学构造）。因果 Mask 下，第 t 行可以读取 t + 1 个位置。左图每条线是一次读取，线越粗权重越大。后面几步都和这个基线对照。',
@@ -65,6 +67,7 @@ export default {
     lesson({
       name: T('稀疏窗口'),
       title: T('滑动窗口：只看最近 w 个位置'),
+      symbols: memorySymbols[1],
       formula: String.raw`\max(0,t-w+1)\le j\le t`,
       explanation: (c) =>
         T(
@@ -79,6 +82,7 @@ export default {
     lesson({
       name: T('线性核'),
       title: T('Linear Attention：换一种打分方式'),
+      symbols: memorySymbols[2],
       formula: String.raw`w_{tj}=\phi(q_t)\cdot\phi(k_j),\quad\phi(x)=ELU(x)+1`,
       explanation: T(
         '把 Softmax 里的 exp(q·k) 换成两个正值特征的点积 φ(q)·φ(k)，其中 φ(x) = ELU(x) + 1。这样可以利用矩阵乘法的结合律，先把 K 和 V 合起来（原书 24.5.2）。这一步先按定义显式算一遍，作为下一步递推的基线。它是另一种 Attention，输出一般和 Softmax 版不同。',
@@ -91,6 +95,7 @@ export default {
     lesson({
       name: T('状态递推'),
       title: T('把历史累加进固定大小的状态'),
+      symbols: memorySymbols[3],
       formula: String.raw`S_t=S_{t-1}+\phi(k_t)^Tv_t,\ z_t=z_{t-1}+\phi(k_t),\ o_t=\frac{\phi(q_t)S_t}{\phi(q_t)z_t^T}`,
       explanation: (c) =>
         T(
@@ -105,6 +110,7 @@ export default {
     lesson({
       name: T('Infini 分段'),
       title: T('Infini-attention：旧片段进记忆，当前片段局部算'),
+      symbols: memorySymbols[4],
       formula: String.raw`A=\sigma(\beta)A_{mem}+(1-\sigma(\beta))A_{local}`,
       explanation: (c) =>
         T(
@@ -120,6 +126,7 @@ export default {
     lesson({
       name: T('压缩边界'),
       title: T('压缩会丢信息：两段不同的历史，可能得到同一个状态'),
+      symbols: memorySymbols[5],
       formula: String.raw`M_{new}=M_{old}+\phi(K)^T(V-\widehat V_{old})`,
       explanation: T(
         '表中两段历史的 V 不同，压缩后的 S 和 z 却完全相同，之后读出时就无法区分它们。原书 24.9 的误区 3 也提醒：Infini Attention 不能无损记住所有历史。最后先预测：只扩大窗口，当前稀疏输出会不会变？',

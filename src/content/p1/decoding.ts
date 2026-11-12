@@ -1,3 +1,4 @@
+import { decodingSymbols } from '../notation/decoding';
 import { formatNumber as fmt } from '../../math/attention';
 import { sampling } from '../../math/p1/sampling';
 import { BOOK } from '../book';
@@ -46,6 +47,7 @@ export default {
     lesson({
       name: T('分数分布'),
       title: T('先把 logits 变成概率'),
+      symbols: decodingSymbols[0],
       formula: String.raw`p_i=\frac{e^{z_i}}{\sum_j e^{z_j}}`,
       explanation: (c) =>
         T(
@@ -60,6 +62,7 @@ export default {
     lesson({
       name: T('温度'),
       title: T('温度：先除以 τ，分布变尖或变平'),
+      symbols: decodingSymbols[1],
       formula: String.raw`p_i(\tau)=softmax(z/\tau)_i,\quad\tau>0`,
       explanation: (c) =>
         T(
@@ -74,6 +77,7 @@ export default {
     lesson({
       name: 'Top-K',
       title: T('Top-K：只留前 K 名，再重新分配概率'),
+      symbols: decodingSymbols[2],
       formula: String.raw`A=TopK(p,K),\quad p'_i=\frac{p_i\mathbf1[i\in A]}{\sum_{j\in A}p_j}`,
       explanation: (c) =>
         T(
@@ -88,6 +92,7 @@ export default {
     lesson({
       name: 'Top-P',
       title: T('Top-P：累计概率跨过阈值的那一项也要留下'),
+      symbols: decodingSymbols[3],
       formula: String.raw`m=\min\{k:\sum_{i=1}^k p_{(i)}\ge P\}`,
       explanation: (c) =>
         T(
@@ -103,6 +108,7 @@ export default {
     lesson({
       name: T('种子采样'),
       title: T('抽一次：随机数落在哪一段，就选谁'),
+      symbols: decodingSymbols[4],
       formula: String.raw`u\sim U[0,1),\quad i=\min\{k:\sum_{j\le k}p'_j>u\}`,
       explanation: (c) =>
         T(
@@ -117,6 +123,7 @@ export default {
     lesson({
       name: T('短序列搜索'),
       title: T('多看一步：贪心与束搜索可能选出不同的序列'),
+      symbols: decodingSymbols[5],
       formula: String.raw`\log p(y_1,y_2)=\log p(y_1)+\log p(y_2\mid y_1)`,
       explanation: (c) => {
         const greedy = c.text('Greedy'),

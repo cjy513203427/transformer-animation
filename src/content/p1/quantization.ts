@@ -1,3 +1,4 @@
+import { quantizationSymbols } from '../notation/quantization';
 import { formatNumber as fmt } from '../../math/attention';
 import { quantization } from '../../math/p1/quantization';
 import { BOOK } from '../book';
@@ -44,6 +45,7 @@ export default {
     lesson({
       name: T('离散刻度'),
       title: T('先定格点：位数和最大值决定间距'),
+      symbols: quantizationSymbols[0],
       formula: String.raw`q_{max}=2^{b-1}-1,\quad s_g=\min(cap,\max|x_g|)/q_{max}`,
       explanation: (c) => {
         const qmax = c.metric(T('整数范围 ±qmax')),
@@ -66,6 +68,7 @@ export default {
     lesson({
       name: T('舍入'),
       title: T('每个数落到最近的格点，再乘回间距'),
+      symbols: quantizationSymbols[1],
       formula: String.raw`q_i=\operatorname{clip}(round(x_i/s_g),-q_{max},q_{max}),\quad\hat x_i=s_gq_i`,
       explanation: (c) => {
         const x = c.values(T('裁剪后的 x'))[0],
@@ -88,6 +91,7 @@ export default {
     lesson({
       name: T('裁剪'),
       title: T('把校准上限调小：格点更密，但大数被截断'),
+      symbols: quantizationSymbols[2],
       formula: String.raw`x_{clip}=\max(-a_g,\min(a_g,x))`,
       explanation: (c) =>
         T(
@@ -101,6 +105,7 @@ export default {
     lesson({
       name: T('分组'),
       title: T('分组：每组用自己的格点间距'),
+      symbols: quantizationSymbols[3],
       formula: String.raw`B_{scale}=4\lceil N/G\rceil`,
       explanation: (c) =>
         T(
@@ -115,6 +120,7 @@ export default {
     lesson({
       name: T('异常值'),
       title: T('误差从哪里来：逐项看'),
+      symbols: quantizationSymbols[4],
       formula: String.raw`MSE=\frac1N\sum_i(\hat x_i-x_i)^2`,
       explanation: (c) =>
         T(
@@ -128,6 +134,7 @@ export default {
     lesson({
       name: T('存储与误差'),
       title: T('账本：省下多少字节，换来多少误差'),
+      symbols: quantizationSymbols[5],
       formula: String.raw`B=\lceil Nb/8\rceil+4\lceil N/G\rceil`,
       explanation: (c) =>
         T(

@@ -1,9 +1,11 @@
+import { attentionSymbols } from './notation/attention';
 import { chapterUrl } from './book';
 import { T } from '../i18n';
 export const steps = [
   {
     title: T('投影'),
     symbol: 'Q, K, V',
+    symbols: attentionSymbols[0],
     formula: 'Q=XW_Q,\\quad K=XW_K,\\quad V=XW_V',
     shape: '[3, 2] × [2, 2] → [3, 2]',
     question: T('同一份输入，为什么要变成三个矩阵？'),
@@ -17,6 +19,7 @@ export const steps = [
   {
     title: T('打分'),
     symbol: 'S',
+    symbols: attentionSymbols[1],
     formula: 'S=\\frac{QK^\\top}{\\sqrt{d_k}}',
     shape: T('[3, 2] × [2, 3] → [3, 3]，$d_k = 2$'),
     question: T('矩阵里的一个分数是怎样算出来的？'),
@@ -30,6 +33,7 @@ export const steps = [
   {
     title: T('屏蔽'),
     symbol: 'S + M',
+    symbols: attentionSymbols[2],
     formula: T(
       'M_{ij}=\\begin{cases}-\\infty & j>i\\text{ 且开启因果 Mask}\\\\0&\\text{其他}\\end{cases}',
     ),
@@ -45,6 +49,7 @@ export const steps = [
   {
     title: T('归一化'),
     symbol: 'P',
+    symbols: attentionSymbols[3],
     formula:
       '\\begin{gathered}P_{ij}=\\frac{\\exp\\big((S+M)_{ij}-m_i\\big)}{\\sum_k \\exp\\big((S+M)_{ik}-m_i\\big)}\\\\[0.5em] m_i=\\max_j\\,(S+M)_{ij}\\end{gathered}',
     shape: T('[3, 3] → [3, 3]，沿 Key 轴逐行计算'),
@@ -59,6 +64,7 @@ export const steps = [
   {
     title: T('加权求和'),
     symbol: 'O',
+    symbols: attentionSymbols[4],
     formula: 'O=PV,\\qquad O_i=\\sum_j P_{ij}V_j',
     shape: '[3, 3] × [3, 2] → [3, 2]',
     question: T('权重不变，输出也一定不变吗？'),

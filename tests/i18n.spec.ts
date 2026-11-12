@@ -253,6 +253,16 @@ async function overlappingText(page: Page) {
 async function walkSteps(page: Page, locale: 'en' | 'de', label: string) {
   let clicks = 0;
   for (; clicks < 40; clicks++) {
+    // Formula meanings must be readable in place in both languages, including narrow screens.
+    const formulas = page
+      .locator('details.lesson-formula')
+      .filter({ has: page.locator('.formula-symbols') });
+    for (const formula of await formulas.all()) {
+      if (!(await formula.isVisible())) continue;
+      if (!(await formula.evaluate((el) => (el as HTMLDetailsElement).open)))
+        await formula.locator('summary').click();
+      await expect(formula.locator('.formula-symbols')).toBeVisible();
+    }
     expect(await chineseLeftovers(page), `${label} after ${clicks} clicks`).toEqual([]);
     expect(await overflow(page), `${label} horizontal overflow`).toBeLessThanOrEqual(1);
     expect(await spilledText(page), `${label} text outside its box`).toEqual([]);
