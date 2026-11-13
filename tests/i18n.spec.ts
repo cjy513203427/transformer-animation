@@ -350,10 +350,13 @@ for (const locale of ['en', 'de'] as const)
 test('the language switch keeps the experiment and its state', async ({ page }) => {
   await page.goto('/en/moe#lab=probe');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  const toggle = page.locator('.course-directory-toggle');
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
   const languages = page.getByRole('navigation', { name: 'Interface language' });
   await languages.getByRole('link', { name: 'Deutsch' }).click();
   await expect(page).toHaveURL(/\/de\/moe#lab=probe$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
   await page
     .getByRole('navigation', { name: 'Sprache der Oberfläche' })
     .getByRole('link', { name: '中文' })
