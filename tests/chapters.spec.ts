@@ -35,12 +35,8 @@ async function layoutAndLanguage(page: Page, locale: 'en' | 'de') {
   expect(problems).toEqual([]);
 }
 
-test('章节目录覆盖35项，搜索、缺口筛选、锚点与双入口可用', async ({ page }) => {
-  await page.goto('/moe');
-  await page
-    .getByRole('navigation', { name: '学习入口' })
-    .getByRole('link', { name: '按原书章节', exact: true })
-    .click();
+test('旧章节索引链接仍可使用搜索、缺口筛选和锚点', async ({ page }) => {
+  await page.goto('/chapters');
   await expect(page).toHaveURL(/\/chapters$/);
   await expect(page.locator('.chapter-entry')).toHaveCount(35);
   const search = page.getByRole('searchbox', { name: '查找章节或概念' });
@@ -171,7 +167,8 @@ for (const locale of ['', 'en', 'de'] as const)
   test(`${locale || 'zh'} 机制目录可直达并展开RWKV，章节锚点保留已编辑输入`, async ({ page }) => {
     const prefix = locale ? `/${locale}` : '';
     await page.goto(prefix + '/ssm-mamba');
-    await page.locator('.course-directory-toggle').click();
+    const toggle = page.locator('.course-directory-toggle');
+    if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
     const link = page.locator('#course-directory .course-architecture-guide');
     await expect(link).toContainText('RWKV');
     await expect(link).toHaveAttribute('href', prefix + '/chapters/32#family-rwkv');

@@ -1,3 +1,8 @@
+.notebook-page {
+  container-name: notebook;
+  container-type: inline-size;
+}
+
 .notebook-layout {
   display: grid;
   grid-template-columns: minmax(220px, 0.75fr) minmax(0, 2.2fr);
@@ -285,7 +290,7 @@
   line-height: 1.85;
   font-size: 13px;
 }
-@media (max-width: 760px) {
+@container notebook (max-width: 760px) {
   .notebook-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;

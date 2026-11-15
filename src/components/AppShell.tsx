@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { BOOK_URL } from '../content/book';
 import { INTRO, ROADMAP, TOPICS, TOPIC_GROUPS, type TopicId } from '../content/topics';
 import {
@@ -12,6 +12,14 @@ import {
   type Locale,
 } from '../i18n';
 import { Tx } from '../i18n/jsx';
+import {
+  DEFAULT_SIDEBAR_WIDTH,
+  MIN_SIDEBAR_WIDTH,
+  MAX_SIDEBAR_WIDTH,
+  MIN_READING_ZOOM,
+  MAX_READING_ZOOM,
+  useReadingLayout,
+} from './useReadingLayout';
 import '../styles/shell.css';
 
 const SHORT_LABEL: Record<Locale, string> = { zh: '中文', en: 'EN', de: 'DE' };
@@ -59,8 +67,13 @@ export function AppShell({
   chapter?: { id: string; title: string };
   children: ReactNode;
 }) {
-  const [directoryOpen, setDirectoryOpen] = useState(false);
+  const { width, zoom, desktop, directoryOpen, setDirectoryOpen, setWidth, setZoom } =
+    useReadingLayout();
+  const [resizing, setResizing] = useState(false);
   const directoryButton = useRef<HTMLButtonElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
+  const mainShell = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ pointerId: number; startX: number; width: number } | null>(null);
   const intro = active === 'intro';
   const notebookMode = active === 'notes';
   const bookMode = active === 'chapters' || notebookMode;
@@ -79,6 +92,10 @@ export function AppShell({
   const previousIsIntro = previous === INTRO;
   const group = intro || bookMode ? undefined : TOPICS[activeIndex].group;
   const groupIndex = TOPIC_GROUPS.findIndex((g) => g.id === group);
+  const closeDirectory = () => {
+    setDirectoryOpen(false);
+    directoryButton.current?.focus({ preventScroll: true });
+  };
   useEffect(() => {
     document.title = T('{#0} · LLM 原理实验室', title);
   }, [title]);
@@ -87,14 +104,44 @@ export function AppShell({
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setDirectoryOpen(false);
-        directoryButton.current?.focus();
+        directoryButton.current?.focus({ preventScroll: true });
+      }
+      if (!desktop && event.key === 'Tab') {
+        const controls = sidebar.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not(:disabled)',
+        );
+        if (!controls?.length) return;
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [directoryOpen]);
+  }, [directoryOpen, desktop]);
+  useEffect(() => {
+    if (desktop || !directoryOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (mainShell.current) mainShell.current.inert = true;
+    sidebar.current?.querySelector<HTMLElement>('button')?.focus({ preventScroll: true });
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      if (mainShell.current) mainShell.current.inert = false;
+      directoryButton.current?.focus({ preventScroll: true });
+    };
+  }, [desktop, directoryOpen]);
   return (
-    <div className="app-shell lesson-shell editorial-shell">
+    <div
+      className={`app-shell lesson-shell editorial-shell${directoryOpen ? ' directory-open' : ''}${resizing ? ' directory-resizing' : ''}`}
+      style={{ '--sidebar-width': `${width}px` } as CSSProperties}
+    >
       <a
         className="skip-to-content"
         href="#main"
@@ -108,7 +155,23 @@ export function AppShell({
       >
         {T('跳到实验内容')}
       </a>
-      <header className="site-header">
+      {!desktop && directoryOpen && (
+        <button
+          className="directory-backdrop"
+          aria-label={T('收起目录')}
+          onClick={closeDirectory}
+          tabIndex={-1}
+        />
+      )}
+      <aside
+        ref={sidebar}
+        id="course-sidebar"
+        className="course-sidebar"
+        hidden={!directoryOpen}
+        role={!desktop && directoryOpen ? 'dialog' : undefined}
+        aria-modal={!desktop && directoryOpen ? true : undefined}
+        aria-label={T('学习目录')}
+      >
         <div className="masthead">
           <a className="site-brand" href={localePath('/')} aria-label={T('LLM 原理实验室首页')}>
             <span className="site-brand-mark" aria-hidden="true">
@@ -118,115 +181,48 @@ export function AppShell({
             </span>
             <span>{T('LLM 原理实验室')}</span>
           </a>
-          <div className="masthead-tools">
-            <a className="site-reading-link" href={BOOK_URL} target="_blank" rel="noreferrer">
-              {Tx('阅读原书 {#0}', <span aria-hidden="true">↗</span>)}
-            </a>
-            <LanguageSwitch />
-          </div>
+          <button
+            className="directory-close"
+            aria-label={T('收起目录')}
+            title={T('收起目录')}
+            onClick={closeDirectory}
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
         </div>
         <div className="course-navigation">
-          <nav className="study-views" aria-label={T('学习入口')}>
+          <p className="directory-heading">{T('学习目录')}</p>
+          <nav id="course-directory" className="course-directory" aria-label={T('实验目录')}>
             <a
-              href={localePath('/chapters')}
-              aria-current={active === 'chapters' ? 'page' : undefined}
+              className="course-introduction"
+              href={INTRO.href}
+              aria-label={T('{#0} 导读', INTRO.number)}
+              aria-current={intro ? 'page' : undefined}
               onClick={(event) => {
-                if (active === 'chapters' && !chapter) event.preventDefault();
+                if (intro) {
+                  event.preventDefault();
+                  closeDirectory();
+                }
               }}
             >
-              {T('按原书章节')}
+              <span className="course-item-number" aria-hidden="true">
+                {INTRO.number}
+              </span>
+              <span>{INTRO.title}</span>
             </a>
-            <a href={localePath('/notes')} aria-current={notebookMode ? 'page' : undefined}>
+            <a
+              className="course-introduction"
+              href={localePath('/notes')}
+              aria-current={notebookMode ? 'page' : undefined}
+              onClick={(event) => {
+                if (notebookMode) {
+                  event.preventDefault();
+                  closeDirectory();
+                }
+              }}
+            >
               {T('知识笔记')}
             </a>
-            <a
-              href={
-                bookMode
-                  ? localePath('/attention')
-                  : (TOPICS[activeIndex]?.href ?? localePath('/attention'))
-              }
-              aria-current={!bookMode ? 'page' : undefined}
-              onClick={(event) => {
-                if (!bookMode && !intro) event.preventDefault();
-              }}
-            >
-              {T('按机制实验')}
-            </a>
-          </nav>
-          <div className="course-toolbar">
-            <div className="course-location">
-              <span>
-                {bookMode
-                  ? notebookMode
-                    ? T('知识点主线 · 解释、对照与复述')
-                    : T('章节主线 · 讲解与实验分别标注')
-                  : intro
-                    ? T('学习顺序 · 开始之前')
-                    : Tx(
-                        '学习顺序 · 阶段 {#0} / {#1} · {#2}',
-                        groupIndex + 1,
-                        TOPIC_GROUPS.length,
-                        TOPIC_GROUPS[groupIndex].title,
-                      )}
-              </span>
-              <strong>
-                <span className="course-position">
-                  {current.number}
-                  {!bookMode && ` / ${TOPICS.length}`}
-                </span>
-                {current.title}
-              </strong>
-            </div>
-            <div className="course-actions">
-              <div className="course-arrows" aria-label={T('相邻实验')}>
-                {bookMode ? (
-                  <a href={localePath('/chapters')}>{T('全部章节')}</a>
-                ) : previous ? (
-                  <a
-                    href={previous.href}
-                    aria-label={
-                      previousIsIntro
-                        ? T('回到导读：{#0}', previous.subtitle)
-                        : T('上一实验：{#0}', previous.title)
-                    }
-                  >
-                    ← <span>{previousIsIntro ? INTRO.title : T('上一实验')}</span>
-                  </a>
-                ) : (
-                  <span className="course-arrow-disabled" aria-disabled="true">
-                    ← <span>{T('上一实验')}</span>
-                  </span>
-                )}
-                {bookMode ? null : next ? (
-                  <a href={next.href} aria-label={T('下一实验：{#0}', next.title)}>
-                    <span>{T('下一实验')}</span> →
-                  </a>
-                ) : (
-                  <span className="course-arrow-disabled" aria-disabled="true">
-                    <span>{T('下一实验')}</span> →
-                  </span>
-                )}
-              </div>
-              <button
-                ref={directoryButton}
-                className="course-directory-toggle"
-                aria-expanded={directoryOpen}
-                aria-controls="course-directory"
-                onClick={() => setDirectoryOpen((open) => !open)}
-              >
-                {Tx(
-                  '学习目录 {#0}',
-                  <span aria-hidden="true">{directoryOpen ? '−' : T('＋')}</span>,
-                )}
-              </button>
-            </div>
-          </div>
-          <nav
-            id="course-directory"
-            className="course-directory"
-            aria-label={T('实验目录')}
-            hidden={!directoryOpen}
-          >
             {TOPIC_GROUPS.map((group, index) => {
               const topics = TOPICS.filter((topic) => topic.group === group.id);
               return (
@@ -239,7 +235,7 @@ export function AppShell({
                     <span>{String(index + 1).padStart(2, '0')}</span>
                     {group.title}
                   </h2>
-                  <p>{group.description}</p>
+                  <p className="course-group-description">{group.description}</p>
                   <ol start={Number(topics[0].number)}>
                     {topics.map((topic) => (
                       <li key={topic.id}>
@@ -250,8 +246,7 @@ export function AppShell({
                           onClick={(event) => {
                             if (topic.id === active) {
                               event.preventDefault();
-                              setDirectoryOpen(false);
-                              directoryButton.current?.focus();
+                              closeDirectory();
                             }
                           }}
                         >
@@ -260,7 +255,6 @@ export function AppShell({
                           </span>
                           <span>
                             <strong>{topic.title}</strong>
-                            <small>{topic.subtitle}</small>
                           </span>
                           {topic.id === active && (
                             <span className="course-current-mark" aria-hidden="true">
@@ -282,7 +276,6 @@ export function AppShell({
                       </span>
                       <span>
                         <strong>{T('RWKV / RetNet / Hyena 架构导读')}</strong>
-                        <small>{T('历史状态与计算方式对照')}</small>
                       </span>
                     </a>
                   )}
@@ -315,36 +308,181 @@ export function AppShell({
               {T(
                 '编号表示建议学习顺序，与原书章节编号不同；可按顺序学习，也可直接跳到需要的实验。',
               )}{' '}
-              {Tx(
-                '第一次来？先读 {#0}。',
-                <a
-                  href={INTRO.href}
-                  aria-current={intro ? 'page' : undefined}
-                  onClick={(event) => {
-                    if (intro) {
-                      event.preventDefault();
-                      setDirectoryOpen(false);
-                      directoryButton.current?.focus();
-                    }
-                  }}
-                >
-                  {Tx('{#0} 导读', INTRO.number)}
-                </a>,
-              )}
             </p>
           </nav>
         </div>
-      </header>
+        <div className="sidebar-footer">
+          <a className="site-reading-link" href={BOOK_URL} target="_blank" rel="noreferrer">
+            {Tx('阅读原书 {#0}', <span aria-hidden="true">↗</span>)}
+          </a>
+          <LanguageSwitch />
+        </div>
+        <div
+          className="directory-resize"
+          role="separator"
+          aria-label={T('调整目录宽度')}
+          aria-orientation="vertical"
+          aria-valuemin={MIN_SIDEBAR_WIDTH}
+          aria-valuemax={MAX_SIDEBAR_WIDTH}
+          aria-valuenow={width}
+          aria-controls="course-sidebar"
+          title={T('拖动调整目录宽度；方向键微调，双击恢复')}
+          tabIndex={desktop ? 0 : -1}
+          onDoubleClick={() => setWidth(DEFAULT_SIDEBAR_WIDTH)}
+          onKeyDown={(event) => {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            setWidth(
+              event.key === 'Home'
+                ? MIN_SIDEBAR_WIDTH
+                : event.key === 'End'
+                  ? MAX_SIDEBAR_WIDTH
+                  : width + (event.key === 'ArrowLeft' ? -10 : 10),
+            );
+          }}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.currentTarget.focus({ preventScroll: true });
+            event.currentTarget.setPointerCapture(event.pointerId);
+            drag.current = { pointerId: event.pointerId, startX: event.clientX, width };
+            setResizing(true);
+          }}
+          onPointerMove={(event) => {
+            if (drag.current?.pointerId === event.pointerId)
+              setWidth(drag.current.width + event.clientX - drag.current.startX);
+          }}
+          onPointerUp={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId))
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            drag.current = null;
+            setResizing(false);
+          }}
+          onLostPointerCapture={() => {
+            drag.current = null;
+            setResizing(false);
+          }}
+        />
+      </aside>
 
-      <div className="main-shell">
-        <main id="main" className="main-content" tabIndex={-1} aria-label={crumb}>
+      <div ref={mainShell} className="main-shell">
+        <header className="site-header">
+          <div className="course-toolbar">
+            <button
+              ref={directoryButton}
+              className="course-directory-toggle"
+              aria-label={T('学习目录')}
+              title={T('学习目录')}
+              aria-expanded={directoryOpen}
+              aria-controls="course-sidebar"
+              onClick={() => setDirectoryOpen((open) => !open)}
+            >
+              <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+                <rect x="2.5" y="3.5" width="15" height="13" rx="1.5" />
+                <path d="M7 4v12M10 7h4M10 10h4M10 13h4" />
+              </svg>
+              <span>{T('学习目录')}</span>
+            </button>
+            <div className="course-location">
+              <span>
+                {bookMode
+                  ? T('学习目录')
+                  : intro
+                    ? T('学习顺序 · 开始之前')
+                    : TOPIC_GROUPS[groupIndex].title}
+              </span>
+              <span className="course-location-divider" aria-hidden="true">
+                /
+              </span>
+              <strong title={current.title}>
+                <span className="course-position">{current.number}</span>
+                {current.title}
+              </strong>
+            </div>
+            <div className="reading-zoom" role="group" aria-label={T('阅读缩放')}>
+              <button
+                aria-label={T('缩小阅读内容')}
+                title={T('缩小阅读内容')}
+                disabled={zoom <= MIN_READING_ZOOM}
+                onClick={() => setZoom(zoom - 10)}
+              >
+                −
+              </button>
+              <button
+                className="reading-zoom-reset"
+                aria-label={T('恢复 100% 缩放')}
+                title={T('恢复 100% 缩放')}
+                onClick={() => setZoom(100)}
+              >
+                {zoom}%
+              </button>
+              <button
+                aria-label={T('放大阅读内容')}
+                title={T('放大阅读内容')}
+                disabled={zoom >= MAX_READING_ZOOM}
+                onClick={() => setZoom(zoom + 10)}
+              >
+                +
+              </button>
+            </div>
+            <nav className="course-arrows" aria-label={T('相邻实验')}>
+              {!bookMode && (
+                <>
+                  {previous ? (
+                    <a
+                      href={previous.href}
+                      aria-label={
+                        previousIsIntro
+                          ? T('回到导读：{#0}', previous.subtitle)
+                          : T('上一实验：{#0}', previous.title)
+                      }
+                      title={previous.title}
+                    >
+                      ←
+                    </a>
+                  ) : (
+                    <span
+                      className="course-arrow-disabled"
+                      role="link"
+                      aria-disabled="true"
+                      aria-label={T('上一实验')}
+                    >
+                      <span aria-hidden="true">←</span>
+                    </span>
+                  )}
+                  {next ? (
+                    <a
+                      href={next.href}
+                      aria-label={T('下一实验：{#0}', next.title)}
+                      title={next.title}
+                    >
+                      →
+                    </a>
+                  ) : (
+                    <span
+                      className="course-arrow-disabled"
+                      role="link"
+                      aria-disabled="true"
+                      aria-label={T('下一实验')}
+                    >
+                      <span aria-hidden="true">→</span>
+                    </span>
+                  )}
+                </>
+              )}
+            </nav>
+          </div>
+        </header>
+        <main
+          id="main"
+          className="main-content"
+          tabIndex={-1}
+          aria-label={crumb}
+          style={{ zoom: zoom / 100 }}
+        >
           {children}
           {bookMode ? (
             <nav className="course-pagination" aria-label={T('章节学习导航')}>
-              <a href={localePath('/chapters')}>
-                <span>{T('全部章节')}</span>
-                <strong>{T('检查知识主线与尚未覆盖的内容')}</strong>
-              </a>
               <a href={localePath('/attention')}>
                 <span>{T('按机制实验')}</span>
                 <strong>{T('进入可计算的机制实验')}</strong>
@@ -371,7 +509,7 @@ export function AppShell({
                 <div className="course-boundary">
                   <span>{T('学习起点')}</span>
                   <strong>{T('从这里拆开计算过程')}</strong>
-                  <small>{T('可用顶部学习目录跳到其他实验')}</small>
+                  <small>{T('可用左侧学习目录跳到其他实验')}</small>
                 </div>
               )}
               {next ? (

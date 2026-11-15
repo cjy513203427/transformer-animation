@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { openDirectory } from './helpers/navigation';
 
 test('RLHF从导航可发现，阶段、回退、复述与原书链接可用', async ({ page }) => {
   await page.goto('/preference');
-  await page.getByRole('button', { name: '学习目录', exact: true }).click();
-  await page.getByRole('link', { name: /RLHF 全流程笔记/ }).click();
+  const directory = await openDirectory(page);
+  await directory.getByRole('link', { name: /RLHF 全流程笔记/ }).click();
   await expect(page).toHaveURL(/\/notes#rlhf$/);
   await expect(page.locator('#note-title')).toContainText('RLHF');
   const stage = page.getByLabel('RLHF 当前阶段', { exact: true });
@@ -22,6 +23,11 @@ test('RLHF从导航可发现，阶段、回退、复述与原书链接可用', a
   await expect(stage).toHaveText('6 / 7');
   await page.getByText('对应章节与原始来源', { exact: true }).click();
   await expect(page.locator('.note-sources a')).toHaveCount(3);
+  const notesDirectory = await openDirectory(page);
+  await notesDirectory.getByRole('link', { name: '知识笔记', exact: true }).click();
+  await expect(page).toHaveURL(/\/notes#rlhf$/);
+  await expect(stage).toHaveText('6 / 7');
+  await expect(notesDirectory).toBeHidden();
 });
 
 test('提示拼装、投票反例和分享状态可恢复，锚点切换保留输入', async ({ page, context }) => {
@@ -114,11 +120,28 @@ for (const locale of ['en', 'de'])
     await page.evaluate(() => {
       window.location.hash = '#rlhf';
     });
-    await page
-      .locator('.note-reading')
-      .screenshot({
-        path: `test-results/${info.project.name}-notebook-${locale}.png`,
-        scale: 'css',
-      });
+    await expect(page.locator('#note-reading')).toHaveAttribute('data-note', 'rlhf');
+    if (info.project.name === 'desktop') {
+      await page.setViewportSize({ width: 1024, height: 1000 });
+      const resize = page.getByRole('separator');
+      await resize.focus();
+      await page.keyboard.press('End');
+      await expect(resize).toHaveAttribute('aria-valuenow', '400');
+    }
+    const zoom = page.locator('.reading-zoom button').last();
+    for (let i = 0; i < 3; i++) await zoom.click();
+    await expect(page.locator('.reading-zoom-reset')).toHaveText('130%');
+    expect(
+      await page
+        .locator('.notebook-layout')
+        .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length),
+    ).toBe(1);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+    ).toBeLessThanOrEqual(1);
+    await page.locator('.note-reading').screenshot({
+      path: `test-results/${info.project.name}-notebook-${locale}.png`,
+      scale: 'css',
+    });
     expect(errors).toEqual([]);
   });

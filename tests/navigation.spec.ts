@@ -22,21 +22,29 @@ const orderedTitles = [
 test('学习目录分四阶段，14个实验顺序明确，当前项与键盘关闭可用', async ({ page }, info) => {
   await page.goto('/moe');
   const toggle = page.getByRole('button', { name: '学习目录', exact: true });
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toHaveAttribute(
+    'aria-expanded',
+    info.project.name === 'desktop' ? 'true' : 'false',
+  );
   await expect(page.locator('.course-location')).toContainText('MoE 与专家并行');
   await expect(page.locator('.course-location')).toContainText('架构扩展');
   const position = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
   if (info.project.name === 'mobile') await toggle.tap();
-  else await toggle.click();
   const directory = page.getByRole('navigation', { name: '实验目录', exact: true });
   await expect(directory).toBeVisible();
+  await expect(page.locator('.study-views')).toHaveCount(0);
+  await expect(page.locator('.course-sidebar a[href$="/chapters"]')).toHaveCount(0);
   for (const group of ['基础计算', '生成与效率', '架构扩展', '训练与部署']) {
     await expect(directory.getByRole('heading', { name: new RegExp(group) })).toBeVisible();
   }
   const links = directory.locator('ol a');
-  // 14 numbered experiments; the architecture guide and introduction have separate links.
+  // The notes, two note shortcuts, architecture guide, and introduction are separate links.
   await expect(links).toHaveCount(14);
-  await expect(directory.getByRole('link')).toHaveCount(18);
+  await expect(directory.getByRole('link')).toHaveCount(19);
+  await expect(directory.getByRole('link', { name: '知识笔记', exact: true })).toHaveAttribute(
+    'href',
+    '/notes',
+  );
   await expect(directory.getByRole('link', { name: '00 导读', exact: true })).toHaveAttribute(
     'href',
     '/',
@@ -52,7 +60,7 @@ test('学习目录分四阶段，14个实验顺序明确，当前项与键盘关
   await expect(directory.locator('[aria-current="page"]')).toHaveAccessibleName('MoE 与专家并行');
   expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(position);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
-  await page.locator('.site-header').screenshot({
+  await page.screenshot({
     path: `test-results/${info.project.name}-ordered-directory.png`,
     scale: 'css',
   });
@@ -102,10 +110,6 @@ test('目录选择当前实验只收起目录，保留已分享的参数和步�
   const hash = serializeFlashState(state);
   await page.goto('/flash-attention' + hash);
   await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
-  await page
-    .getByRole('navigation', { name: '学习入口', exact: true })
-    .getByRole('link', { name: '按机制实验', exact: true })
-    .click();
   expect(new URL(page.url()).hash).toBe(hash);
   await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
   const directory = await openDirectory(page);
@@ -115,6 +119,123 @@ test('目录选择当前实验只收起目录，保留已分享的参数和步�
   expect(new URL(page.url()).hash).toBe(hash);
   await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
   await expect(page.locator('.flash-inputs')).toContainText('当前 ΔK[3,0] = 1');
+});
+
+test('目录固定在左侧，可拖动和用键盘调整宽度，收放后实验状态不变', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'The resizable outline is a desktop control.');
+  const state = initialFlashState();
+  state.step = 3;
+  const hash = serializeFlashState(state);
+  await page.goto('/flash-attention' + hash);
+  const sidebar = page.locator('.course-sidebar');
+  const separator = page.getByRole('separator', { name: '调整目录宽度' });
+  const initial = await sidebar.boundingBox();
+  expect(initial?.x).toBe(0);
+  expect(initial?.width).toBe(280);
+  const handle = (await separator.boundingBox())!;
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + 100);
+  await page.mouse.down();
+  await page.mouse.move(handle.x + handle.width / 2 + 60, handle.y + 100, { steps: 6 });
+  await page.mouse.up();
+  await expect(separator).toHaveAttribute('aria-valuenow', '340');
+  await separator.focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(separator).toHaveAttribute('aria-valuenow', '330');
+  await page.keyboard.press('Home');
+  await expect(separator).toHaveAttribute('aria-valuenow', '220');
+  await page.keyboard.press('End');
+  await expect(separator).toHaveAttribute('aria-valuenow', '400');
+  await separator.dblclick({ position: { x: 4, y: 100 } });
+  await expect(separator).toHaveAttribute('aria-valuenow', '280');
+  await page.keyboard.press('Escape');
+  await expect(sidebar).toBeHidden();
+  expect((await page.locator('.main-shell').boundingBox())?.x).toBe(0);
+  await openDirectory(page);
+  await page.evaluate(() => window.scrollTo(0, 500));
+  expect((await sidebar.boundingBox())?.y).toBe(0);
+  expect(new URL(page.url()).hash).toBe(hash);
+  await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
+});
+
+test('阅读缩放有边界、可重置并跨页面记忆，不改变分享状态', async ({ page }) => {
+  const state = initialFlashState();
+  state.step = 3;
+  const hash = serializeFlashState(state);
+  await page.goto('/flash-attention' + hash);
+  const increase = page.getByRole('button', { name: '放大阅读内容' });
+  const decrease = page.getByRole('button', { name: '缩小阅读内容' });
+  const reset = page.getByRole('button', { name: '恢复 100% 缩放' });
+  const headingHeight = (await page.locator('h1').boundingBox())!.height;
+  for (let i = 0; i < 3; i++) await increase.click();
+  await expect(reset).toHaveText('130%');
+  await expect(increase).toBeDisabled();
+  expect((await page.locator('h1').boundingBox())!.height).toBeGreaterThan(headingHeight);
+  expect(new URL(page.url()).hash).toBe(hash);
+  await expect(page.locator('.lesson-progress')).toHaveText('4 / 6');
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+  ).toBeLessThanOrEqual(1);
+  await page.reload();
+  await expect(reset).toHaveText('130%');
+  await page.goto('/position');
+  await expect(reset).toHaveText('130%');
+  for (let i = 0; i < 5; i++) await decrease.click();
+  await expect(reset).toHaveText('80%');
+  await expect(decrease).toBeDisabled();
+  await reset.click();
+  await expect(reset).toHaveText('100%');
+});
+
+test('手机目录锁定背景、管理焦点并保留阅读位置，可用遮罩和 Escape 关闭', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'The modal drawer is a mobile control.');
+  await page.goto('/position');
+  await page.evaluate(() => window.scrollTo(0, 400));
+  const before = await page.evaluate(() => scrollY);
+  const toggle = page.getByRole('button', { name: '学习目录', exact: true });
+  await toggle.tap();
+  const drawer = page.getByRole('dialog', { name: '学习目录', exact: true });
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole('button', { name: '收起目录' })).toBeFocused();
+  expect(await page.locator('.main-shell').evaluate((el) => (el as HTMLElement).inert)).toBe(true);
+  await drawer.getByRole('link', { name: 'Deutsch' }).focus();
+  await page.keyboard.press('Tab');
+  await expect(drawer.locator('.site-brand')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+  await expect(toggle).toBeFocused();
+  expect(await page.evaluate(() => scrollY)).toBe(before);
+  await toggle.tap();
+  await page.locator('.directory-backdrop').tap({ position: { x: 375, y: 200 } });
+  await expect(drawer).toBeHidden();
+  expect(await page.locator('.main-shell').evaluate((el) => (el as HTMLElement).inert)).toBe(false);
+});
+
+test('失效的阅读偏好回退到安全范围，各页面共用机制实验目录', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('llm-reading-layout-v1', JSON.stringify({ width: -500, zoom: 'broken' }));
+  });
+  await page.goto('/chapters');
+  await expect(page.locator('.reading-zoom-reset')).toHaveText('100%');
+  const toggle = page.getByRole('button', { name: '学习目录', exact: true });
+  if (info.project.name === 'mobile') await toggle.tap();
+  const directory = page.getByRole('navigation', { name: '实验目录', exact: true });
+  await expect(directory.locator('ol a')).toHaveCount(14);
+  if (info.project.name === 'desktop')
+    await expect(page.getByRole('separator', { name: '调整目录宽度' })).toHaveAttribute(
+      'aria-valuenow',
+      '220',
+    );
+  await directory.getByRole('link', { name: '位置编码', exact: true }).click();
+  await expect(page).toHaveURL(/\/position$/);
+  if (info.project.name === 'mobile') {
+    await expect(page.locator('.course-sidebar')).toBeHidden();
+    expect(await page.locator('.main-shell').evaluate((el) => (el as HTMLElement).inert)).toBe(
+      false,
+    );
+  }
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+  ).toBeLessThanOrEqual(1);
 });
 
 test('根路径是导读：接词演示用 Softmax 实际计算，学习路径链接到各实验', async ({ page }) => {

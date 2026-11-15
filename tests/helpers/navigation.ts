@@ -1,10 +1,11 @@
 import { expect, type Page } from '@playwright/test';
 
 export async function openDirectory(page: Page) {
+  const directory = page.getByRole('navigation', { name: '实验目录', exact: true });
+  if (await directory.isVisible()) return directory;
   const toggle = page.getByRole('button', { name: '学习目录', exact: true });
   await expect(toggle).toBeVisible();
   if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
-  const directory = page.getByRole('navigation', { name: '实验目录', exact: true });
   await expect(directory).toBeVisible();
   return directory;
 }
