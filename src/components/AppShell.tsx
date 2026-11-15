@@ -52,7 +52,7 @@ export function AppShell({
   children,
 }: {
   /** The current experiment, or the introduction that precedes them. */
-  active: TopicId | 'intro' | 'chapters';
+  active: TopicId | 'intro' | 'chapters' | 'notes';
   crumb: string;
   indicator: string;
   title: string;
@@ -62,13 +62,16 @@ export function AppShell({
   const [directoryOpen, setDirectoryOpen] = useState(false);
   const directoryButton = useRef<HTMLButtonElement>(null);
   const intro = active === 'intro';
-  const bookMode = active === 'chapters';
+  const notebookMode = active === 'notes';
+  const bookMode = active === 'chapters' || notebookMode;
   const activeIndex = TOPICS.findIndex((topic) => topic.id === active);
-  const current = bookMode
-    ? { number: chapter?.id ?? '32 + 3', title: chapter?.title ?? T('原书章节与覆盖情况') }
-    : intro
-      ? INTRO
-      : TOPICS[activeIndex];
+  const current = notebookMode
+    ? { number: '26', title: T('知识笔记') }
+    : bookMode
+      ? { number: chapter?.id ?? '32 + 3', title: chapter?.title ?? T('原书章节与覆盖情况') }
+      : intro
+        ? INTRO
+        : TOPICS[activeIndex];
   // The first experiment leads back to the introduction; the introduction leads into it.
   const previous =
       intro || bookMode ? undefined : activeIndex === 0 ? INTRO : TOPICS[activeIndex - 1],
@@ -126,12 +129,15 @@ export function AppShell({
           <nav className="study-views" aria-label={T('学习入口')}>
             <a
               href={localePath('/chapters')}
-              aria-current={bookMode ? 'page' : undefined}
+              aria-current={active === 'chapters' ? 'page' : undefined}
               onClick={(event) => {
-                if (bookMode && !chapter) event.preventDefault();
+                if (active === 'chapters' && !chapter) event.preventDefault();
               }}
             >
               {T('按原书章节')}
+            </a>
+            <a href={localePath('/notes')} aria-current={notebookMode ? 'page' : undefined}>
+              {T('知识笔记')}
             </a>
             <a
               href={
@@ -151,7 +157,9 @@ export function AppShell({
             <div className="course-location">
               <span>
                 {bookMode
-                  ? T('章节主线 · 讲解与实验分别标注')
+                  ? notebookMode
+                    ? T('知识点主线 · 解释、对照与复述')
+                    : T('章节主线 · 讲解与实验分别标注')
                   : intro
                     ? T('学习顺序 · 开始之前')
                     : Tx(
@@ -275,6 +283,28 @@ export function AppShell({
                       <span>
                         <strong>{T('RWKV / RetNet / Hyena 架构导读')}</strong>
                         <small>{T('历史状态与计算方式对照')}</small>
+                      </span>
+                    </a>
+                  )}
+                  {group.id === 'adaptation' && (
+                    <a className="course-note-guide" href={localePath('/notes') + '#rlhf'}>
+                      <span className="course-item-number" aria-hidden="true">
+                        ↳
+                      </span>
+                      <span>
+                        <strong>{T('RLHF 全流程笔记')}</strong>
+                        <small>{T('SFT、奖励模型与策略更新')}</small>
+                      </span>
+                    </a>
+                  )}
+                  {group.id === 'generation' && (
+                    <a className="course-note-guide" href={localePath('/notes') + '#prompt'}>
+                      <span className="course-item-number" aria-hidden="true">
+                        ↳
+                      </span>
+                      <span>
+                        <strong>{T('Prompt Engineering 提示工程')}</strong>
+                        <small>{T('示例、思维链、投票与工具流程')}</small>
                       </span>
                     </a>
                   )}

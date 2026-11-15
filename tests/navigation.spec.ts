@@ -16,7 +16,7 @@ const orderedTitles = [
   'SSM / Mamba',
   'LoRA / QLoRA',
   '量化',
-  '偏好学习 / GRPO',
+  'RLHF / 偏好学习 / GRPO',
 ];
 
 test('学习目录分四阶段，14个实验顺序明确，当前项与键盘关闭可用', async ({ page }, info) => {
@@ -36,7 +36,7 @@ test('学习目录分四阶段，14个实验顺序明确，当前项与键盘关
   const links = directory.locator('ol a');
   // 14 numbered experiments; the architecture guide and introduction have separate links.
   await expect(links).toHaveCount(14);
-  await expect(directory.getByRole('link')).toHaveCount(16);
+  await expect(directory.getByRole('link')).toHaveCount(18);
   await expect(directory.getByRole('link', { name: '00 导读', exact: true })).toHaveAttribute(
     'href',
     '/',
@@ -86,7 +86,7 @@ test('上一与下一实验跨阶段衔接，首尾边界明确，目录可直�
   await expect(header.getByRole('link', { name: '下一实验：位置编码', exact: true })).toBeVisible();
 
   const lastDirectory = await openDirectory(page);
-  await lastDirectory.getByRole('link', { name: '偏好学习 / GRPO', exact: true }).click();
+  await lastDirectory.getByRole('link', { name: 'RLHF / 偏好学习 / GRPO', exact: true }).click();
   await expect(page).toHaveURL(/\/preference$/);
   await expect(header.getByRole('link', { name: /^下一实验：/ })).toHaveCount(0);
   await expect(header.getByRole('link', { name: '上一实验：量化', exact: true })).toBeVisible();

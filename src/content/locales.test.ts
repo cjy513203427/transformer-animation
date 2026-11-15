@@ -45,6 +45,7 @@ const P0_MODULES = {
   flash: () => import('./flash'),
   topics: () => import('./topics'),
   book: () => import('./book'),
+  notebook: () => import('./notebook'),
 };
 
 for (const locale of ['en', 'de'] as const)

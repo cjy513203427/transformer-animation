@@ -44,7 +44,12 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第01章-GPT是什么-LLM发展简史与核心思想/'),
     units: [
       { name: T('下一 token 的分布'), status: 'interactive', topics: [], href: localePath('/') },
-      { name: T('发展历史与关键转折'), status: 'reference', topics: [] },
+      {
+        name: T('发展历史与关键转折'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#model'),
+      },
     ],
   },
   {
@@ -99,7 +104,13 @@ export const CHAPTERS: Chapter[] = [
         topics: [],
         href: localePath('/chapters/15'),
       },
-      { name: T('真实分词、字节与 BPE 合并'), status: 'missing', topics: [] },
+      {
+        name: T('字节、BPE 合并与查表的边界'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#tokenization'),
+      },
+      { name: T('真实 Tokenizer 与词表执行'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -145,7 +156,13 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第07章-神经网络层-不需要懂也能理解Transformer/'),
     units: [
       { name: T('扩维、激活与压回'), status: 'interactive', topics: ['ffn'] },
-      { name: T('完整反向传播与参数更新'), status: 'missing', topics: [] },
+      {
+        name: T('反向传播与优化器更新流程'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#training'),
+      },
+      { name: T('完整模型的数值反向训练'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -276,7 +293,12 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第16章-训练与推理的异同-为什么推理要一个字一个字生成/'),
     units: [
       { name: T('右移目标、Prefill 与 Decode'), status: 'interactive', topics: ['inference'] },
-      { name: T('损失到梯度、优化器更新的完整训练链'), status: 'missing', topics: [] },
+      {
+        name: T('损失、梯度与优化器的训练链'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#training'),
+      },
     ],
   },
   {
@@ -289,7 +311,15 @@ export const CHAPTERS: Chapter[] = [
     ),
     prerequisites: ['07', '16'],
     bookUrl: chapterUrl('第17章-学习率的理解-训练稳定的关键/'),
-    units: [{ name: T('优化轨迹、Warmup 与调度曲线'), status: 'missing', topics: [] }],
+    units: [
+      {
+        name: T('优化轨迹、Warmup 与学习率调度'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/notes#learning-rate'),
+      },
+      { name: T('真实优化器与多维训练轨迹'), status: 'reference', topics: [] },
+    ],
   },
   {
     id: '18',
@@ -454,8 +484,31 @@ export const CHAPTERS: Chapter[] = [
     prerequisites: ['16'],
     bookUrl: chapterUrl('第28章-Prompt-Engineering-提示工程实战/'),
     units: [
-      { name: T('提示、示例与上下文的作用'), status: 'reference', topics: [] },
-      { name: T('Self-Consistency、ToT 与采样投票'), status: 'missing', topics: [] },
+      {
+        name: T('提示、示例与上下文的作用'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#few-shot'),
+      },
+      {
+        name: T('提示结构拼装与对照'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/notes#prompt'),
+      },
+      {
+        name: T('Self-Consistency 答案投票'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/notes#self-consistency'),
+      },
+      {
+        name: T('CoT、ToT、ReAct 与提示评估'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#tot-react'),
+      },
+      { name: T('真实模型的采样、搜索与提示效果'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -470,7 +523,19 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第29章-RLHF与偏好学习-让模型对齐人类/'),
     units: [
       { name: T('奖励差、DPO 与 PPO 裁剪'), status: 'interactive', topics: ['preference'] },
-      { name: T('Rollout、价值函数与完整 RLHF 训练闭环'), status: 'missing', topics: [] },
+      {
+        name: T('Rollout、价值函数与 RLHF 流程'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#rlhf'),
+      },
+      {
+        name: T('奖励偏差、RLAIF 与对齐评估'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#alignment-risks'),
+      },
+      { name: T('真实策略与奖励模型训练'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -501,7 +566,12 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第31章-推理模型革命-从o1到R1/'),
     units: [
       { name: T('组内优势、KL 惩罚与蒸馏分布'), status: 'interactive', topics: ['preference'] },
-      { name: T('推理预算、搜索与公开训练数据流'), status: 'missing', topics: [] },
+      {
+        name: T('推理预算、搜索与公开训练数据流'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#reasoning'),
+      },
     ],
   },
   {
@@ -547,7 +617,21 @@ export const CHAPTERS: Chapter[] = [
     ),
     prerequisites: ['17', '30'],
     bookUrl: chapterUrl('附录A-Scaling-Law与计算量估算/'),
-    units: [{ name: T('经验曲线与训练计算预算工具'), status: 'missing', topics: [] }],
+    units: [
+      {
+        name: T('Scaling Law 的经验边界'),
+        status: 'explained',
+        topics: [],
+        href: localePath('/notes#scaling'),
+      },
+      {
+        name: T('训练计算预算工具'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/notes#scaling'),
+      },
+      { name: T('真实模型损失曲线拟合'), status: 'reference', topics: [] },
+    ],
   },
   {
     id: 'B',
@@ -599,4 +683,4 @@ export const coverageLabel = (status: CoverageStatus): string =>
     reference: T('原书阅读'),
     missing: T('尚待补充'),
   })[status];
-export const CHAPTER_VERIFIED_DATE = '2026-11-12';
+export const CHAPTER_VERIFIED_DATE = '2026-11-15';

@@ -130,7 +130,7 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     id: 'preference',
     group: 'adaptation',
     href: '/preference',
-    title: T('偏好学习 / GRPO'),
+    title: T('RLHF / 偏好学习 / GRPO'),
     subtitle: T('偏好对、组优势与策略约束'),
   },
 ];
@@ -150,4 +150,4 @@ export const INTRO = {
   subtitle: T('大模型在做什么，这里怎么学'),
 };
 
-export const ROADMAP = ['Tokenization / BPE', T('学习率与 Scaling Law'), T('提示与推理预算')];
+export const ROADMAP = [T('真实 Tokenizer 与完整模型训练')];

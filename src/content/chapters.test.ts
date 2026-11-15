@@ -33,10 +33,10 @@ describe('章节覆盖与讲解边界', () => {
     }
   });
   it('保留明确缺口，不能用局部实验冒充完整模型实现', () => {
-    expect(CHAPTERS.find((c) => c.id === '04')!.units.some((u) => u.status === 'missing')).toBe(
+    expect(CHAPTERS.find((c) => c.id === '04')!.units.some((u) => u.status === 'reference')).toBe(
       true,
     );
-    expect(CHAPTERS.find((c) => c.id === '17')!.units.every((u) => u.status === 'missing')).toBe(
+    expect(CHAPTERS.find((c) => c.id === '17')!.units.some((u) => u.status === 'interactive')).toBe(
       true,
     );
     expect(CHAPTERS.find((c) => c.id === '27')!.units.some((u) => u.status === 'reference')).toBe(

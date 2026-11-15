@@ -128,6 +128,13 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           <div className="eyebrow">{Tx('原书导读 · {#0} · 可手算的机制实验', topic.chapter)}</div>
           <h1>{topic.title}</h1>
           <p>{topic.intro}</p>
+          {topic.id === 'preference' && (
+            <p>
+              <a href={localePath('/notes#rlhf')}>
+                {T('先读 RLHF 全流程：SFT、奖励模型、Rollout 与策略更新 →')}
+              </a>
+            </p>
+          )}
         </div>
         <button className="button secondary share-button" onClick={() => void share()}>
           {T('↗ 复制实验链接')}

@@ -293,7 +293,8 @@
   background: #edf4e7;
   color: #315e18;
 }
-:root .editorial-shell .course-group .course-architecture-guide {
+:root .editorial-shell .course-group .course-architecture-guide,
+:root .editorial-shell .course-group .course-note-guide {
   margin-top: 8px;
   border-top: 1px dashed #d9e0d4;
 }

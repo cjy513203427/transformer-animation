@@ -1,0 +1,321 @@
+.notebook-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(0, 2.2fr);
+  align-items: start;
+  gap: 30px;
+  border-top: 1px solid var(--line);
+}
+.note-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin: 0 0 24px;
+  font-size: 13px;
+}
+.notebook-directory {
+  min-width: 0;
+  padding: 20px 18px 20px 0;
+  border-right: 1px solid var(--line);
+}
+.notebook-directory > label {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 13px;
+  font-size: 12px;
+}
+.notebook-directory input,
+.notebook-directory select {
+  width: 100%;
+}
+.notebook-directory .note-count {
+  color: var(--muted);
+  font-size: 12px;
+}
+.notebook-directory h2 {
+  font-size: 12px;
+  margin: 24px 0 8px;
+  color: #5b695b;
+}
+.notebook-directory ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.notebook-directory li a {
+  display: block;
+  padding: 8px 10px;
+  line-height: 1.7;
+  font-size: 12px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  border-left: 2px solid transparent;
+}
+.notebook-directory li a:hover {
+  background: #f5f8f2;
+}
+.notebook-directory li a[aria-current] {
+  border-color: #69a82b;
+  background: #f0f6e9;
+  color: #285c17;
+  font-weight: 600;
+}
+.note-reading {
+  min-width: 0;
+  padding-block: 24px;
+  scroll-margin-top: 20px;
+  outline: none;
+}
+.note-reading:focus-visible {
+  outline: 2px solid #38751d;
+  outline-offset: 5px;
+}
+.note-reading h2 {
+  margin: 6px 0 14px;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.5;
+}
+.note-reading h3 {
+  font-size: 15px;
+  margin: 0 0 12px;
+  line-height: 1.7;
+}
+.note-reading p,
+.note-reading details {
+  font-size: 14px;
+}
+.note-reading-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.note-reading .note-question {
+  font-size: 16px;
+  font-weight: 600;
+  color: #345925;
+}
+.note-explanation {
+  padding: 10px 0;
+}
+.note-example {
+  padding: 18px 20px;
+  border-left: 3px solid #5586ac;
+  background: #f3f7fa;
+  margin: 15px 0 24px;
+}
+.note-example p,
+.note-boundary p {
+  margin: 0;
+}
+.note-boundary {
+  border-block: 1px solid var(--line);
+  padding: 18px 0;
+  margin: 24px 0;
+}
+.note-recall {
+  padding: 20px;
+  background: #f4f8ed;
+  margin: 22px 0;
+}
+.note-reading summary {
+  cursor: pointer;
+  line-height: 1.8;
+}
+.note-related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding-block: 14px;
+  font-size: 13px;
+}
+.note-related h3 {
+  flex-basis: 100%;
+  margin: 0;
+}
+.note-sources {
+  margin-block: 20px;
+  color: #586252;
+}
+.note-sources li {
+  margin-block: 8px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.note-reading .note-reset {
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.note-tool {
+  min-width: 0;
+  border: 1px solid #cedcc7;
+  padding: 20px;
+  margin: 24px 0;
+  background: #fcfdf9;
+}
+.note-tool .note-tool-caption {
+  font-size: 12px;
+  color: #5d6b58;
+}
+.note-tool button,
+.note-reading-header button {
+  border: 1px solid #c5d1c0;
+  background: #fff;
+  color: #325729;
+  padding: 8px 12px;
+  border-radius: 3px;
+  line-height: 1.6;
+  font-size: 12px;
+  cursor: pointer;
+}
+.note-tool button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.note-tool button[aria-pressed='true'] {
+  background: #e9f3df;
+  border-color: #6d9649;
+}
+.note-tool .chapter-preset-buttons {
+  align-items: center;
+  margin-block: 14px;
+}
+.note-tool-controls {
+  display: flex;
+  gap: 14px 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-block: 16px;
+}
+.note-tool label {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.note-tool-controls label:has(input[type='number']),
+.note-tool-controls label:has(select) {
+  display: grid;
+  gap: 5px;
+}
+.note-prompt,
+.note-data {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font: 12px/1.9 var(--font-mono, monospace);
+  background: #f1f4ee;
+  padding: 14px;
+  max-width: 100%;
+}
+.note-votes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-block: 20px;
+}
+.note-votes label {
+  display: grid;
+  gap: 6px;
+}
+.note-slider {
+  display: grid;
+  gap: 8px;
+  margin-block: 20px;
+}
+.note-slider input {
+  width: 100%;
+  accent-color: #55852f;
+}
+.note-result {
+  border-left: 3px solid #6d9649;
+  background: #eff5e9;
+  padding: 14px 18px;
+  margin-top: 18px;
+}
+.note-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.note-table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 12px/1.6 var(--font-mono, monospace);
+}
+.note-table-scroll th,
+.note-table-scroll td {
+  text-align: right;
+  border-bottom: 1px solid #d8e1d2;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+.note-table-scroll caption {
+  text-align: left;
+  font-size: 12px;
+  margin: 6px 0 12px;
+}
+.note-pipeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+  margin: 20px 0;
+}
+.note-pipeline li {
+  display: flex;
+  min-width: 0;
+}
+.note-pipeline button {
+  width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.note-pipeline button span {
+  display: block;
+  color: #64715e;
+  margin-bottom: 4px;
+}
+.note-stage {
+  padding: 4px 0 16px;
+}
+.note-stage h4 {
+  margin: 0;
+  font-size: 18px;
+}
+.note-stage > strong {
+  display: block;
+  line-height: 1.85;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .notebook-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .notebook-directory {
+    padding-right: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .notebook-directory > nav {
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-block: 1px solid var(--line);
+  }
+  .notebook-directory h2 {
+    margin-top: 12px;
+  }
+  .note-reading {
+    padding-top: 20px;
+  }
+  .note-tool,
+  .note-example,
+  .note-recall {
+    padding: 14px;
+  }
+  .note-votes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .note-pipeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

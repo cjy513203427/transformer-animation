@@ -54,8 +54,11 @@ test('章节目录覆盖35项，搜索、缺口筛选、锚点与双入口可用
   await page.goto('/chapters#chapter-17');
   const learningRate = page.locator('#chapter-17');
   await expect(learningRate).toHaveAttribute('open', '');
-  await expect(learningRate.locator('.coverage-status')).toHaveText('尚待补充');
-  await expect(learningRate.getByRole('link', { name: '打开计算 →' })).toHaveCount(0);
+  await expect(learningRate.locator('.coverage-status')).toHaveText(['可操作实验', '原书阅读']);
+  await expect(learningRate.getByRole('link', { name: '打开计算 →' })).toHaveAttribute(
+    'href',
+    '/notes#learning-rate',
+  );
   await page.goto('/chapters');
   await page.locator('#chapter-32 > summary').focus();
   await page.keyboard.press('Enter');
