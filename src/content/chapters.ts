@@ -104,13 +104,9 @@ export const CHAPTERS: Chapter[] = [
         topics: [],
         href: localePath('/chapters/15'),
       },
-      {
-        name: T('字节、BPE 合并与查表的边界'),
-        status: 'explained',
-        topics: [],
-        href: localePath('/chapters/15'),
-      },
+      { name: T('字节、BPE 合并与查表的边界'), status: 'interactive', topics: ['bpe'] },
       { name: T('真实 Tokenizer 与词表执行'), status: 'reference', topics: [] },
+      { name: T('Embedding 参数量 V×d'), status: 'interactive', topics: ['budget'] },
     ],
   },
   {
@@ -156,6 +152,7 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第07章-神经网络层-不需要懂也能理解Transformer/'),
     units: [
       { name: T('扩维、激活与压回'), status: 'interactive', topics: ['ffn'] },
+      { name: T('参数分布：Embedding、Attention、FFN 与 Norm'), status: 'interactive', topics: ['budget'] },
       {
         name: T('反向传播与优化器更新流程'),
         status: 'interactive',
@@ -216,6 +213,7 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第11章-Multi-Head-Attention-多视角理解/'),
     units: [
       { name: T('投影、切头、转轴与独立 Attention'), status: 'interactive', topics: ['attention'] },
+      { name: T('多头参数量与常见配置'), status: 'interactive', topics: ['budget'] },
     ],
   },
   {
@@ -279,6 +277,7 @@ export const CHAPTERS: Chapter[] = [
         topics: [],
         href: localePath('/chapters/15#scope'),
       },
+      { name: T('GPT-2 Small 参数量表'), status: 'interactive', topics: ['budget'] },
     ],
   },
   {
@@ -318,6 +317,7 @@ export const CHAPTERS: Chapter[] = [
         topics: [],
         href: localePath('/training-step'),
       },
+      { name: T('SGD、Adam 与 AdamW 的逐项更新'), status: 'interactive', topics: ['optimizer'] },
       { name: T('真实优化器与多维训练轨迹'), status: 'reference', topics: [] },
     ],
   },
@@ -339,6 +339,7 @@ export const CHAPTERS: Chapter[] = [
         href: localePath('/chapters/15'),
       },
       { name: T('PyTorch 实现与逐行代码联动'), status: 'reference', topics: [] },
+      { name: T('权重绑定与不绑定的参数量'), status: 'interactive', topics: ['budget'] },
     ],
   },
   {
@@ -413,6 +414,7 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第23章-MHA到MQA到GQA演进/'),
     units: [
       { name: T('分组映射、参数与缓存'), status: 'interactive', topics: ['kv'] },
+      { name: T('投影参数随 KV 头数的变化'), status: 'interactive', topics: ['budget'] },
       { name: T('转换后的继续训练与质量评估'), status: 'reference', topics: [] },
     ],
   },
@@ -441,7 +443,10 @@ export const CHAPTERS: Chapter[] = [
     ),
     prerequisites: ['05', '10'],
     bookUrl: chapterUrl('第25章-位置编码演进-Sinusoidal到RoPE到ALiBi/'),
-    units: [{ name: T('三处位置入口与共同平移核对'), status: 'interactive', topics: ['position'] }],
+    units: [
+      { name: T('三处位置入口与共同平移核对'), status: 'interactive', topics: ['position'] },
+      { name: T('PI、NTK-aware 与 YaRN 的上下文扩展'), status: 'interactive', topics: ['context'] },
+    ],
   },
   {
     id: '26',
@@ -627,15 +632,10 @@ export const CHAPTERS: Chapter[] = [
         name: T('Scaling Law 的经验边界'),
         status: 'explained',
         topics: [],
-        href: localePath('/training-step'),
-      },
-      {
-        name: T('训练计算预算工具'),
-        status: 'interactive',
-        topics: [],
-        href: localePath('/training-step'),
+        href: localePath('/model-budget'),
       },
       { name: T('真实模型损失曲线拟合'), status: 'reference', topics: [] },
+      { name: T('参数量与 FLOPs：12Ld²、前向与 6ND'), status: 'interactive', topics: ['budget'] },
     ],
   },
   {

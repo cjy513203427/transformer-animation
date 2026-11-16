@@ -31,11 +31,3 @@ export function gradientTrajectory(eta: number, steps: number, schedule: boolean
     return row;
   });
 }
-
-/** Dense Transformer rough training estimate: C≈6ND; B parameters, B training tokens. */
-export function trainingBudget(parametersB: number, tokensB: number) {
-  return {
-    flops: 6 * parametersB * 1e9 * tokensB * 1e9,
-    tokensPerParameter: tokensB / parametersB,
-  };
-}

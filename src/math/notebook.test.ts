@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { gradientTrajectory, tallyAnswers, trainingBudget } from './notebook';
+import { gradientTrajectory, tallyAnswers } from './notebook';
 
 it('投票处理平局、提取失败和一致但错误的答案', () => {
   expect(tallyAnswers([5, 3, null, 5, 3], 2).winners).toEqual([3, 5]);
@@ -19,9 +19,4 @@ it('二次损失SGD满足闭式解，过大学习率发散，warmup初期确实�
   expect(scheduled[0].rate).toBeCloseTo(0.2);
   expect(scheduled[2].rate).toBeCloseTo(0.6);
   expect(scheduled[12].rate).toBe(0);
-});
-it('训练账本按参数和token分别线性缩放，不把20:1当作限制', () => {
-  expect(trainingBudget(7, 140)).toEqual({ flops: 5.88e21, tokensPerParameter: 20 });
-  expect(trainingBudget(14, 140).flops).toBe(2 * trainingBudget(7, 140).flops);
-  expect(trainingBudget(7, 280).flops).toBe(2 * trainingBudget(7, 140).flops);
 });

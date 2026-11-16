@@ -1,0 +1,104 @@
+.bpe-corpus {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+.bpe-word-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+.bpe-word-row label,
+.bpe-probe {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.bpe-word-row input,
+.bpe-probe input {
+  font: inherit;
+  padding: 6px 8px;
+  min-width: 0;
+}
+.bpe-word-row input[type='number'] {
+  width: 6em;
+}
+.bpe-word-row button,
+.bpe-controls button {
+  font: inherit;
+  padding: 6px 12px;
+}
+.bpe-problem {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12px;
+  color: #a1402f;
+}
+.bpe-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 14px 0;
+}
+.bpe-controls label {
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+}
+.bpe-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 18px;
+}
+@media (max-width: 760px) {
+  .bpe-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.bpe-tokens {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.bpe-token {
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+/* The token just merged: a heavier outline as well as a tint, not colour alone. */
+.bpe-new {
+  border-width: 2px;
+  border-color: #426439;
+  background: #eef4e9;
+  font-weight: 600;
+}
+.bpe-best th {
+  font-weight: 600;
+}
+.bpe-mark {
+  margin-left: 8px;
+  font-size: 11px;
+  color: #426439;
+}
+.bpe-vocab ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.bpe-vocab li {
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+}
+.bpe-vocab li span {
+  color: #8a9389;
+  margin-right: 2px;
+}

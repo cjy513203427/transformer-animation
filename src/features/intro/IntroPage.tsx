@@ -176,13 +176,7 @@ export default function IntroPage() {
                         );
                       })}
                     </p>
-                  ) : (
-                    i === 0 && (
-                      <p className="intro-station-links intro-station-later">
-                        {T('分词与 BPE 的实验还在计划中。')}
-                      </p>
-                    )
-                  )}
+                  ) : null}
                 </div>
               </li>
             ))}

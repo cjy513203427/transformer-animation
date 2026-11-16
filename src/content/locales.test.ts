@@ -34,6 +34,8 @@ const P1 = [
   'preference',
   'memory',
   'ssm',
+  'optimizer',
+  'context',
 ];
 /** Imported fresh after each locale switch; explicit so the bundler can resolve them. */
 const P0_MODULES = {

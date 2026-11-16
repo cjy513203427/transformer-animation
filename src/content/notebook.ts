@@ -596,7 +596,7 @@ export const KNOWLEDGE_NOTES: KnowledgeNote[] = [
         'Scaling Law 是在特定数据、模型族与训练范围中拟合的经验关系，常用幂律描述损失随参数 N、训练 token D 或计算 C 的变化。Chinchilla 讨论固定训练预算下的模型与数据分配；约 20 token/参数只是特定拟合的粗略起点，部署时也需考虑后续推理成本。',
       ),
       T(
-        '稠密 Transformer 的粗略训练估算 C≈6ND，把前向与反向主要矩阵计算合并。下方只算这个口径与 D/N，不预测 loss 或训练时间；Attention 的序列长度项、Embedding、硬件利用率与通信没有在 6ND 中精确展开。',
+        '稠密 Transformer 的粗略训练估算 C≈6ND，把前向与反向主要矩阵计算合并。参数量与计算量页面按这个口径和更细的逐层算式计算，不预测 loss 或训练时间；Attention 的序列长度项、Embedding、硬件利用率与通信没有在 6ND 中精确展开。',
       ),
     ],
     example: T(

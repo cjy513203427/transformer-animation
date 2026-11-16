@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { Formula } from '../../components/Formula';
 import { Prediction } from '../../components/Controls';
 
-import { gradientTrajectory, trainingBudget } from '../../math/notebook';
+import { gradientTrajectory } from '../../math/notebook';
 import { formatNumber as fmt } from '../../math/attention';
 import { initialNotebookState, type NotebookState } from '../../state/notebook';
 import type { Parameters } from '../../math/p1/shared';
 import '../../styles/training-tools.css';
-import { T } from '../../i18n';
+import { T, localePath } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
 
 interface ToolProps {
@@ -15,15 +15,31 @@ interface ToolProps {
   onChange: (state: NotebookState) => void;
 }
 
-/** Optional calculators share the experiment's validated configuration and URL. */
-export default function TrainingTools({config,onChange}:{config:Parameters;onChange:(config:Parameters)=>void}) {
-  const state=initialNotebookState();
-  state.config={samples:5,eta:config.trajectoryEta,schedule:config.schedule===1,parametersB:config.parametersB,tokensB:config.tokensB};
-  const change=(next:NotebookState)=>onChange({...config,trajectoryEta:next.config.eta,schedule:Number(next.config.schedule),parametersB:next.config.parametersB,tokensB:next.config.tokensB});
-  return <>
-    <details><summary>{T('学习率轨迹与 Warmup')}</summary><LearningRateTool state={state} onChange={change}/></details>
-    <details><summary>{T('训练计算量账本')}</summary><ScalingTool state={state} onChange={change}/></details>
-  </>;
+/** The trajectory tool shares the experiment's validated configuration and URL. */
+export default function TrainingTools({
+  config,
+  onChange,
+}: {
+  config: Parameters;
+  onChange: (config: Parameters) => void;
+}) {
+  const state = initialNotebookState();
+  state.config = { ...state.config, eta: config.trajectoryEta, schedule: config.schedule === 1 };
+  const change = (next: NotebookState) =>
+    onChange({ ...config, trajectoryEta: next.config.eta, schedule: Number(next.config.schedule) });
+  return (
+    <>
+      <details>
+        <summary>{T('学习率轨迹与 Warmup')}</summary>
+        <LearningRateTool state={state} onChange={change} />
+      </details>
+      <p>
+        <a href={localePath('/model-budget')}>
+          {T('整个模型训练一遍要多少计算？打开参数量与计算量 →')}
+        </a>
+      </p>
+    </>
+  );
 }
 
 export function LearningRateTool({ state, onChange }: ToolProps) {
@@ -136,69 +152,3 @@ export function LearningRateTool({ state, onChange }: ToolProps) {
   );
 }
 
-export function ScalingTool({ state, onChange }: ToolProps) {
-  const budget = trainingBudget(state.config.parametersB, state.config.tokensB);
-  return (
-    <section className="note-tool" aria-label={T('训练计算量估算器')}>
-      <h3>{T('只计算明确口径下的训练账本')}</h3>
-      <Formula
-        expression={String.raw`C\approx6ND`}
-        symbols={[
-          [String.raw`C`, T('估算训练浮点运算次数，单位 FLOPs')],
-          ['N', T('稠密模型参数数量')],
-          ['D', T('训练中处理的 token 总数（含重复）')],
-        ]}
-      />
-      <div className="note-tool-controls">
-        <label>
-          {T('参数 N（十亿）')}
-          <input
-            type="number"
-            min="0.1"
-            max="1000"
-            step="0.1"
-            value={state.config.parametersB}
-            onChange={(e) => {
-              if (e.currentTarget.validity.valid && e.target.value !== '')
-                onChange({
-                  ...state,
-                  config: { ...state.config, parametersB: Number(e.target.value) },
-                });
-            }}
-          />
-        </label>
-        <label>
-          {T('训练 token D（十亿）')}
-          <input
-            type="number"
-            min="1"
-            max="100000"
-            step="1"
-            value={state.config.tokensB}
-            onChange={(e) => {
-              if (e.currentTarget.validity.valid && e.target.value !== '')
-                onChange({
-                  ...state,
-                  config: { ...state.config, tokensB: Number(e.target.value) },
-                });
-            }}
-          />
-        </label>
-      </div>
-      <div className="note-result" aria-live="polite" data-testid="training-budget">
-        <strong>C ≈ {budget.flops.toExponential(3)} FLOPs</strong>
-        <p>D/N = {fmt(budget.tokensPerParameter, 2)}</p>
-      </div>
-      <p>
-        {T('只统计稠密模型主要训练矩阵运算的粗估，不含硬件效率、通信或费用；不据此预测 loss。')}
-      </p>
-      <button
-        onClick={() =>
-          onChange({ ...state, config: { ...state.config, parametersB: 7, tokensB: 140 } })
-        }
-      >
-        {T('恢复预设示例')}
-      </button>
-    </section>
-  );
-}

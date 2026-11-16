@@ -14,6 +14,8 @@ import decoding from '../p1/decoding';
 import preference from '../p1/preference';
 import memory from '../p1/memory';
 import ssm from '../p1/ssm';
+import optimizer from '../p1/optimizer';
+import context from '../p1/context';
 import { multiheadSymbols } from './multihead';
 import {
   projectionCellSymbols,
@@ -30,7 +32,7 @@ describe('公式的就地符号说明', () => {
     kvSteps,
     moeSteps,
     flashSteps,
-    ...[normalization, ffn, lora, quantization, decoding, preference, memory, ssm].map(
+    ...[normalization, ffn, lora, quantization, decoding, preference, memory, ssm, optimizer, context].map(
       (topic) => topic.steps,
     ),
   ];

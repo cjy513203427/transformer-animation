@@ -15,6 +15,8 @@ const ROUTES = [
   '/lora',
   '/quantization',
   '/preference',
+  '/optimizer',
+  '/context-extension',
 ];
 const NEXT = {
   en: /^(Next: .* →|Next step|Next stop →)$/,

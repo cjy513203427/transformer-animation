@@ -1,7 +1,7 @@
 import type { NoteId } from '../state/notebook';
 /** Compatibility for previously shared notes; experiments own the learning paths. */
 export const NOTE_DESTINATIONS: Record<NoteId,string> = {
-  model:'/chapters/15', tokenization:'/chapters/15', architecture:'/chapters/15',
+  model:'/chapters/15', tokenization:'/tokenization', architecture:'/chapters/15',
   attention:'/attention', components:'/ffn-residual', position:'/position',
   training:'/training-step', 'learning-rate':'/training-step', generation:'/inference-cache',
   efficiency:'/flash-attention', memory:'/attention-variants', adaptation:'/lora',
@@ -9,5 +9,5 @@ export const NOTE_DESTINATIONS: Record<NoteId,string> = {
   'few-shot':'/prompt-engineering', cot:'/prompt-search', 'self-consistency':'/prompt-voting',
   'tot-react':'/prompt-search', rlhf:'/policy-update', 'ppo-dpo':'/policy-update',
   'alignment-risks':'/policy-update', grpo:'/preference', reasoning:'/policy-update',
-  scaling:'/training-step', faq:'/inference-cache',
+  scaling:'/model-budget', faq:'/inference-cache',
 };

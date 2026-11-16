@@ -20,8 +20,6 @@ export default function KnowledgeNotebook() {
         next.config.eta = Math.min(2,Math.round(state.config.eta*20)/20);
         next.config.trajectoryEta = Math.round(state.config.eta*20)/20;
         next.config.schedule = Number(state.config.schedule);
-        next.config.parametersB = Math.round(state.config.parametersB*10)/10;
-        next.config.tokensB = Math.round(state.config.tokensB);
       }
       if(topic.id==='prompt-vote') {
         const answers=state.input.answers.filter((a):a is 3|5|7=>a!==null);

@@ -20,7 +20,7 @@ for(const lab of labs) test(`${lab.id} 同一例子逐步核对、预测、回�
   await expect(page.locator('.lesson-progress')).toHaveText(`1 / ${lab.steps}`);
   await expect(page.locator('.diagram-panel figure')).toBeVisible();
   const directory=await openDirectory(page);
-  await expect(directory.locator('ol a')).toHaveCount(19);
+  await expect(directory.locator('ol a')).toHaveCount(23);
   await page.keyboard.press('Escape');
   for(let i=0;i<lab.steps;i++){
     await page.locator('.p1-steps button').nth(i).click();
@@ -111,17 +111,18 @@ test('旧笔记链接进入实验，训练补充工具仍计算并随分享恢�
   await page.getByRole('button',{name:'不更小',exact:true}).click();
   await page.getByRole('button',{name:'执行 12 次更新',exact:true}).click();
   await expect(page.getByTestId('learning-result')).toContainText('预测与计算一致');
-  await page.getByText('训练计算量账本',{exact:true}).click();
-  await page.getByRole('spinbutton',{name:'参数 N（十亿）',exact:true}).fill('14');
-  await expect(page.getByTestId('training-budget')).toContainText('1.176e+22');
   await page.getByRole('button',{name:'复制实验链接',exact:false}).click();
   const url=await page.evaluate(()=>navigator.clipboard.readText());
   // A hash-only goto keeps the page (and its open panels); load the link fresh.
   await page.goto('about:blank');
   await page.goto(url);
   await page.getByText('进一步理解',{exact:true}).click();
-  await page.getByText('训练计算量账本',{exact:true}).click();
-  await expect(page.getByRole('spinbutton',{name:'参数 N（十亿）',exact:true})).toHaveValue('14');
+  await page.getByText('学习率轨迹与 Warmup',{exact:true}).click();
+  await expect(page.getByRole('slider',{name:'基础学习率 η',exact:true})).toHaveValue('2.5');
+  // The compute ledger moved to the calculator; old #scaling links follow it.
+  await page.goto('/notes#scaling');
+  await expect(page).toHaveURL(/\/model-budget$/);
+  await expect(page.getByTestId('budget-total')).toHaveText('124,439,808');
 });
 
 for(const locale of ['en','de']) test(`${locale} 五个新实验完整翻译且窄屏可读`,async({page},info)=>{

@@ -638,6 +638,12 @@
   :root .editorial-shell .course-location > strong {
     gap: 6px;
     line-height: 1.5;
+    /* Long English/German titles wrap to two lines instead of running past the toolbar. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   :root .editorial-shell .course-position {
     display: none;

@@ -50,7 +50,7 @@ test('旧章节索引链接仍可使用搜索、缺口筛选和锚点', async ({
   await page.goto('/chapters#chapter-17');
   const learningRate = page.locator('#chapter-17');
   await expect(learningRate).toHaveAttribute('open', '');
-  await expect(learningRate.locator('.coverage-status')).toHaveText(['可操作实验', '原书阅读']);
+  await expect(learningRate.locator('.coverage-status')).toHaveText(['可操作实验', '可操作实验', '原书阅读']);
   await expect(learningRate.getByRole('link', { name: '打开计算 →' })).toHaveAttribute(
     'href',
     '/training-step',

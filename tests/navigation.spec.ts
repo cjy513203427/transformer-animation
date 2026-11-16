@@ -4,6 +4,7 @@ import { initialFlashState, serializeFlashState } from '../src/state/flash';
 
 const orderedTitles = [
   '跟图理解 Attention',
+  '分词与 BPE',
   '位置编码',
   '归一化',
   'FFN 与残差',
@@ -14,17 +15,20 @@ const orderedTitles = [
   '提示链与核对',
   '答案投票',
   '思路搜索',
+  '上下文扩展',
   '稀疏与压缩记忆',
   'MoE 与专家并行',
   'SSM / Mamba',
   '前向、损失与参数更新',
+  '优化器：SGD、Adam 与 AdamW',
+  '参数量与计算量',
   'RLHF 与策略更新',
   'LoRA / QLoRA',
   '量化',
   'RLHF / 偏好学习 / GRPO',
 ];
 
-test('学习目录分四阶段，19个实验顺序明确，当前项与键盘关闭可用', async ({ page }, info) => {
+test('学习目录分四阶段，23个实验顺序明确，当前项与键盘关闭可用', async ({ page }, info) => {
   await page.goto('/moe');
   const toggle = page.getByRole('button', { name: '学习目录', exact: true });
   await expect(toggle).toHaveAttribute(
@@ -43,8 +47,8 @@ test('学习目录分四阶段，19个实验顺序明确，当前项与键盘关
     await expect(directory.getByRole('heading', { name: new RegExp(group) })).toBeVisible();
   }
   const links = directory.locator('ol a');
-  await expect(links).toHaveCount(19);
-  await expect(directory.getByRole('link')).toHaveCount(20);
+  await expect(links).toHaveCount(23);
+  await expect(directory.getByRole('link')).toHaveCount(24);
   await expect(directory.locator('.course-note-guide,.course-architecture-guide')).toHaveCount(0);
   await expect(directory.getByRole('link', { name: '00 导读', exact: true })).toHaveAttribute(
     'href',
@@ -88,7 +92,7 @@ test('上一与下一实验跨阶段衔接，首尾边界明确，目录可直�
   await expect(page).toHaveURL(/\/attention$/);
   await expect(header.getByRole('link', { name: /^上一实验：/ })).toHaveCount(0);
   await expect(header.getByRole('link', { name: /^回到导读：/ })).toHaveAttribute('href', '/');
-  await expect(header.getByRole('link', { name: '下一实验：位置编码', exact: true })).toBeVisible();
+  await expect(header.getByRole('link', { name: '下一实验：分词与 BPE', exact: true })).toBeVisible();
 
   const lastDirectory = await openDirectory(page);
   await lastDirectory.getByRole('link', { name: 'RLHF / 偏好学习 / GRPO', exact: true }).click();
@@ -216,7 +220,7 @@ test('失效的阅读偏好回退到安全范围，各页面共用机制实验�
   const toggle = page.getByRole('button', { name: '学习目录', exact: true });
   if (info.project.name === 'mobile') await toggle.tap();
   const directory = page.getByRole('navigation', { name: '实验目录', exact: true });
-  await expect(directory.locator('ol a')).toHaveCount(19);
+  await expect(directory.locator('ol a')).toHaveCount(23);
   if (info.project.name === 'desktop')
     await expect(page.getByRole('separator', { name: '调整目录宽度' })).toHaveAttribute(
       'aria-valuenow',
@@ -256,7 +260,7 @@ test('根路径是导读：接词演示用 Softmax 实际计算，学习路径�
   await demo.getByRole('button', { name: '重新开始', exact: true }).click();
   await expect(demo.locator('.intro-candidates button')).toHaveCount(4);
 
-  await expect(page.locator('.intro-path a')).toHaveCount(19);
+  await expect(page.locator('.intro-path a')).toHaveCount(23);
   await expect(page.getByRole('link', { name: /^从 跟图理解 Attention 开始/ })).toHaveAttribute(
     'href',
     '/attention',

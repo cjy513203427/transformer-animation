@@ -17,6 +17,12 @@ it('输出层反向梯度与独立中心差分一致，更新后真实损失下�
   expect(result.nextLoss).toBeLessThan(result.loss);
   expect(result.nextProbabilities[target]).toBeGreaterThan(result.probabilities[target]);
   expect(supervisedStep([0, 0], target, 1).weightGradient.flat()).toEqual([0, -0, 0, 0, -0, 0]);
+  // Output layer only: z′_y − z′_j grows by η‖h‖²(1 − p_y + p_j) > 0, so any η > 0 raises p_y.
+  for (const eta of [0.25, 1, 2, 10, 100])
+    for (const y of [0, 1, 2]) {
+      const step = supervisedStep(hidden, y, eta);
+      expect(step.nextProbabilities[y]).toBeGreaterThan(step.probabilities[y]);
+    }
   expect(supervisedStep(hidden, target, 0.25, 3).nextProbabilities).toEqual(expect.arrayContaining(result.nextProbabilities.map((v) => expect.closeTo(v, 12))));
 });
 

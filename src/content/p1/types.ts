@@ -62,7 +62,9 @@ export interface TopicDefinition {
     | 'policy'
     | 'prompt-chain'
     | 'prompt-vote'
-    | 'prompt-search';
+    | 'prompt-search'
+    | 'optimizer'
+    | 'context';
   path: string;
   title: string;
   chapter: string;
