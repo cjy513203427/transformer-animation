@@ -60,7 +60,7 @@ export function AppShell({
   children,
 }: {
   /** The current experiment, or the introduction that precedes them. */
-  active: TopicId | 'intro' | 'chapters' | 'notes';
+  active: TopicId | 'intro' | 'chapters';
   crumb: string;
   indicator: string;
   title: string;
@@ -75,12 +75,9 @@ export function AppShell({
   const mainShell = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pointerId: number; startX: number; width: number } | null>(null);
   const intro = active === 'intro';
-  const notebookMode = active === 'notes';
-  const bookMode = active === 'chapters' || notebookMode;
+  const bookMode = active === 'chapters';
   const activeIndex = TOPICS.findIndex((topic) => topic.id === active);
-  const current = notebookMode
-    ? { number: '26', title: T('知识笔记') }
-    : bookMode
+  const current = bookMode
       ? { number: chapter?.id ?? '32 + 3', title: chapter?.title ?? T('原书章节与覆盖情况') }
       : intro
         ? INTRO
@@ -210,19 +207,6 @@ export function AppShell({
               </span>
               <span>{INTRO.title}</span>
             </a>
-            <a
-              className="course-introduction"
-              href={localePath('/notes')}
-              aria-current={notebookMode ? 'page' : undefined}
-              onClick={(event) => {
-                if (notebookMode) {
-                  event.preventDefault();
-                  closeDirectory();
-                }
-              }}
-            >
-              {T('知识笔记')}
-            </a>
             {TOPIC_GROUPS.map((group, index) => {
               const topics = TOPICS.filter((topic) => topic.group === group.id);
               return (
@@ -265,42 +249,6 @@ export function AppShell({
                       </li>
                     ))}
                   </ol>
-                  {group.id === 'architecture' && (
-                    <a
-                      className="course-architecture-guide"
-                      href={localePath('/chapters/32') + '#family-rwkv'}
-                      aria-label={T('RWKV / RetNet / Hyena 架构导读')}
-                    >
-                      <span className="course-item-number" aria-hidden="true">
-                        ↳
-                      </span>
-                      <span>
-                        <strong>{T('RWKV / RetNet / Hyena 架构导读')}</strong>
-                      </span>
-                    </a>
-                  )}
-                  {group.id === 'adaptation' && (
-                    <a className="course-note-guide" href={localePath('/notes') + '#rlhf'}>
-                      <span className="course-item-number" aria-hidden="true">
-                        ↳
-                      </span>
-                      <span>
-                        <strong>{T('RLHF 全流程笔记')}</strong>
-                        <small>{T('SFT、奖励模型与策略更新')}</small>
-                      </span>
-                    </a>
-                  )}
-                  {group.id === 'generation' && (
-                    <a className="course-note-guide" href={localePath('/notes') + '#prompt'}>
-                      <span className="course-item-number" aria-hidden="true">
-                        ↳
-                      </span>
-                      <span>
-                        <strong>{T('Prompt Engineering 提示工程')}</strong>
-                        <small>{T('示例、思维链、投票与工具流程')}</small>
-                      </span>
-                    </a>
-                  )}
                 </section>
               );
             })}

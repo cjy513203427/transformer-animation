@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
+import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
 import { Rich } from '../../components/Tex';
 import { inferenceMyths, inferenceSources, inferenceSteps } from '../../content/inference';
@@ -431,6 +432,7 @@ export default function InferenceLab() {
         )}
       </section>
 
+      <RelatedNotes path="/inference-cache" />
       <details className="details-panel source-panel">
         <summary>
           <span>{T('适用条件与来源')}</span>

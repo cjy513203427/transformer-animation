@@ -24,6 +24,11 @@ const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
   '/quantization': lazy(() => import('./features/p1/QuantizationLab')),
   '/decoding': lazy(() => import('./features/p1/DecodingLab')),
   '/preference': lazy(() => import('./features/p1/PreferenceLab')),
+  '/training-step': lazy(() => import('./features/p1/LearningLabs').then(m => ({default:m.TrainingLab}))),
+  '/policy-update': lazy(() => import('./features/p1/LearningLabs').then(m => ({default:m.PolicyLab}))),
+  '/prompt-engineering': lazy(() => import('./features/p1/LearningLabs').then(m => ({default:m.PromptChainLab}))),
+  '/prompt-voting': lazy(() => import('./features/p1/LearningLabs').then(m => ({default:m.PromptVoteLab}))),
+  '/prompt-search': lazy(() => import('./features/p1/LearningLabs').then(m => ({default:m.PromptSearchLab}))),
   '/attention-variants': lazy(() => import('./features/p1/MemoryLab')),
   '/ssm-mamba': lazy(() => import('./features/p1/SSMLab')),
 };

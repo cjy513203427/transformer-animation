@@ -53,7 +53,7 @@ test('旧章节索引链接仍可使用搜索、缺口筛选和锚点', async ({
   await expect(learningRate.locator('.coverage-status')).toHaveText(['可操作实验', '原书阅读']);
   await expect(learningRate.getByRole('link', { name: '打开计算 →' })).toHaveAttribute(
     'href',
-    '/notes#learning-rate',
+    '/training-step',
   );
   await page.goto('/chapters');
   await page.locator('#chapter-32 > summary').focus();
@@ -164,13 +164,11 @@ test('Mamba模块、SSD输入、锚点和分享状态联动，复述模式可恢
 });
 
 for (const locale of ['', 'en', 'de'] as const)
-  test(`${locale || 'zh'} 机制目录可直达并展开RWKV，章节锚点保留已编辑输入`, async ({ page }) => {
+  test(`${locale || 'zh'} SSM进阶阅读可展开RWKV，章节锚点保留已编辑输入`, async ({ page }) => {
     const prefix = locale ? `/${locale}` : '';
     await page.goto(prefix + '/ssm-mamba');
-    const toggle = page.locator('.course-directory-toggle');
-    if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
-    const link = page.locator('#course-directory .course-architecture-guide');
-    await expect(link).toContainText('RWKV');
+    const link = page.locator('a[href$="/chapters/32#family-rwkv"]');
+    await page.locator('.details-panel').filter({has:link}).locator('summary').first().click();
     await expect(link).toHaveAttribute('href', prefix + '/chapters/32#family-rwkv');
     await link.click();
     await expect(page).toHaveURL(/\/chapters\/32#family-rwkv$/);

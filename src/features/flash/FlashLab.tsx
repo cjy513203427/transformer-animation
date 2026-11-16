@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
+import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
 import { Rich } from '../../components/Tex';
 import { StepSources, WhyIntro } from '../../components/WhyIntro';
@@ -337,6 +338,7 @@ export default function FlashLab() {
           </p>
         )}
       </section>
+      <RelatedNotes path="/flash-attention" />
       <details className="details-panel source-panel">
         <summary>
           <span>{T('适用条件与来源')}</span>

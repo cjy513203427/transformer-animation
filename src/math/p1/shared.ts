@@ -20,6 +20,9 @@ export interface Frame {
   ranking?: Ranking;
   strip?: Strip;
   chain?: Chain;
+  flow?: { nodes: { label: string; value: string }[]; active: number; caption: string };
+  distribution?: { names: string[]; before: number[]; after?: number[]; caption: string };
+  search?: { root: number; middle: number[]; operations: number[]; leaves: {label:string;value:number;state:'unvisited'|'match'|'miss'}[];caption:string };
 }
 /** Values drawn on horizontal number lines; the same index is the same coordinate in every row. */
 export interface NumberLine {

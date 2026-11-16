@@ -10,7 +10,6 @@ import {
   type Chapter,
 } from '../../content/chapters';
 import { TOPICS } from '../../content/topics';
-import { KNOWLEDGE_NOTES } from '../../content/notebook';
 import { T, localePath } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
 import '../../styles/editorial.css';
@@ -129,13 +128,13 @@ export default function ChapterIndex() {
               </a>
             );
           })}
-          <a href={localePath('/notes#rlhf')}>
-            <span>{T('知识笔记')}</span>
-            <strong>{T('RLHF 全流程笔记')} →</strong>
+          <a href={localePath('/policy-update')}>
+            <span>{T('交互实验')}</span>
+            <strong>{T('RLHF 与策略更新')} →</strong>
           </a>
-          <a href={localePath('/notes#prompt')}>
-            <span>{T('知识笔记')}</span>
-            <strong>{T('Prompt Engineering 提示工程')} →</strong>
+          <a href={localePath('/prompt-engineering')}>
+            <span>{T('交互实验')}</span>
+            <strong>{T('提示链与核对')} →</strong>
           </a>
         </div>
         <section className="chapter-index-controls" aria-label={T('筛选章节')}>
@@ -190,13 +189,6 @@ export default function ChapterIndex() {
                   </summary>
                   <div className="chapter-entry-body">
                     <p>{chapter.summary}</p>
-                    <div className="chapter-unit-links">
-                      {KNOWLEDGE_NOTES.filter((n) => n.chapters.includes(chapter.id)).map((n) => (
-                        <a key={n.id} href={localePath('/notes') + '#' + n.id}>
-                          {T('笔记：{#0}', n.title)} →
-                        </a>
-                      ))}
-                    </div>
                     {chapter.prerequisites.length > 0 && (
                       <p className="chapter-prerequisites">
                         {T('先备知识：')}

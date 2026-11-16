@@ -14,7 +14,12 @@ export type TopicId =
   | 'decoding'
   | 'preference'
   | 'memory'
-  | 'ssm';
+  | 'ssm'
+  | 'training'
+  | 'policy'
+  | 'prompt-chain'
+  | 'prompt-vote'
+  | 'prompt-search';
 
 export type TopicGroupId = 'foundation' | 'generation' | 'architecture' | 'adaptation';
 export interface Topic {
@@ -91,13 +96,10 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     title: 'FlashAttention',
     subtitle: T('分块、在线归一化与中间存储'),
   },
-  {
-    id: 'memory',
-    group: 'architecture',
-    href: '/attention-variants',
-    title: T('稀疏与压缩记忆'),
-    subtitle: T('Sparse、Linear 与 Infini-attention'),
-  },
+  { id:'prompt-chain', group:'generation', href:'/prompt-engineering', title:T('提示链与核对'), subtitle:T('提取、计算、核对与输出') },
+  { id:'prompt-vote', group:'generation', href:'/prompt-voting', title:T('答案投票'), subtitle:T('Self-Consistency 与独立验证') },
+  { id:'prompt-search', group:'generation', href:'/prompt-search', title:T('思路搜索'), subtitle:T('展开、检查与回退') },
+  { id:'memory', group:'architecture', href:'/attention-variants', title:T('稀疏与压缩记忆'), subtitle:T('Sparse、Linear 与 Infini-attention') },
   {
     id: 'moe',
     group: 'architecture',
@@ -112,13 +114,9 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     title: 'SSM / Mamba',
     subtitle: T('状态递推与选择性参数'),
   },
-  {
-    id: 'lora',
-    group: 'adaptation',
-    href: '/lora',
-    title: 'LoRA / QLoRA',
-    subtitle: T('冻结底座与低秩更新'),
-  },
+  { id:'training', group:'adaptation', href:'/training-step', title:T('前向、损失与参数更新'), subtitle:T('用同一例子算完一次训练') },
+  { id:'policy', group:'adaptation', href:'/policy-update', title:T('RLHF 与策略更新'), subtitle:T('奖励、价值、优势与 PPO') },
+  { id:'lora', group:'adaptation', href:'/lora', title:'LoRA / QLoRA', subtitle:T('冻结底座与低秩更新') },
   {
     id: 'quantization',
     group: 'adaptation',

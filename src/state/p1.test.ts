@@ -8,6 +8,7 @@ import decoding from '../content/p1/decoding';
 import preference from '../content/p1/preference';
 import memory from '../content/p1/memory';
 import ssm from '../content/p1/ssm';
+import * as learning from '../content/p1/learning';
 import type { TopicDefinition } from '../content/p1/types';
 const topics: TopicDefinition[] = [
   normalization,
@@ -18,6 +19,7 @@ const topics: TopicDefinition[] = [
   preference,
   memory,
   ssm,
+  ...Object.values(learning),
 ];
 describe('P1 可分享状态与完整计算', () => {
   for (const topic of topics) {
