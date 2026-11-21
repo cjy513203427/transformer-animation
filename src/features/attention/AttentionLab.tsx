@@ -5,6 +5,7 @@ import {
 } from '../../content/notation/attention';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
+import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
 import { Rich, Tex } from '../../components/Tex';
 import { Matrix } from '../../components/Matrix';
@@ -1104,6 +1105,7 @@ export default function AttentionLab() {
         </div>
       )}
 
+      <RelatedNotes path="/attention" />
       <details className="details-panel source-panel">
         <summary>
           <span>{T('适用条件与来源')}</span>

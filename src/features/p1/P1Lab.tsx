@@ -29,6 +29,8 @@ import '../../styles/experiment.css';
 import '../../styles/p1.css';
 import '../../styles/editorial.css';
 import { hasMechanism, MechanismDiagram } from './MechanismDiagram';
+import { RelatedNotes } from '../../components/RelatedNotes';
+import TrainingTools from './TrainingTools';
 const errorText = (value: number) => (value === 0 ? '0' : value.toExponential(2));
 /** Name a flattened cell by its row and column labels instead of bare indices. */
 function cellLabel(t: Tensor, i: number) {
@@ -128,6 +130,13 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           <div className="eyebrow">{Tx('原书导读 · {#0} · 可手算的机制实验', topic.chapter)}</div>
           <h1>{topic.title}</h1>
           <p>{topic.intro}</p>
+          {topic.id === 'preference' && (
+            <p>
+              <a href={localePath('/policy-update')}>
+                {T('先算一遍：奖励、优势与策略更新 →')}
+              </a>
+            </p>
+          )}
         </div>
         <button className="button secondary share-button" onClick={() => void share()}>
           {T('↗ 复制实验链接')}
@@ -147,7 +156,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           <input readOnly value={manual} onFocus={(e) => e.target.select()} />
         </label>
       )}
-      <WhyIntro why={topic.why} />
+      <WhyIntro why={topic.why} initiallyOpen={topic.introExpanded ?? true} />
       <section className="lesson-panel p1-panel" aria-label={T('{#0} 逐步实验', topic.id)}>
         <div className="lesson-panel-heading">
           <div>
@@ -453,6 +462,16 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
           </div>
         )}
       </section>
+      <RelatedNotes path={topic.path}>
+        {topic.id === 'training' && (
+          <TrainingTools config={state.config} onChange={(config) => edit({ ...state, config })} />
+        )}
+        {topic.id === 'ssm' && (
+          <p>
+            <a href={localePath('/chapters/32#family-rwkv')}>{T('查看架构关系与混合层账本 →')}</a>
+          </p>
+        )}
+      </RelatedNotes>
       <details className="details-panel source-panel">
         <summary>
           <span>{T('适用条件与来源')}</span>
@@ -491,7 +510,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
             ))}
           </ul>
           <p className="subtle">
-            {Tx('来源核对日期：{#0}。解释、图形和教学数值由本项目编写。', verifiedDate)}
+            {Tx('来源核对日期：{#0}。解释、图形和教学数值由本项目编写。', topic.verifiedDate ?? verifiedDate)}
           </p>
         </div>
       </details>

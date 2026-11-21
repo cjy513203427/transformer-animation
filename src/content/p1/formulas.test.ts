@@ -8,6 +8,8 @@ import decoding from './decoding';
 import preference from './preference';
 import memory from './memory';
 import ssm from './ssm';
+import optimizer from './optimizer';
+import context from './context';
 import { explain, inputRange, lessonContext, type TopicDefinition } from './types';
 import { initialLabState } from '../../state/p1';
 import { BOOK_URL } from '../book';
@@ -21,6 +23,8 @@ const topics: TopicDefinition[] = [
   preference,
   memory,
   ssm,
+  optimizer,
+  context,
 ];
 const BARE_CONTROL_WORD =
   /(^|[^\\a-zA-Z])(sqrt|frac|mathrm|theta|omega|times|cdot|operatorname|sum|ldots|alpha|sigma|epsilon|phi|Delta)(?![a-zA-Z])/;

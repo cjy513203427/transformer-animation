@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
+import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
 import { Rich, Tex } from '../../components/Tex';
 import { bookNotes, positionSources, positionSteps } from '../../content/position';
@@ -400,6 +401,7 @@ export default function PositionLab() {
         )}
       </section>
 
+      <RelatedNotes path="/position" />
       <details className="details-panel source-panel">
         <summary>
           <span>{T('适用条件、与原书对照与来源')}</span>

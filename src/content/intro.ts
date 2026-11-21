@@ -50,7 +50,7 @@ export const STATIONS: Station[] = [
     title: T('切成小块'),
     english: 'Tokenization',
     text: T('文字先被切成一个个 token，每个 token 在词表里查到一个编号。'),
-    topics: [],
+    topics: ['bpe'],
   },
   {
     title: T('变成一串数字'),

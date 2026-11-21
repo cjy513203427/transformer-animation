@@ -78,10 +78,10 @@ export function AppShell({
   const bookMode = active === 'chapters';
   const activeIndex = TOPICS.findIndex((topic) => topic.id === active);
   const current = bookMode
-    ? { number: chapter?.id ?? '32 + 3', title: chapter?.title ?? T('原书章节与覆盖情况') }
-    : intro
-      ? INTRO
-      : TOPICS[activeIndex];
+      ? { number: chapter?.id ?? '32 + 3', title: chapter?.title ?? T('原书章节与覆盖情况') }
+      : intro
+        ? INTRO
+        : TOPICS[activeIndex];
   // The first experiment leads back to the introduction; the introduction leads into it.
   const previous =
       intro || bookMode ? undefined : activeIndex === 0 ? INTRO : TOPICS[activeIndex - 1],
@@ -249,20 +249,6 @@ export function AppShell({
                       </li>
                     ))}
                   </ol>
-                  {group.id === 'architecture' && (
-                    <a
-                      className="course-architecture-guide"
-                      href={localePath('/chapters/32') + '#family-rwkv'}
-                      aria-label={T('RWKV / RetNet / Hyena 架构导读')}
-                    >
-                      <span className="course-item-number" aria-hidden="true">
-                        ↳
-                      </span>
-                      <span>
-                        <strong>{T('RWKV / RetNet / Hyena 架构导读')}</strong>
-                      </span>
-                    </a>
-                  )}
                 </section>
               );
             })}

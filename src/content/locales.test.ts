@@ -34,6 +34,8 @@ const P1 = [
   'preference',
   'memory',
   'ssm',
+  'optimizer',
+  'context',
 ];
 /** Imported fresh after each locale switch; explicit so the bundler can resolve them. */
 const P0_MODULES = {
@@ -45,6 +47,7 @@ const P0_MODULES = {
   flash: () => import('./flash'),
   topics: () => import('./topics'),
   book: () => import('./book'),
+  notebook: () => import('./notebook'),
 };
 
 for (const locale of ['en', 'de'] as const)
@@ -59,8 +62,11 @@ for (const locale of ['en', 'de'] as const)
     it('P1: every preset and step explains with real numbers and no Chinese', async () => {
       const { explain, lessonContext } = await import('./p1/types');
       const { initialLabState } = await import('../state/p1');
-      for (const name of P1) {
-        const topic = (await import(`./p1/${name}.ts`)).default as TopicDefinition;
+      const topics: TopicDefinition[] = [
+        ...await Promise.all(P1.map(async name => (await import(`./p1/${name}.ts`)).default)),
+        ...Object.values(await import('./p1/learning')),
+      ];
+      for (const topic of topics) {
         expect(chinese(strings(topic, topic.id))).toEqual([]);
         const base = initialLabState(topic);
         for (const example of [{ input: topic.input, parameters: {} }, ...topic.examples]) {

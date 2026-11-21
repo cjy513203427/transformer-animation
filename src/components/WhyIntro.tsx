@@ -15,9 +15,9 @@ export interface WhyContent {
 }
 
 /** The book opens every chapter with the problem first; each experiment does the same. */
-export function WhyIntro({ why }: { why: WhyContent }) {
+export function WhyIntro({ why, initiallyOpen = true }: { why: WhyContent; initiallyOpen?: boolean }) {
   return (
-    <details className="why-intro" open>
+    <details className="why-intro" open={initiallyOpen}>
       <summary>
         <span className="why-kicker">{T('先说为什么')}</span>
         <strong>{why.question}</strong>

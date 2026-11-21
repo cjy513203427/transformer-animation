@@ -10,6 +10,7 @@ const MAX_TICKS = 64;
 /** True when the frame carries a dedicated figure instead of the generic bar view. */
 export const hasMechanism = (f: Frame) =>
   !!(
+    f.flow || f.search || f.distribution ||
     f.line ||
     f.plot ||
     f.ranking ||
@@ -193,6 +194,34 @@ function NumberLineDiagram({ line }: { line: NumberLine }) {
 }
 
 export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallback: ReactNode }) {
+  if (f.distribution) return <figure className="learning-distribution" aria-label={f.title}>
+    <div className="distribution-legend"><span>{f.distribution.after?T('更新前'):T('概率')}</span>{f.distribution.after&&<span>{T('更新后')}</span>}</div>
+    {f.distribution.names.map((name,i)=><div key={name} className="distribution-row">
+      <strong>{name}</strong><div>{[f.distribution!.before,f.distribution!.after].map((values,j)=>values&&<div className={`distribution-value distribution-${j}`} key={j}>
+        <div className="distribution-track"><span style={{width:`${values[i]*100}%`}}/></div><output>{fmt(values[i],4)}</output>
+      </div>)}</div>
+    </div>)}<figcaption>{f.distribution.caption}</figcaption>
+  </figure>;
+  if (f.search) return <figure className="learning-tree" aria-label={f.title}>
+    <svg className="p1-svg" viewBox="0 0 430 260" role="img" aria-label={f.title}>
+      {[110,320].map((x,i)=><g key={i}><line x1="215" y1="37" x2={x} y2="91" className="p1-wire"/><text x={(215+x)/2} y="61" textAnchor="middle" className="p1-svg-small">{i===0?'+':'−'} {f.search!.operations[0]}</text></g>)}
+      {f.search.leaves.map((leaf,i)=>{const x=55+i*107, parent=i<2?110:320; return <g key={i}>
+        <line x1={parent} y1="110" x2={x} y2="183" className="p1-wire"/>
+        <text x={(x+parent)/2} y="145" textAnchor="middle" className="p1-svg-small">{i%2===0?'+':'−'} {f.search!.operations[1]}</text>
+        <rect x={x-34} y="184" width="68" height="34" rx="3" className={`search-${leaf.state}`}><title>{leaf.label}</title></rect>
+        <text x={x} y="206" textAnchor="middle" className="p1-svg-title">{leaf.value}</text>
+        <FitText x={x} y="237" width={102} textAnchor="middle" className="p1-svg-small" maxLines={2}>{leaf.state==='unvisited'?T('未检查'):leaf.state==='match'?T('找到解'):T('未到达目标')}</FitText>
+      </g>})}
+      <rect x="181" y="5" width="68" height="32" rx="3" className="p1-node"/><text x="215" y="27" textAnchor="middle" className="p1-svg-title">{f.search.root}</text>
+      {f.search.middle.map((value,i)=><g key={i}><rect x={76+i*210} y="81" width="68" height="32" rx="3" className="p1-node"/><text x={110+i*210} y="103" textAnchor="middle" className="p1-svg-title">{value}</text></g>)}
+    </svg>
+    <figcaption>{f.search.caption}</figcaption>
+  </figure>;
+  if (f.flow) return <figure className="learning-flow" aria-label={f.title}>
+    <ol>{f.flow.nodes.map((node,i)=><li key={i} aria-current={i===f.flow!.active?'step':undefined} className={i>f.flow!.active?'flow-pending':''}>
+      <span>{node.label}</span><strong>{node.value}</strong>
+    </li>)}</ol><figcaption>{f.flow.caption}</figcaption>
+  </figure>;
   if (f.line)
     return (
       <Captioned caption={f.line.caption}>

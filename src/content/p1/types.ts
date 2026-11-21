@@ -57,7 +57,14 @@ export interface TopicDefinition {
     | 'decoding'
     | 'preference'
     | 'memory'
-    | 'ssm';
+    | 'ssm'
+    | 'training'
+    | 'policy'
+    | 'prompt-chain'
+    | 'prompt-vote'
+    | 'prompt-search'
+    | 'optimizer'
+    | 'context';
   path: string;
   title: string;
   chapter: string;
@@ -67,6 +74,8 @@ export interface TopicDefinition {
   /** One-line summary of the computation chain. */
   headline: string;
   why: WhyContent;
+  introExpanded?: boolean;
+  verifiedDate?: string;
   input: number[];
   /** Allowed range of each input value; defaults to [−8, 8]. */
   inputRange?: [number, number];

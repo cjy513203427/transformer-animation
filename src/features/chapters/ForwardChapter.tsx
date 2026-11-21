@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
+import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
 import { Matrix } from '../../components/Matrix';
 import { Prediction } from '../../components/Controls';
@@ -486,6 +487,7 @@ export default function ForwardChapter() {
             </div>
           )}
         </section>
+        <RelatedNotes path="/chapters/15" />
         <details id="scope" className="chapter-section">
           <summary>{T('设定、简化与来源')}</summary>
           <p>

@@ -1,0 +1,174 @@
+.note-tool {
+  min-width: 0;
+  border: 1px solid #cedcc7;
+  padding: 20px;
+  margin: 24px 0;
+  background: #fcfdf9;
+}
+.note-tool .note-tool-caption {
+  font-size: 12px;
+  color: #5d6b58;
+}
+.note-tool button,
+.note-reading-header button {
+  border: 1px solid #c5d1c0;
+  background: #fff;
+  color: #325729;
+  padding: 8px 12px;
+  border-radius: 3px;
+  line-height: 1.6;
+  font-size: 12px;
+  cursor: pointer;
+}
+.note-tool button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.note-tool button[aria-pressed='true'] {
+  background: #e9f3df;
+  border-color: #6d9649;
+}
+.note-tool .chapter-preset-buttons {
+  align-items: center;
+  margin-block: 14px;
+}
+.note-tool-controls {
+  display: flex;
+  gap: 14px 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-block: 16px;
+}
+.note-tool label {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.note-tool-controls label:has(input[type='number']),
+.note-tool-controls label:has(select) {
+  display: grid;
+  gap: 5px;
+}
+.note-prompt,
+.note-data {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font: 12px/1.9 var(--font-mono, monospace);
+  background: #f1f4ee;
+  padding: 14px;
+  max-width: 100%;
+}
+.note-votes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-block: 20px;
+}
+.note-votes label {
+  display: grid;
+  gap: 6px;
+}
+.note-slider {
+  display: grid;
+  gap: 8px;
+  margin-block: 20px;
+}
+.note-slider input {
+  width: 100%;
+  accent-color: #55852f;
+}
+.note-result {
+  border-left: 3px solid #6d9649;
+  background: #eff5e9;
+  padding: 14px 18px;
+  margin-top: 18px;
+}
+.note-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.note-table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 12px/1.6 var(--font-mono, monospace);
+}
+.note-table-scroll th,
+.note-table-scroll td {
+  text-align: right;
+  border-bottom: 1px solid #d8e1d2;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+.note-table-scroll caption {
+  text-align: left;
+  font-size: 12px;
+  margin: 6px 0 12px;
+}
+.note-pipeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+  margin: 20px 0;
+}
+.note-pipeline li {
+  display: flex;
+  min-width: 0;
+}
+.note-pipeline button {
+  width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.note-pipeline button span {
+  display: block;
+  color: #64715e;
+  margin-bottom: 4px;
+}
+.note-stage {
+  padding: 4px 0 16px;
+}
+.note-stage h4 {
+  margin: 0;
+  font-size: 18px;
+}
+.note-stage > strong {
+  display: block;
+  line-height: 1.85;
+  font-size: 13px;
+}
+@container notebook (max-width: 760px) {
+  .notebook-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .notebook-directory {
+    padding-right: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .notebook-directory > nav {
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-block: 1px solid var(--line);
+  }
+  .notebook-directory h2 {
+    margin-top: 12px;
+  }
+  .note-reading {
+    padding-top: 20px;
+  }
+  .note-tool,
+  .note-example,
+  .note-recall {
+    padding: 14px;
+  }
+  .note-votes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .note-pipeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

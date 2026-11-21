@@ -1,6 +1,6 @@
 # 章节主线与综合实验
 
-核对日期：2026-11-12。章节结构按原书，算法边界按文末列出的原始论文或作者代码核对；讲解与图形为本站编写。
+核对日期：2026-11-15。章节结构按原书，算法边界按文末列出的原始论文或作者代码核对；讲解与图形为本站编写。
 
 ## 路由与覆盖状态
 
@@ -8,9 +8,10 @@
 - `/chapters/04`：UTF-8 字节、BPE 训练与编码、Embedding 查表和 token 数预测。
 - `/chapters/15`：完整前向数值回放。
 - `/chapters/32`：后 Transformer 架构导读与两个静态计算实验，支持小节锚点。
+- `/notes`：仅为旧链接保留的跳转页。`#notes=` 与 `#rlhf` 等锚点按 `src/content/experimentLinks.ts` 打开对应实验，并尽量换算为该实验的 `#lab=` 状态。
 - 英德版本使用 `/en/`、`/de/` 前缀，切换语言保留 hash。
 
-机制目录的“架构扩展”组另有未编号的 RWKV / RetNet / Hyena 导读入口，直达 `/chapters/32#family-rwkv` 并展开该条目。`#family-retnet` 等架构条目锚点同样可直达；小节或条目跳转保留已编辑的计算输入。
+SSM / Mamba 实验的“进一步理解”链接到 `/chapters/32#family-rwkv` 并展开 RWKV 条目。`#family-retnet` 等架构条目锚点同样可直达；小节或条目跳转保留已编辑的计算输入。
 
 `src/content/chapters.ts` 的状态针对每一个覆盖条目：
 
@@ -32,6 +33,42 @@ UTF-8 的 256 个字节值是基础词表，ID 为 0–255。连续空白与连�
 `#bpe=` 保存当前文本、配置、种子和步骤。三个语言入口使用同一状态格式。输入限 48 个 UTF-16 代码单元，要求代理项配对，限制分享链接长度。
 
 来源于 2026-11-21 核对。[原书第 4 章](https://waylandz.com/llm-transformer-book-en/chapter-04-tokenization/)、[Sennrich 等人的 BPE 子词论文](https://aclanthology.org/P16-1162/)、[tiktoken 教学实现](https://github.com/openai/tiktoken/blob/main/tiktoken/_educational.py)。
+
+## 知识笔记与补充实验
+
+笔记内容在 `src/content/notebook.ts`，归属页面在 `src/content/experimentLinks.ts`，由 `src/components/RelatedNotes.tsx` 渲染在该页的“进一步理解”中（标题、两段解释、适用边界）。P0 实验、P1 实验与第 15 章共用这个面板；`tests/notebook.spec.ts` 检查 26 条笔记都能在对应页面读到。
+
+补充实验（`src/content/p1/learning.ts`、`learningFrames.ts`，数值在 `src/math/learning.ts`）：
+
+- 训练一步：固定 h:[1,2]、W:[2,3]，单样本交叉熵与 SGD。梯度与中心差分核对；所有 logits 同加常数不改变更新。只训练输出投影，不是完整 Transformer 反向。
+- 策略更新：两个完整回答作为终止动作，按 π_old 精确枚举期望；梯度含 PPO 裁剪项与对 π_ref 的完整 KL，与差分核对；完整期望下价值基线平移不改变更新。未实现逐 token GAE 与 Critic 训练。DPO 步骤固定 A 为 chosen。
+- 学习率轨迹与计算账本（训练实验的“进一步理解”）：`L(w)=w²/2`、`w₀=2` 的 12 步 SGD，可选 3 步 Warmup 加余弦衰减；稠密模型粗估 `C≈6ND`。数值仍随 `#lab=` 分享。
+- 提示链、投票、思路搜索：模板字段、手工候选与固定访问顺序，浏览器做精确算术核对。投票对照比较的是选出的答案（平局单独标记），不是票数；票数比例不称为正确率或置信度。
+
+## 分词、优化器与上下文扩展
+
+- `/tokenization`（`src/math/bpe.ts`、`src/state/bpe.ts`、`src/features/bpe/BPELab.tsx`）：Sennrich 等人 Algorithm 1 的字符级 BPE，词尾符号 `</w>`，相邻对按单词次数加权计数，从左到右不重叠合并，最多 12 次。原论文未规定平局，本页取字典序最小的一对。不重叠时每次合并使 token 总数减少该对的计数；同一字母连续出现时减少量更小（单测覆盖 `aaa`）。Embedding 行是按 ID 生成的教学数值。字节一节只显示 UTF-8 字节，不运行真实 tokenizer。语料限 6 个单词、每词 1–12 个小写字母，次数 1–50；自由文本不进入链接。
+- `/optimizer`（`src/math/p1/optimizer.ts`）：L = ½(w₀² + b·w₁²)。AdamW 按 PyTorch 先乘 (1 − ηλ) 再做 Adam 更新；“Adam + L2”把 λw 加进梯度。性质核对：第 1 步 m̂ = g、v̂ = g²；SGD 中 L2 与解耦衰减相同；损失整体放大 100 倍时 Adam 更新基本不变（相对误差 ≤ 1e−6）。
+- `/context-extension`（`src/math/p1/context.ts`）：按 YaRN（arXiv 2309.00071）核对：θ_d = b^(−2d/|D|)；PI 用附录 A.1 的 m·L/L′（正文 Eq. 9 的抽取文本与之矛盾，按附录实现）；NTK-aware 底数 b·s^(|D|/(|D|−2))；NTK-by-parts 的 r = L/λ、γ 斜坡 α = 1、β = 32；温度 √(1/t) = 0.1·ln s + 1。“训练中见过”按角度判断：λ_d ≤ L 的维度见过全部角度，其余只见过 [0, L·θ_d)。这是角度层面的判断，不测量模型质量。
+
+## 参数量与计算量（`/model-budget`）
+
+计算在 `src/math/budget.ts`，分享状态与预设在 `src/state/budget.ts`，页面在 `src/features/budget/BudgetLab.tsx`。覆盖原书第 4.5、7.8、11.7、12.12、15.7、18.11 节与附录 A.2、A.3、A.6 的参数与计算量算式。
+
+```text
+d_h = d / H,  K/V 宽度 = H_kv · d_h
+每层 Attention = 2d² + 2d·H_kv·d_h   (+ 2d + 2H_kv·d_h，若含偏置)
+每层 FFN       = 2·d·d_ff (GELU) 或 3·d·d_ff (SwiGLU)   (+ 偏置)
+归一化         = (2L+1) · (2d LayerNorm 或 d RMSNorm)
+N = V·d + P·d + L·(Attention + FFN) + 归一化 + [不共享时] V·d
+前向 FLOPs(s) = L·(2s·M + 4s²·d) + 2s·d·V，M = 每层 Attention 与 FFN 权重元素数
+单步 Decode   = 2·(L·M + d·V) + L·4s·d
+训练每 token  ≈ 3 × 前向每 token
+```
+
+1 次乘加计 2 FLOPs；不计归一化、Softmax、激活、偏置加法与查表；配对项按完整 s×s 计，因果实现约减半，与 Kaplan 等人表 1 的 `2·n_layer·n_ctx·d_attn` 一致。只覆盖稠密 Decoder-only，不含 MoE、MLA、优化器状态、激活与 KV 缓存。
+
+预设与独立核对：GPT-2 Small 124,439,808（逐项与原书 15.7 节一致），原书第 18 章模型 44,503,040 / 不绑定 70,103,040（18.11 节），Llama 2 7B 6,738,415,616 与 70B 68,976,648,192（与逐张量形状清单相同）。Llama 2 的层宽与头数按 NousResearch 镜像的 config.json 核对，Meta 原仓库需要授权。`#budget=` v1 校验版本、类型、整数范围、长度，以及 `H | d_model`、`H_kv | H`；输入框中的无效组合会提示原因并保留最近一次有效结果。
 
 ## 第 15 章：完整前向
 

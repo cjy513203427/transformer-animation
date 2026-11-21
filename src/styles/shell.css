@@ -205,6 +205,13 @@
   font-size: inherit;
   font-weight: 450;
 }
+:root .editorial-shell .course-group a small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #727a6c;
+}
 :root .editorial-shell .course-group a[aria-current] strong {
   font-weight: 600;
 }
@@ -216,7 +223,8 @@
   font-size: 9px;
 }
 
-:root .editorial-shell .course-group .course-architecture-guide {
+:root .editorial-shell .course-group .course-architecture-guide,
+:root .editorial-shell .course-group .course-note-guide {
   margin-top: 5px;
   color: #747e72;
   font-size: 11px;
@@ -630,6 +638,12 @@
   :root .editorial-shell .course-location > strong {
     gap: 6px;
     line-height: 1.5;
+    /* Long English/German titles wrap to two lines instead of running past the toolbar. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   :root .editorial-shell .course-position {
     display: none;

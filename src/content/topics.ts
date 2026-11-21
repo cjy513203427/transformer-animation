@@ -14,7 +14,16 @@ export type TopicId =
   | 'decoding'
   | 'preference'
   | 'memory'
-  | 'ssm';
+  | 'ssm'
+  | 'training'
+  | 'policy'
+  | 'prompt-chain'
+  | 'prompt-vote'
+  | 'prompt-search'
+  | 'budget'
+  | 'optimizer'
+  | 'context'
+  | 'bpe';
 
 export type TopicGroupId = 'foundation' | 'generation' | 'architecture' | 'adaptation';
 export interface Topic {
@@ -42,6 +51,7 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     title: T('跟图理解 Attention'),
     subtitle: T('单头、多头，逐步核对'),
   },
+  { id:'bpe', group:'foundation', href:'/tokenization', title:T('分词与 BPE'), subtitle:T('合并相邻对、切分新词与查表') },
   {
     id: 'position',
     group: 'foundation',
@@ -91,13 +101,11 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     title: 'FlashAttention',
     subtitle: T('分块、在线归一化与中间存储'),
   },
-  {
-    id: 'memory',
-    group: 'architecture',
-    href: '/attention-variants',
-    title: T('稀疏与压缩记忆'),
-    subtitle: T('Sparse、Linear 与 Infini-attention'),
-  },
+  { id:'prompt-chain', group:'generation', href:'/prompt-engineering', title:T('提示链与核对'), subtitle:T('提取、计算、核对与输出') },
+  { id:'prompt-vote', group:'generation', href:'/prompt-voting', title:T('答案投票'), subtitle:T('Self-Consistency 与独立验证') },
+  { id:'prompt-search', group:'generation', href:'/prompt-search', title:T('思路搜索'), subtitle:T('展开、检查与回退') },
+  { id:'context', group:'architecture', href:'/context-extension', title:T('上下文扩展'), subtitle:T('PI、NTK-aware 与 YaRN') },
+  { id:'memory', group:'architecture', href:'/attention-variants', title:T('稀疏与压缩记忆'), subtitle:T('Sparse、Linear 与 Infini-attention') },
   {
     id: 'moe',
     group: 'architecture',
@@ -112,13 +120,11 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     title: 'SSM / Mamba',
     subtitle: T('状态递推与选择性参数'),
   },
-  {
-    id: 'lora',
-    group: 'adaptation',
-    href: '/lora',
-    title: 'LoRA / QLoRA',
-    subtitle: T('冻结底座与低秩更新'),
-  },
+  { id:'training', group:'adaptation', href:'/training-step', title:T('前向、损失与参数更新'), subtitle:T('用同一例子算完一次训练') },
+  { id:'optimizer', group:'adaptation', href:'/optimizer', title:T('优化器：SGD、Adam 与 AdamW'), subtitle:T('动量、按坐标归一化与权重衰减') },
+  { id:'budget', group:'adaptation', href:'/model-budget', title:T('参数量与计算量'), subtitle:T('从配置数出参数与 FLOPs') },
+  { id:'policy', group:'adaptation', href:'/policy-update', title:T('RLHF 与策略更新'), subtitle:T('奖励、价值、优势与 PPO') },
+  { id:'lora', group:'adaptation', href:'/lora', title:'LoRA / QLoRA', subtitle:T('冻结底座与低秩更新') },
   {
     id: 'quantization',
     group: 'adaptation',
@@ -130,7 +136,7 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     id: 'preference',
     group: 'adaptation',
     href: '/preference',
-    title: T('偏好学习 / GRPO'),
+    title: T('RLHF / 偏好学习 / GRPO'),
     subtitle: T('偏好对、组优势与策略约束'),
   },
 ];
@@ -150,4 +156,4 @@ export const INTRO = {
   subtitle: T('大模型在做什么，这里怎么学'),
 };
 
-export const ROADMAP = [T('学习率与 Scaling Law'), T('提示与推理预算')];
+export const ROADMAP = [T('真实 Tokenizer 与完整模型训练')];

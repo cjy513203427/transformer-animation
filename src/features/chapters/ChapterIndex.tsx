@@ -10,7 +10,7 @@ import {
   type Chapter,
 } from '../../content/chapters';
 import { TOPICS } from '../../content/topics';
-import { T } from '../../i18n';
+import { T, localePath } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
 import '../../styles/editorial.css';
 import '../../styles/chapters.css';
@@ -128,6 +128,14 @@ export default function ChapterIndex() {
               </a>
             );
           })}
+          <a href={localePath('/policy-update')}>
+            <span>{T('交互实验')}</span>
+            <strong>{T('RLHF 与策略更新')} →</strong>
+          </a>
+          <a href={localePath('/prompt-engineering')}>
+            <span>{T('交互实验')}</span>
+            <strong>{T('提示链与核对')} →</strong>
+          </a>
         </div>
         <section className="chapter-index-controls" aria-label={T('筛选章节')}>
           <label>
