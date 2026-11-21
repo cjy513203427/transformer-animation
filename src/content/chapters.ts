@@ -97,9 +97,15 @@ export const CHAPTERS: Chapter[] = [
         name: T('ID 与 Embedding 查表'),
         status: 'interactive',
         topics: [],
-        href: localePath('/chapters/15'),
+        href: localePath('/chapters/04'),
       },
-      { name: T('真实分词、字节与 BPE 合并'), status: 'missing', topics: [] },
+      {
+        name: T('字节级 BPE 与词表训练'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/chapters/04'),
+      },
+      { name: T('生产 tokenizer 的规则与词表'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -587,9 +593,11 @@ export const CHAPTERS: Chapter[] = [
     ],
   },
 ];
+const standaloneChapters = new Set(['04', '15', '32']);
 export const chapterHref = (id: string): string =>
-  localePath(id === '15' || id === '32' ? '/chapters/' + id : '/chapters') +
-  (id === '15' || id === '32' ? '' : '#chapter-' + id);
+  standaloneChapters.has(id)
+    ? localePath('/chapters/' + id)
+    : localePath('/chapters') + '#chapter-' + id;
 export const chapterLabel = (id: string): string =>
   /^\d+$/.test(id) ? T('第 {#0} 章', Number(id)) : T('附录 {#0}', id);
 export const coverageLabel = (status: CoverageStatus): string =>

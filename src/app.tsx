@@ -9,6 +9,7 @@ const AttentionLab = lazy(() => import('./features/attention/AttentionLab'));
 const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
   '/': lazy(() => import('./features/intro/IntroPage')),
   '/chapters': lazy(() => import('./features/chapters/ChapterIndex')),
+  '/chapters/04': lazy(() => import('./features/chapters/TokenizationChapter')),
   '/chapters/15': lazy(() => import('./features/chapters/ForwardChapter')),
   '/chapters/32': lazy(() => import('./features/chapters/PostTransformerChapter')),
   '/attention': AttentionLab,

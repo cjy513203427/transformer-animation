@@ -4,6 +4,7 @@ import { CHAPTERS, CHAPTER_PARTS } from './chapters';
 import { FORWARD_CONTENT } from './forward';
 import { ARCHITECTURE_FAMILIES, ARCHITECTURE_SYMBOLS, MAMBA_NODES } from './postTransformer';
 import { TOPICS } from './topics';
+import { tokenizationSteps } from './tokenization';
 
 describe('章节覆盖与讲解边界', () => {
   it('32章和3附录均有实质导读，引用和先备关系没有遗漏或循环', () => {
@@ -33,9 +34,11 @@ describe('章节覆盖与讲解边界', () => {
     }
   });
   it('保留明确缺口，不能用局部实验冒充完整模型实现', () => {
-    expect(CHAPTERS.find((c) => c.id === '04')!.units.some((u) => u.status === 'missing')).toBe(
-      true,
-    );
+    const tokenization = CHAPTERS.find((c) => c.id === '04')!;
+    expect(
+      tokenization.units.filter((unit) => unit.status === 'interactive').map((unit) => unit.href),
+    ).toEqual(['/chapters/04', '/chapters/04']);
+    expect(tokenization.units.some((unit) => unit.status === 'reference')).toBe(true);
     expect(CHAPTERS.find((c) => c.id === '17')!.units.every((u) => u.status === 'missing')).toBe(
       true,
     );
@@ -48,6 +51,10 @@ describe('章节覆盖与讲解边界', () => {
     expect(ARCHITECTURE_FAMILIES.find((f) => f.id === 'ssd')!.boundary).toContain('不能推成');
   });
   it('新增公式与所有符号可严格排版', () => {
+    for (const { formula } of tokenizationSteps)
+      expect(() =>
+        katex.renderToString(formula, { throwOnError: true, strict: 'ignore' }),
+      ).not.toThrow();
     for (const content of [...Object.values(FORWARD_CONTENT), ...MAMBA_NODES]) {
       expect(content.symbols.length).toBeGreaterThan(0);
       expect(() =>

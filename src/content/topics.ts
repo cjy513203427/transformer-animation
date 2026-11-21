@@ -150,4 +150,4 @@ export const INTRO = {
   subtitle: T('大模型在做什么，这里怎么学'),
 };
 
-export const ROADMAP = ['Tokenization / BPE', T('学习率与 Scaling Law'), T('提示与推理预算')];
+export const ROADMAP = [T('学习率与 Scaling Law'), T('提示与推理预算')];
