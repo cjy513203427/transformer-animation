@@ -20,6 +20,7 @@ import {
   MAX_READING_ZOOM,
   useReadingLayout,
 } from './useReadingLayout';
+import { SiteSearch } from './SiteSearch';
 import '../styles/shell.css';
 
 const SHORT_LABEL: Record<Locale, string> = { zh: '中文', en: 'EN', de: 'DE' };
@@ -347,6 +348,7 @@ export function AppShell({
                 {current.title}
               </strong>
             </div>
+            <SiteSearch />
             <div className="reading-zoom" role="group" aria-label={T('阅读缩放')}>
               <button
                 aria-label={T('缩小阅读内容')}

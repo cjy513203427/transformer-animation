@@ -10,6 +10,7 @@ import {
   type Chapter,
 } from '../../content/chapters';
 import { TOPICS } from '../../content/topics';
+import { fuzzyMatchesText } from '../../content/search';
 import { T, localePath } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
 import '../../styles/editorial.css';
@@ -89,10 +90,9 @@ export default function ChapterIndex() {
     return () => window.removeEventListener('hashchange', reveal);
   }, []);
   const visible = CHAPTERS.filter((c) => {
-    const text =
-      `${c.id} ${Number(c.id) || ''} ${c.title} ${c.question} ${c.summary} ${c.units.map((u) => u.name).join(' ')}`.toLocaleLowerCase();
+    const text = `${c.id} ${Number(c.id) || ''} ${c.title} ${c.question} ${c.summary} ${c.units.map((u) => u.name).join(' ')}`;
     return (
-      text.includes(search.trim().toLocaleLowerCase()) &&
+      fuzzyMatchesText(search, text) &&
       (filter === 'all' ||
         (filter === 'interactive'
           ? c.units.some((u) => u.status === 'interactive')
