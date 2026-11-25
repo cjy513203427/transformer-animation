@@ -1,7 +1,7 @@
 .architecture-panel {
-  border: 1px solid #d9e1db;
+  border: 1px solid #dfd6c8;
   border-radius: 12px;
-  background: #ffffff;
+  background: #fbf8f2;
   overflow: hidden;
 }
 .architecture-panel-head {
@@ -9,7 +9,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 22px 28px;
-  border-bottom: 1px solid #e0e6e1;
+  border-bottom: 1px solid #dfd6c8;
   gap: 16px;
 }
 .architecture-panel-head h2 {
@@ -22,7 +22,7 @@
 }
 .lesson-eyebrow {
   font-size: 11px;
-  color: #38751d;
+  color: #9e3c28;
   letter-spacing: 1.2px;
 }
 .architecture-layout {
@@ -30,15 +30,15 @@
   grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1fr);
 }
 .architecture-map {
-  border-right: 1px solid #e0e6e1;
-  background: #f6f8f7;
+  border-right: 1px solid #dfd6c8;
+  background: #efe9dd;
   padding: 16px 24px 18px;
   min-width: 0;
 }
 .architecture-map-label {
   display: flex;
   justify-content: space-between;
-  color: #68736c;
+  color: #766d61;
   font-size: 11px;
 }
 .architecture-map svg {
@@ -53,7 +53,7 @@
   stroke-width: 1.5;
 }
 .architecture-wire.residual {
-  stroke: #68967c;
+  stroke: #766d61;
   stroke-width: 2;
 }
 .architecture-node {
@@ -62,23 +62,23 @@
 }
 .architecture-node rect,
 .architecture-node circle {
-  fill: #ffffff;
-  stroke: #c4cfc5;
+  fill: #fbf8f2;
+  stroke: #d4cab9;
   stroke-width: 1.3;
 }
 .architecture-node.attention-node rect {
-  fill: #e6f2db;
-  stroke: #6b7a54;
+  fill: #f0e1da;
+  stroke: #4a433b;
 }
 .architecture-node.selected rect,
 .architecture-node.selected circle {
-  fill: #d8ecbf;
-  stroke: #38751d;
+  fill: #e6ccc0;
+  stroke: #9e3c28;
   stroke-width: 2.5;
 }
 .architecture-node:hover rect,
 .architecture-node:hover circle {
-  stroke: #38751d;
+  stroke: #9e3c28;
 }
 .architecture-node:focus-visible rect,
 .architecture-node:focus-visible circle {
@@ -87,45 +87,41 @@
 }
 .architecture-node text {
   font:
-    13px 'Microsoft YaHei',
-    sans-serif;
+    13px var(--font-sans, 'Noto Sans SC', sans-serif);
   fill: #413d33;
   pointer-events: none;
 }
 .architecture-node .architecture-plus {
   font-size: 23px;
-  fill: #537a65;
+  fill: #4a433b;
 }
 .architecture-node .architecture-you {
   font-size: 13px;
-  fill: #38751d;
+  fill: #9e3c28;
 }
 .architecture-block-caption {
   font:
     12px Consolas,
     monospace;
-  fill: #658671;
+  fill: #766d61;
 }
 .architecture-residual-label {
   font:
-    10px 'Microsoft YaHei',
-    sans-serif;
-  fill: #68967c;
+    10px var(--font-sans, 'Noto Sans SC', sans-serif);
+  fill: #766d61;
 }
 .architecture-position-label {
   font:
-    11px 'Microsoft YaHei',
-    sans-serif;
+    11px var(--font-sans, 'Noto Sans SC', sans-serif);
   fill: #94713a;
 }
 .architecture-reading-label {
   font:
-    14px 'Microsoft YaHei',
-    sans-serif;
+    14px var(--font-sans, 'Noto Sans SC', sans-serif);
   fill: #5f5c54;
 }
 .architecture-diagram-note {
-  color: #68736c;
+  color: #766d61;
   font-size: 11px;
   text-align: center;
   line-height: 1.8;
@@ -136,13 +132,13 @@
 }
 .architecture-location {
   font-size: 12px;
-  color: #65716a;
+  color: #766d61;
 }
 .architecture-location strong {
   display: block;
   font-family: Consolas, monospace;
   font-size: 14px;
-  color: #38751d;
+  color: #9e3c28;
   font-weight: 500;
   margin-top: 7px;
 }
@@ -160,22 +156,22 @@
 }
 .architecture-explanation dt {
   font-size: 11px;
-  color: #67736b;
+  color: #766d61;
   margin-bottom: 7px;
 }
 .architecture-explanation dd {
   margin: 0;
   font-size: 14px;
   line-height: 1.9;
-  color: #424d46;
+  color: #4a433b;
 }
 .architecture-hint {
   padding: 14px 16px;
-  background: #f2f7ed;
-  border-left: 3px solid #73835d;
+  background: #f3e7e1;
+  border-left: 3px solid #766d61;
   font-size: 12px;
   line-height: 1.9;
-  color: #5d695f;
+  color: #4a433b;
   margin: 22px 0 13px;
 }
 .architecture-chapter {
@@ -200,17 +196,17 @@
   color: #65625a;
 }
 .architecture-explore {
-  border-top: 1px solid #e0e6e1;
+  border-top: 1px solid #dfd6c8;
   margin-top: 24px;
   padding-top: 20px;
 }
 .architecture-explore > span {
   font-size: 11px;
-  color: #38751d;
+  color: #9e3c28;
 }
 .architecture-explore p {
   font-size: 13px;
-  color: #5c685f;
+  color: #4a433b;
   line-height: 1.8;
   margin: 8px 0 13px;
 }
@@ -260,7 +256,7 @@
   }
   .architecture-map {
     border-right: 0;
-    border-bottom: 1px solid #e0e6e1;
+    border-bottom: 1px solid #dfd6c8;
     padding: 15px 9px;
   }
   .architecture-map svg {

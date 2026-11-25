@@ -15,25 +15,25 @@
   line-height: 1.5;
 }
 :root .guided-heading p {
-  color: #66716a;
+  color: #766d61;
   font-size: 14px;
 }
 :root .guided-exit,
 :root .guided-restart {
   border: 0;
-  border-bottom: 1px solid #b5c5ad;
+  border-bottom: 1px solid #d4cab9;
   padding: 7px 0;
   border-radius: 0;
   background: transparent;
   font-size: 13px;
-  color: #46663b;
+  color: #8c3422;
   flex-shrink: 0;
   min-height: 40px;
 }
 :root .guided-exit:hover:not(:disabled),
 :root .guided-restart:hover:not(:disabled) {
   background: transparent;
-  border-color: #38751d;
+  border-color: #9e3c28;
 }
 :root .guided-progress {
   display: flex;
@@ -44,7 +44,7 @@
   padding: 0 0 15px;
   border-bottom: 1px solid var(--line);
   font-size: 13px;
-  color: #7a827c;
+  color: #766d61;
 }
 :root .guided-progress li {
   display: flex;
@@ -55,7 +55,7 @@
   font: 12px var(--mono);
 }
 :root .guided-progress [aria-current='step'] {
-  color: #285d16;
+  color: #8a3220;
   font-weight: 600;
 }
 :root .guided-layout {
@@ -72,7 +72,7 @@
 :root .guided-task-position {
   display: flex;
   justify-content: space-between;
-  color: #73806e;
+  color: #766d61;
   font-size: 12px;
 }
 :root .guided-progress-count {
@@ -88,15 +88,15 @@
 }
 :root .guided-task > p {
   font-size: 15px;
-  color: #46514a;
+  color: #4a433b;
   line-height: 1.95;
 }
 :root .guided-target {
   margin: 22px 0 15px;
   padding: 18px;
-  background: #f4f8ee;
-  border: 1px solid #b6ce9c;
-  border-left: 3px solid #76a747;
+  background: #f4efe5;
+  border: 1px solid #c77b68;
+  border-left: 3px solid #b3543e;
 }
 :root .guided-token-picker {
   display: flex;
@@ -109,12 +109,12 @@
   align-items: center;
   gap: 2px;
   padding: 12px 7px;
-  border-color: #b7c4b1;
-  background: #fff;
+  border-color: #d4cab9;
+  background: #fbf8f2;
   min-height: 81px;
 }
 :root .guided-token-picker small {
-  color: #6a7862;
+  color: #766d61;
   font: 11px var(--mono);
 }
 :root .guided-token-picker strong {
@@ -123,7 +123,7 @@
 }
 :root .guided-token-picker span {
   font-size: 11px;
-  color: #68766a;
+  color: #766d61;
 }
 :root .guided-token-picker [aria-pressed='true'] {
   background: #eaf1fb;
@@ -132,12 +132,12 @@
 :root .guided-hint {
   margin-top: 10px;
   font-size: 12px;
-  color: #63705c;
+  color: #4a433b;
   line-height: 1.8;
 }
 :root .guided-task > .guided-hint {
   font-size: 12px;
-  color: #63705c;
+  color: #4a433b;
 }
 :root .guided-prediction {
   display: flex;
@@ -147,8 +147,8 @@
   flex: 1;
   min-height: 50px;
   font-size: 14px;
-  background: #fff;
-  border-color: #9eaf94;
+  background: #fbf8f2;
+  border-color: #b8ad9d;
 }
 :root .guided-range-label {
   display: flex;
@@ -171,7 +171,7 @@
   display: flex;
   justify-content: space-between;
   font: 11px var(--mono);
-  color: #76816e;
+  color: #766d61;
 }
 :root .guided-input .button {
   margin-top: 16px;
@@ -180,8 +180,8 @@
 :root .guided-verdict {
   margin: 16px 0;
   padding: 12px 15px;
-  border-left: 3px solid #7caa52;
-  background: #f1f7ea;
+  border-left: 3px solid #a84b36;
+  background: #f4efe5;
 }
 :root .guided-comparison {
   max-width: 100%;
@@ -202,7 +202,7 @@
   font-weight: 400;
 }
 :root .guided-comparison thead th {
-  color: #6e7968;
+  color: #766d61;
   font-size: 11px;
 }
 :root .guided-comparison td {
@@ -219,26 +219,26 @@
 }
 :root .guided-recall {
   padding: 12px 0 12px 15px;
-  border-left: 2px solid #a5bd94;
+  border-left: 2px solid #c77b68;
   margin: 18px 0;
 }
 :root .guided-recall strong {
   font-size: 12px;
-  color: #466c2f;
+  color: #8c3422;
 }
 :root .guided-recall p {
   margin-top: 5px;
   font-size: 13px;
   line-height: 1.9;
-  color: #53614d;
+  color: #4a433b;
 }
 :root .guided-figure {
   grid-area: figure;
   min-width: 0;
   margin: 0;
   padding: 20px;
-  border: 1px solid #e2e9e1;
-  background: #f6f8f7;
+  border: 1px solid #e5ddd0;
+  background: #efe9dd;
 }
 :root .guided-figure figcaption {
   display: flex;
@@ -246,11 +246,11 @@
   align-items: baseline;
   gap: 14px;
   font-size: 12px;
-  color: #718069;
+  color: #766d61;
 }
 :root .guided-figure figcaption strong {
   font-size: 14px;
-  color: #43513c;
+  color: #4a433b;
   font-weight: 600;
 }
 :root .guided-figure svg {
@@ -261,30 +261,29 @@
 }
 :root .guided-figure svg text {
   font:
-    14px 'Microsoft YaHei',
-    sans-serif;
-  fill: #3e5035;
+    14px var(--font-sans, 'Noto Sans SC', sans-serif);
+  fill: #8c3422;
 }
 :root .guided-figure .guided-svg-small {
   font-size: 11px;
-  fill: #677560;
+  fill: #4a433b;
 }
 :root .guided-wire {
   fill: none;
-  stroke: #7c8a7b;
+  stroke: #766d61;
   stroke-width: 1.5;
 }
 :root .guided-node-fixed {
-  fill: #fff;
-  stroke: #b9c6c0;
+  fill: #fbf8f2;
+  stroke: #d4cab9;
 }
 :root .guided-node-probability {
-  fill: #edf5e5;
-  stroke: #9db88e;
+  fill: #f0e1da;
+  stroke: #c77b68;
 }
 :root .guided-node-output {
-  fill: #fff;
-  stroke: #9db88e;
+  fill: #fbf8f2;
+  stroke: #c77b68;
 }
 :root .guided-node-value {
   fill: #f0e9f7;
@@ -301,7 +300,7 @@
 }
 :root .guided-weight-row > strong {
   grid-column: 1 / -1;
-  color: #687762;
+  color: #766d61;
   font-size: 12px;
   font-weight: 500;
 }
@@ -310,17 +309,17 @@
   flex-direction: column;
   gap: 3px;
   padding: 10px 11px;
-  background: #edf4e6;
-  border-top: 2px solid #a6bd90;
+  background: #f0e1da;
+  border-top: 2px solid #c77b68;
 }
 :root .guided-weight-row span {
   font-size: 11px;
-  color: #687762;
+  color: #766d61;
 }
 :root .guided-weight-row strong {
   font-family: var(--mono);
   font-size: 18px;
-  color: #42652e;
+  color: #8c3422;
 }
 :root .guided-weight-row > strong {
   font-family: inherit;
@@ -332,7 +331,7 @@
   gap: 18px;
   margin-top: 22px;
   padding-top: 18px;
-  border-top: 1px solid #dce4dc;
+  border-top: 1px solid #e5ddd0;
 }
 :root .guided-values > div {
   display: flex;
@@ -341,12 +340,12 @@
   min-width: 0;
 }
 :root .guided-values span {
-  color: #687762;
+  color: #766d61;
   font-size: 11px;
 }
 :root .guided-values strong {
   font: 600 19px var(--mono);
-  color: #526f3c;
+  color: #8c3422;
   overflow-wrap: anywhere;
 }
 :root .guided-values > div:first-child strong {
@@ -354,12 +353,12 @@
 }
 :root .guided-values small {
   font-size: 10px;
-  color: #76816f;
+  color: #766d61;
 }
 :root .guided-figure-note {
   margin: 20px 0 0;
   font-size: 11px;
-  color: #74806f;
+  color: #766d61;
   line-height: 1.9;
 }
 :root .guided-controls {
@@ -371,7 +370,7 @@
   padding: 18px 0;
   border-top: 1px solid var(--line);
   font-size: 12px;
-  color: #76816f;
+  color: #766d61;
 }
 :root .guided-controls > span {
   margin-left: auto;

@@ -1,28 +1,48 @@
-/* Technical reading, with interactive figures. Tensor colours retain their meaning. */
+/* Warm archival paper & vermilion ink editorial reading system. Tensor colours retain their meaning. */
 :root {
   color-scheme: light;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  --font-sans:
+    'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'HarmonyOS Sans SC',
+    'DengXian', 'Microsoft YaHei UI', sans-serif;
+  --font-display:
+    'Bahnschrift', 'DIN Alternate', 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC',
+    'Hiragino Sans GB', sans-serif;
+  --mono: 'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace;
+  font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.75;
-  color: #25282a;
-  background: #fff;
-  --ink: #171a1c;
-  --muted: #60696d;
-  --line: #dfe4e3;
-  --teal: #38751d;
-  --accent: #76b900;
-  --paper: #fff;
-  --surface: #f6f8f7;
-  --mono: 'IBM Plex Mono', Consolas, monospace;
+  line-height: 1.8;
+  color: #38322c;
+  background: #f7f3eb;
+  --paper: #f7f3eb;
+  --paper-raised: #fbf8f2;
+  --sidebar-bg: #f2ece1;
+  --surface: #efe9dd;
+  --surface-soft: #f4efe5;
+  --ink: #1e1b18;
+  --body: #38322c;
+  --muted: #766d61;
+  --line: #dfd6c8;
+  --line-soft: #e8e0d3;
+  --line-strong: #c9beac;
+  --teal: #9e3c28;
+  --accent: #9e3c28;
+  --accent-hover: #7f2d1c;
+  --accent-soft: #f0e1da;
+  --accent-mid: #c77b68;
+  --query: #2e5785;
+  --key: #a45619;
+  --value: #6b4b82;
 }
 
 /* An extra root level keeps these shared rules independent of lazy CSS load order. */
 :root {
   ::selection {
-    background: #e0efcb;
+    background: #ead4c9;
+    color: var(--ink);
   }
   body {
     background: var(--paper);
+    color: var(--body);
   }
   button,
   input,
@@ -30,30 +50,32 @@
     border-radius: 2px;
   }
   button {
-    background: #fff;
-    border-color: #cbd2d0;
+    background: var(--paper-raised);
+    border-color: var(--line-strong);
     box-shadow: none;
-    color: #303638;
+    color: var(--body);
   }
   button:hover:not(:disabled) {
-    background: #f2f6ee;
-    border-color: #7b9870;
+    background: var(--surface);
+    border-color: var(--accent-mid);
+    color: var(--ink);
   }
   :is(button, a, input, select, summary):focus-visible {
-    outline: 2px solid #38751d;
+    outline: 2px solid var(--accent);
     outline-offset: 4px;
   }
   input[type='range'],
   input[type='checkbox'] {
-    accent-color: var(--teal);
+    accent-color: var(--accent);
   }
   input[type='number'],
   select {
-    background: #fff;
-    border: 1px solid #bcc6c2;
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
   }
   a {
-    color: var(--teal);
+    color: var(--accent);
     text-underline-offset: 4px;
   }
   .subtle {
@@ -64,7 +86,7 @@
   /* The title is part of the article, with one compact secondary action. */
   .page-heading {
     align-items: flex-end;
-    margin: 0 0 30px;
+    margin: 0 0 32px;
     gap: 24px;
   }
   .page-heading > div {
@@ -74,65 +96,70 @@
   .eyebrow,
   .lesson-eyebrow,
   .section-kicker {
-    font-family: inherit;
+    font-family: var(--font-sans);
     font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--teal);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--accent);
   }
   h1 {
-    font-size: clamp(27px, 2.5vw, 35px);
-    font-weight: 650;
-    line-height: 1.4;
-    letter-spacing: -0.035em;
-    margin: 12px 0 15px;
+    font-family: var(--font-display);
+    font-size: clamp(27px, 2.6vw, 36px);
+    font-weight: 500;
+    line-height: 1.38;
+    letter-spacing: -0.015em;
+    margin: 10px 0 14px;
     text-wrap: balance;
     text-shadow: none;
+    color: var(--ink);
   }
   h1 span {
     font-weight: inherit;
     margin-left: 0;
   }
   .page-heading p {
-    max-width: 54em;
-    font-size: 16px;
+    max-width: 50em;
+    font-size: 15.5px;
     line-height: 1.9;
-    color: #535c60;
+    color: var(--muted);
   }
   .button {
     font-size: 13px;
-    padding: 9px 16px;
-    min-height: 42px;
+    padding: 8px 15px;
+    min-height: 40px;
     font-weight: 500;
   }
   .button.primary {
-    background: #38751d;
-    border-color: #38751d;
-    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--paper-raised);
   }
   .button.primary:hover:not(:disabled) {
-    background: #295d13;
-    border-color: #295d13;
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: var(--paper-raised);
   }
   .button.secondary {
-    background: #fff;
+    background: transparent;
+    border-color: var(--line-strong);
   }
   .share-button {
     background: transparent;
     border: 0;
-    border-bottom: 1px solid #a4b69a;
+    border-bottom: 1px solid var(--line-strong);
     border-radius: 0;
     padding: 5px 0;
     min-height: 36px;
-    color: #46613b;
+    color: var(--muted);
     margin-bottom: 5px;
   }
   .share-button:hover:not(:disabled) {
     background: transparent;
-    border-color: var(--teal);
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .share-button span {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   /* A table of contents, rather than four equal feature cards. */
@@ -141,24 +168,24 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0 28px;
-    margin: 0 0 38px;
+    margin: 0 0 36px;
     padding: 0;
     border-bottom: 1px solid var(--line);
   }
   .lesson-tabs-label {
-    color: #7a8285;
+    color: var(--muted);
     font-size: 12px;
     margin-right: 8px;
   }
   .lesson-tab {
     display: block;
-    padding: 13px 0 12px;
-    min-height: 46px;
+    padding: 12px 0 11px;
+    min-height: 44px;
     border: 0;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid transparent;
     border-radius: 0;
     background: transparent;
-    color: #586165;
+    color: var(--muted);
     font-size: 14px;
     font-weight: 400;
     box-shadow: none;
@@ -166,22 +193,22 @@
   .lesson-tab:hover:not(:disabled) {
     background: transparent;
     color: var(--ink);
-    border-color: #c8d2c2;
+    border-color: var(--line-strong);
   }
   .lesson-tab[aria-pressed='true'] {
     background: transparent;
-    color: #232923;
+    color: var(--ink);
     border-color: var(--accent);
-    font-weight: 600;
+    font-weight: 500;
     transform: none;
     box-shadow: none;
   }
 
-  /* Figures sit on the page; only the data canvas gets a quiet background. */
+  /* Figures sit on the page; only the data canvas gets a quiet paper tint. */
   .architecture-panel,
   .lesson-panel,
   .lab-panel {
-    background: #fff;
+    background: transparent;
     border: 0;
     border-radius: 0;
     box-shadow: none;
@@ -189,21 +216,23 @@
   }
   .architecture-panel-head,
   .lesson-panel-heading {
-    padding: 0 0 22px;
+    padding: 0 0 20px;
     border: 0;
     align-items: flex-end;
   }
   .architecture-panel-head h2,
   .lesson-panel-heading h2 {
-    font-size: 25px;
-    font-weight: 600;
-    line-height: 1.5;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.45;
     margin-top: 5px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+    color: var(--ink);
   }
   .architecture-panel-head > a {
     font-size: 12px;
-    color: #687371;
+    color: var(--muted);
     text-decoration: underline;
   }
   .architecture-layout {
@@ -213,13 +242,15 @@
   }
   .architecture-map {
     background: var(--surface);
-    border: 1px solid #e5eae7;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
     padding: 18px 24px 14px;
     min-width: 0;
   }
   .architecture-map-label {
     font-size: 11px;
-    color: #6e7876;
+    color: var(--muted);
   }
   .architecture-map svg {
     max-height: 590px;
@@ -238,46 +269,47 @@
   }
   .architecture-diagram-note {
     font-size: 12px;
-    color: #66716c;
+    color: var(--muted);
   }
   .architecture-explanation {
     padding: 13px 0 0;
   }
   .architecture-location {
     font-size: 12px;
-    color: #77817c;
+    color: var(--muted);
   }
   .architecture-location strong {
-    color: #416b2e;
+    color: var(--accent);
     font-size: 13px;
   }
   .architecture-explanation h3 {
-    font-size: 28px;
-    font-weight: 600;
-    line-height: 1.5;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.45;
     margin: 12px 0 24px;
   }
   .architecture-explanation dl > div {
     margin: 20px 0;
   }
   .architecture-explanation dt {
-    color: #78817d;
+    color: var(--muted);
     font-size: 12px;
   }
   .architecture-explanation dd {
     font-size: 15px;
     line-height: 1.95;
-    color: #3f4945;
+    color: var(--body);
   }
   .architecture-hint {
     border: 0;
-    border-left: 2px solid #9fbe89;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
     background: transparent;
     padding: 2px 0 2px 16px;
     margin: 24px 0 16px;
     font-size: 13px;
-    color: #53614d;
+    color: var(--muted);
     box-shadow: none;
   }
   .architecture-navigation {
@@ -305,7 +337,7 @@
     border: 0;
     border-bottom: 1px solid var(--line);
     margin-bottom: 24px;
-    gap: 0 20px;
+    gap: 0 22px;
   }
   .lesson-steps button,
   .lesson-steps button + button {
@@ -315,20 +347,25 @@
     border-radius: 0;
     background: transparent;
     padding: 12px 0;
-    color: #65706a;
+    color: var(--muted);
     font-size: 13px;
     min-height: 44px;
   }
+  .lesson-steps button:hover:not(:disabled) {
+    background: transparent;
+    color: var(--ink);
+  }
   .lesson-steps button > span:first-child {
-    color: #909994;
+    color: var(--muted);
+    opacity: 0.7;
     font-size: 11px;
   }
   .lesson-steps button[aria-current='step'] {
-    color: #285d16;
+    color: var(--accent);
     background: transparent;
-    border-bottom-color: #76b900;
+    border-bottom-color: var(--accent);
     box-shadow: none;
-    font-weight: 600;
+    font-weight: 500;
   }
   .lesson-columns {
     column-gap: 36px;
@@ -336,26 +373,29 @@
   }
   .diagram-panel {
     background: var(--surface);
-    border: 1px solid #e5eae7;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
     padding: 20px;
     border-radius: 0;
   }
   .diagram-caption strong {
     font-size: 14px;
-    color: #36433a;
-    font-weight: 600;
+    color: var(--ink);
+    font-weight: 500;
   }
   .diagram-caption span {
     font-size: 11px;
   }
   .lesson-reading {
     padding: 4px 0 24px;
-    background: #fff;
+    background: transparent;
   }
   .lesson-reading h3 {
-    font-size: 25px;
-    font-weight: 600;
-    line-height: 1.5;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.48;
   }
   .lesson-reading-top {
     font-size: 13px;
@@ -367,17 +407,18 @@
   }
   .lesson-explanation {
     font-size: 15px;
-    color: #404a45;
+    color: var(--body);
     line-height: 2;
   }
   .lesson-tokens {
     margin-top: 14px;
   }
   .lesson-tokens button {
-    background: #fff;
+    background: var(--paper-raised);
   }
   .lesson-tokens button[aria-pressed='true'] {
-    background: #edf2fb;
+    background: #e5ecf2;
+    border-color: #7c9bbd;
   }
   .lesson-token-note,
   .lesson-precision,
@@ -389,41 +430,42 @@
   }
   .lesson-takeaway {
     background: transparent;
-    border-left: 2px solid #9fbe89;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
     padding: 2px 0 2px 16px;
     margin-top: 26px;
   }
   .lesson-takeaway strong {
     font-size: 12px;
+    color: var(--accent);
   }
   .lesson-takeaway p {
     font-size: 14px;
-    color: #43513c;
+    color: var(--body);
   }
   .lesson-controls,
   .transport {
-    background: #fff;
+    background: transparent;
     border-top: 1px solid var(--line);
     margin-top: 24px;
     padding: 18px 0;
   }
   .lesson-controls select {
-    background: #fff;
+    background: var(--paper-raised);
   }
   .lesson-controls label,
   .transport-options label {
     font-size: 12px;
   }
   .lesson-recall {
-    background: #f5f8f2;
+    background: var(--surface-soft);
     border: 0;
-    border-left: 2px solid #9fbe89;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
   }
   .lesson-progress {
     font-size: 12px;
-    color: #73806e;
+    color: var(--muted);
   }
 
   .scene-bar {
@@ -434,12 +476,12 @@
     font-size: 12px;
   }
   .numbers-context {
-    background: #f4f7f1;
-    border-left: 2px solid #9fbe89;
+    background: var(--surface-soft);
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
   }
   .lab-toolbar {
-    background: #fff;
+    background: transparent;
     padding: 12px 0 18px;
     border-bottom: 1px solid var(--line);
   }
@@ -452,33 +494,35 @@
     gap: 22px;
   }
   .pipeline-step {
-    background: #f7f9f6;
+    background: var(--surface-soft);
+    border-color: var(--line);
     border-radius: 2px;
   }
   .pipeline-step.current {
-    background: #f0f6e8;
-    border-color: #76a747;
+    background: var(--accent-soft);
+    border-color: var(--accent-mid);
     box-shadow: none;
   }
   .workspace {
     margin-top: 20px;
   }
   .calculation-pane {
-    background: #f6f8f7;
+    background: var(--surface);
     background-image: none;
     padding: 24px;
   }
   .explanation-pane {
-    background: #fff;
+    background: transparent;
     padding: 18px 0 18px 28px;
     border-left: 0;
   }
   .explanation-pane h3 {
+    font-family: var(--font-display);
     font-size: 19px;
-    font-weight: 600;
+    font-weight: 500;
   }
   .explanation-pane p {
-    font-size: 13px;
+    font-size: 13.5px;
     line-height: 1.95;
   }
   .explanation-heading button {
@@ -500,8 +544,9 @@
     padding: 2px 0;
   }
   .step-formula {
-    background: #f6f8f5;
+    background: var(--surface-soft);
     border: 0;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
   }
   .shape-label,
@@ -528,7 +573,8 @@
     font-size: 12px;
   }
   .icon-button {
-    background: #f0f3ef;
+    background: var(--surface);
+    border-color: var(--line);
     min-width: 38px;
     min-height: 38px;
   }
@@ -541,7 +587,7 @@
   .experiment-card,
   .settings-card,
   .recall-card {
-    background: #fff;
+    background: transparent;
     border: 0;
     border-top: 1px solid var(--line);
     border-radius: 0;
@@ -550,9 +596,10 @@
   }
   .experiment-card h2,
   .recall-card h2 {
+    font-family: var(--font-display);
     font-size: 20px;
-    line-height: 1.6;
-    font-weight: 600;
+    line-height: 1.55;
+    font-weight: 500;
   }
   .experiment-card > p,
   .recall-card p {
@@ -573,15 +620,17 @@
     margin-bottom: 15px;
   }
   .pill {
-    background: #edf2f7;
-    border-radius: 2px;
-    font-size: 10px;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    color: var(--muted);
+    font-size: 11px;
   }
   .pill.muted {
     background: transparent;
   }
   .details-panel {
-    background: #fff;
+    background: transparent;
     border: 0;
     border-top: 1px solid var(--line);
     border-radius: 0;
@@ -607,7 +656,7 @@
     margin-top: 32px;
   }
   .source-panel .details-body {
-    background: #fff;
+    background: transparent;
   }
   .source-panel .details-body p {
     font-size: 13px;
@@ -617,9 +666,10 @@
   }
   .notice {
     border: 0;
-    border-left: 2px solid #86a66e;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
-    background: #f3f7ee;
+    background: var(--accent-soft);
+    color: var(--ink);
     box-shadow: none;
     font-size: 13px;
   }
@@ -642,72 +692,75 @@
     padding-bottom: 10px;
   }
   .exp-experiment {
-    background: #f6f8f5;
+    background: var(--surface-soft);
     border: 0;
-    border-left: 2px solid #a5bd94;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
     padding: 16px 18px;
   }
   .exp-verdict,
   .moe-readout {
-    background: #f5f8f2;
+    background: var(--surface-soft);
     border: 0;
-    border-left: 2px solid #a5bd94;
+    border-left: 2px solid var(--accent-mid);
     border-radius: 0;
     font-size: 13px;
   }
   .exp-verdict.ok {
-    background: #f0f7e9;
-    border-color: #78a34d;
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--ink);
   }
   .exp-chip {
-    background: #fff;
-    border-color: #cfd8cc;
+    background: var(--paper-raised);
+    border-color: var(--line-strong);
   }
   .exp-chip-on {
-    border-color: #6b954c;
-    box-shadow: inset 0 -2px #6b954c;
+    border-color: var(--accent);
+    box-shadow: inset 0 -2px var(--accent);
   }
   .exp-bar-on i {
-    background: #56872e;
+    background: var(--accent);
   }
   .exp-range input {
-    accent-color: var(--teal);
+    accent-color: var(--accent);
   }
   .mh-settings {
     padding: 0 0 22px;
   }
   .moe-inputs {
-    background: #f7f9f6;
+    background: var(--surface-soft);
     border: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
     padding: 18px 20px;
     margin-bottom: 18px;
   }
   .moe-field input,
   .kv-field input {
-    background: #fff;
-    border-color: #c4ceca;
+    background: var(--paper-raised);
+    border-color: var(--line-strong);
   }
   .kv-flow {
-    background: #fff;
-    border-color: #d7dfda;
+    background: var(--paper-raised);
+    border-color: var(--line);
     border-radius: 0;
   }
   .kv-flow-on {
-    background: #f6f9f2;
-    border-color: #75a547;
+    background: var(--surface-soft);
+    border-color: var(--accent);
   }
   .kv-bar-current .kv-bar-part-0 {
-    background: #54842e;
+    background: var(--accent);
   }
   .kv-bar-name small {
-    color: #37651c;
-    border-color: #91b478;
+    color: var(--accent);
+    border-color: var(--accent-mid);
   }
   .diagram-multihead {
     background: transparent;
     border: 0;
-    border-top: 1px solid #d8e1da;
+    border-top: 1px solid var(--line);
     border-radius: 0;
     padding: 18px 0 0;
   }

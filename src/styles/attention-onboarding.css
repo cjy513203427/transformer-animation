@@ -14,8 +14,8 @@
     padding: 20px 22px;
     border-top: 0;
     border-bottom: 0;
-    border-left: 3px solid #76a747;
-    background: #f5f8f1;
+    border-left: 3px solid #b3543e;
+    background: #f4efe5;
   }
   .attention-entry-intro {
     flex: 1 1 450px;
@@ -23,12 +23,12 @@
   .attention-entry-intro strong {
     font-size: 16px;
     font-weight: 600;
-    color: #253720;
+    color: #2b1814;
   }
   .attention-entry-intro p {
     font-size: 13px;
     line-height: 1.8;
-    color: #5a6754;
+    color: #4a433b;
     margin-top: 4px;
   }
   .attention-entry-actions {
@@ -46,11 +46,11 @@
   }
   .attention-entry-label {
     font-size: 12px;
-    color: #697368;
+    color: #766d61;
   }
   .attention-entry-hint {
     font-size: 12px;
-    color: #697368;
+    color: #766d61;
   }
   .attention-mode-content {
     scroll-margin-top: 20px;

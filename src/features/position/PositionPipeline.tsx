@@ -7,7 +7,7 @@ import { FitText } from '../../components/FitText';
 export const INSERTION_COLORS: Record<Insertion, string> = {
   add: '#b45309',
   rope: '#be185d',
-  alibi: '#4d7c0f',
+  alibi: '#2b6b5e',
 };
 const INSERTION_STEP: Record<Insertion, number> = { add: 1, rope: 3, alibi: 5 };
 const INSERTION_LABEL: Record<Insertion, string> = {

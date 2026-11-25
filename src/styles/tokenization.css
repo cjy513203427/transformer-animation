@@ -16,7 +16,7 @@
   resize: vertical;
   font: inherit;
   padding: 0.6rem 0.8rem;
-  border: 1px solid #bdc9c0;
+  border: 1px solid #c9beac;
   border-radius: 3px;
 }
 
@@ -56,12 +56,12 @@
 
 .bpe-pieces > li {
   padding: 8px 10px;
-  background: #f6f8f4;
-  border: 1px solid #d8e1d4;
+  background: #f4efe5;
+  border: 1px solid #e5ddd0;
 }
 
 .bpe-pieces > li > span {
-  color: #52604e;
+  color: #4a433b;
   font-size: 0.75rem;
 }
 
@@ -77,8 +77,8 @@
   max-width: 100%;
   display: grid;
   padding: 4px 7px;
-  border: 1px solid #bacdaf;
-  background: #edf4e7;
+  border: 1px solid #e6ccc0;
+  background: #f4efe5;
   overflow-wrap: anywhere;
 }
 
@@ -117,9 +117,9 @@
 }
 
 .bpe-stage .exp-predict button[aria-pressed='true'] {
-  color: #285d16;
-  background: #e8f0df;
-  border-color: #668a44;
+  color: #8a3220;
+  background: #efdcd4;
+  border-color: #b3543e;
 }
 
 @media (max-width: 700px) {

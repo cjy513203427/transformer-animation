@@ -92,7 +92,7 @@ export function AttentionDiagram({
             >
               <path
                 d="M0 0 L10 5 L0 10Z"
-                fill={['#817c73', '#4267c7', '#a85a17', '#865dad', '#455e20'][i]}
+                fill={['#81786c', '#2e5785', '#a45619', '#6b4b82', '#9e3c28'][i]}
               />
             </marker>
           ))}

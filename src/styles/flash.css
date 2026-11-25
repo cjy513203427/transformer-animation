@@ -1,9 +1,9 @@
 .flash-inputs {
   padding: 16px 26px;
-  border-bottom: 1px solid #d0dacf;
+  border-bottom: 1px solid #d8cebe;
   display: grid;
   gap: 12px;
-  background: #f6f8f5;
+  background: #f4efe5;
 }
 .flash-input-row {
   display: flex;
@@ -15,7 +15,7 @@
   display: grid;
   gap: 4px;
   font-size: 11px;
-  color: #59665c;
+  color: #766d61;
   max-width: 110px;
 }
 .flash-field input {
@@ -33,10 +33,10 @@
   font-size: 12px;
 }
 .flash-panel :is(.exp-segment, .exp-predict) button[aria-pressed='true'] {
-  background: #e8f0df;
-  border-color: #668a44;
-  color: #285d16;
-  box-shadow: inset 0 -2px #668a44;
+  background: #efdcd4;
+  border-color: #b3543e;
+  color: #8a3220;
+  box-shadow: inset 0 -2px #b3543e;
 }
 .flash-steps {
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -59,26 +59,24 @@
 }
 .flash-diagram-heading span {
   font-size: 11px;
-  color: #59665c;
+  color: #766d61;
 }
 .flash-svg {
   width: 100%;
   height: auto;
 }
 .flash-svg-title {
-  fill: #303638;
+  fill: #38322c;
   font:
-    600 13px 'Microsoft YaHei',
-    sans-serif;
+    600 13px var(--font-sans, 'Noto Sans SC', sans-serif);
 }
 .flash-svg-small {
-  fill: #59665c;
+  fill: #766d61;
   font:
-    10px 'Microsoft YaHei',
-    sans-serif;
+    10px var(--font-sans, 'Noto Sans SC', sans-serif);
 }
 .flash-svg-number {
-  fill: #303638;
+  fill: #38322c;
   font:
     10px Consolas,
     monospace;
@@ -92,7 +90,7 @@
   stroke-width: 1;
 }
 .flash-masked {
-  fill: #f0f1ef;
+  fill: #f4efe5;
   stroke-dasharray: 3 2;
 }
 .flash-active {
@@ -100,8 +98,8 @@
   stroke-width: 2;
 }
 .flash-probability {
-  fill: #c0d59b;
-  stroke: #a6b58c;
+  fill: #e6ccc0;
+  stroke: #c77b68;
 }
 .flash-kv {
   fill: #f4f0f8;
@@ -113,27 +111,27 @@
   fill: #f6e4ce;
 }
 .flash-output {
-  fill: #edf4e3;
-  stroke: #7c9b58;
+  fill: #f0e1da;
+  stroke: #a84b36;
 }
 .flash-onchip {
-  fill: #f2f6ed;
-  stroke: #7c9b58;
+  fill: #f4efe5;
+  stroke: #a84b36;
   stroke-width: 1.5;
 }
 .flash-state-node {
-  fill: #fff;
-  stroke: #a6b58c;
+  fill: #fbf8f2;
+  stroke: #c77b68;
 }
 .flash-wire {
   fill: none;
-  stroke: #6f7d4f;
+  stroke: #b86852;
   stroke-width: 1.7;
 }
 .flash-readout {
   padding: 11px 13px;
-  border: 1px solid #bdc9c0;
-  background: #fff;
+  border: 1px solid #c9beac;
+  background: #fbf8f2;
   font-size: 12px;
   line-height: 1.9;
   overflow-wrap: anywhere;
@@ -149,8 +147,8 @@
 }
 .flash-equation {
   padding: 10px 12px;
-  border-left: 3px solid #6f7d4f;
-  background: #e3e8d6;
+  border-left: 3px solid #b86852;
+  background: #eee0d8;
   font-size: 12px;
   overflow-wrap: anywhere;
 }
@@ -165,7 +163,7 @@
   }
   .flash-columns > .diagram-panel {
     border-right: 0;
-    border-bottom: 1px solid #e0e6e1;
+    border-bottom: 1px solid #dfd6c8;
   }
 }
 @media (max-width: 700px) {
@@ -180,7 +178,7 @@
     padding: 11px 3px;
   }
   .flash-steps button:nth-child(n + 4) {
-    border-top: 1px solid #e0e6e1;
+    border-top: 1px solid #dfd6c8;
   }
   .flash-panel .diagram-panel {
     padding: 18px 12px;

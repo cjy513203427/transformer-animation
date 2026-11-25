@@ -1,11 +1,11 @@
 /* Oblique blocks: the top face is lit, the side face is shaded, so depth reads without colour. */
 .blk-shade-top {
-  fill: #fff;
+  fill: #fbf8f2;
   opacity: 0.38;
   pointer-events: none;
 }
 .blk-shade-side {
-  fill: #20262a;
+  fill: #1e1b18;
   opacity: 0.13;
   pointer-events: none;
 }

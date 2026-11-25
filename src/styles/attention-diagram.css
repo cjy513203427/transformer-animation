@@ -1,8 +1,8 @@
 .diagram-panel {
   min-width: 0;
   padding: 20px 18px;
-  background: #f6f8f7;
-  border-right: 1px solid #e0e6e1;
+  background: #efe9dd;
+  border-right: 1px solid #dfd6c8;
 }
 .diagram-caption {
   display: flex;
@@ -40,7 +40,7 @@
   stroke-width: 2;
 }
 .diagram-wire.main-wire {
-  stroke: #657251;
+  stroke: #4a433b;
 }
 .diagram-wire.lit {
   stroke-width: 3;
@@ -49,7 +49,7 @@
   cursor: pointer;
   outline: none;
   --node-color: #605d56;
-  --node-fill: #ffffff;
+  --node-fill: #fbf8f2;
 }
 .diagram-query {
   --node-color: #4267c7;
@@ -64,12 +64,12 @@
   --node-fill: #f0e9f7;
 }
 .diagram-probability {
-  --node-color: #38751d;
-  --node-fill: #edf5e5;
+  --node-color: #9e3c28;
+  --node-fill: #f0e1da;
 }
 .diagram-node rect {
   fill: var(--node-fill);
-  stroke: #cbd5cc;
+  stroke: #d4cab9;
   stroke-width: 1.3;
 }
 .diagram-node.active rect {
@@ -78,8 +78,7 @@
 }
 .diagram-node text {
   font:
-    15px 'Microsoft YaHei',
-    sans-serif;
+    15px var(--font-sans, 'Noto Sans SC', sans-serif);
   fill: var(--node-color);
   pointer-events: none;
 }
@@ -96,21 +95,19 @@
 }
 .diagram-bypass-label {
   font:
-    13px 'Microsoft YaHei',
-    sans-serif;
+    13px var(--font-sans, 'Noto Sans SC', sans-serif);
   fill: #865dad;
 }
 .diagram-bypass-note {
   font:
-    11px 'Microsoft YaHei',
-    sans-serif;
+    11px var(--font-sans, 'Noto Sans SC', sans-serif);
   fill: #9475ad;
 }
 .diagram-multihead {
   padding: 14px 15px;
   border: 1px dashed #b6b2a7;
   border-radius: 7px;
-  background: #ffffff;
+  background: #fbf8f2;
 }
 .diagram-multihead strong {
   font-size: 11px;
@@ -119,32 +116,32 @@
 }
 .diagram-multihead p {
   font-size: 12px;
-  color: #67736b;
+  color: #766d61;
   line-height: 1.9;
   margin: 7px 0;
 }
 .diagram-multihead em {
   font-style: normal;
-  color: #38751d;
-  background: #eef6e7;
+  color: #9e3c28;
+  background: #f0e1da;
 }
 .diagram-multihead small {
   font-size: 10px;
-  color: #67736b;
+  color: #766d61;
 }
 .diagram-heads-link {
   display: block;
   margin-top: 9px;
   padding: 6px 10px;
   font-size: 11px;
-  color: #38751d;
-  border-color: #a5b490;
-  background: #dbe3d1;
+  color: #9e3c28;
+  border-color: #c77b68;
+  background: #f0e1da;
 }
 @media (max-width: 700px) {
   .diagram-panel {
     border-right: 0;
-    border-bottom: 1px solid #e0e6e1;
+    border-bottom: 1px solid #dfd6c8;
     padding: 18px 8px;
   }
   .diagram-caption {
@@ -164,7 +161,7 @@
 /* Typeset math inside SVG diagrams (foreignObject); text colour follows the surrounding node. */
 .svg-tex {
   white-space: nowrap;
-  font-family: 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-sans, 'Noto Sans SC', sans-serif);
   color: #514d45;
 }
 .svg-tex .katex {
@@ -183,7 +180,7 @@
   color: #6f4a92;
 }
 .pp-insert .svg-tex {
-  color: #67736b;
+  color: #766d61;
 }
 .pp-insert.active .svg-tex {
   color: var(--insert);

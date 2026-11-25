@@ -633,7 +633,7 @@ function VectorDiagram({ frame: f }: { frame: Frame }) {
                     x2="210"
                     y1={offset + 11 + i * 22}
                     y2={offset + 29 + i * 22}
-                    stroke="#9ba89a"
+                    stroke="#a89e90"
                   />
                   <rect
                     x={v < 0 ? 210 - width : 210}

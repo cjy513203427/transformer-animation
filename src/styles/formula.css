@@ -6,8 +6,8 @@
 .formula-symbols {
   margin: 10px 0 14px;
   padding-top: 10px;
-  border-top: 1px solid var(--line, #dfe6e0);
-  color: #46544c;
+  border-top: 1px solid var(--line, #dfd6c8);
+  color: var(--muted, #766d61);
   font-size: 12px;
   line-height: 1.75;
   text-align: start;
@@ -17,8 +17,8 @@
   display: block;
   margin-bottom: 7px;
   font-size: 12px;
-  font-weight: 600;
-  color: #354c40;
+  font-weight: 500;
+  color: var(--ink, #1e1b18);
 }
 
 .formula-symbols dl {
@@ -40,7 +40,7 @@
   min-width: 3rem;
   max-width: 100%;
   overflow-x: auto;
-  color: #263f32;
+  color: var(--ink, #1e1b18);
   padding: 1px 0;
 }
 

@@ -10,13 +10,13 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.7;
-  color: #252a27;
+  color: #1e1b18;
 }
 .linked-code-scroll {
   overflow-x: auto;
-  border: 1px solid #cdd7cb;
+  border: 1px solid #d4cab9;
   border-radius: 4px;
-  background: #f8faf7;
+  background: #f4efe5;
 }
 .linked-code-pre {
   margin: 0;
@@ -25,7 +25,7 @@
     12px/1.65 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #2c352f;
+  color: #2b1814;
 }
 .linked-code-pre code {
   display: block;
@@ -40,20 +40,20 @@
   opacity: 0.72;
 }
 .code-line-active {
-  background: #e5f0d9;
-  border-left-color: #4f7e2d;
-  color: #162210;
+  background: #f0e1da;
+  border-left-color: #9e3c28;
+  color: #2b1814;
   font-weight: 600;
   opacity: 1;
 }
 .code-gutter {
   flex: none;
   user-select: none;
-  color: #66756a;
+  color: #766d61;
   white-space: pre;
 }
 .code-line-active .code-gutter {
-  color: #3a641d;
+  color: #8c3422;
 }
 .code-text {
   white-space: pre;
@@ -62,7 +62,7 @@
   margin: 0;
   font-size: 12px;
   line-height: 1.65;
-  color: #59665c;
+  color: #766d61;
 }
 .linked-code-meta a {
   white-space: nowrap;

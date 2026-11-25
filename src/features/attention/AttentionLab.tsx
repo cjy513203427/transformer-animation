@@ -74,7 +74,7 @@ function WeightFlow({ probabilities, query }: { probabilities: number[]; query: 
           <path
             d={`M110 85 C190 85 205 ${30 + j * 55} 290 ${30 + j * 55}`}
             fill="none"
-            stroke={p ? '#455e20' : '#9e9a8f'}
+            stroke={p ? '#9e3c28' : '#a89f92'}
             strokeWidth={p ? 1.5 + p * 9 : 1}
             strokeDasharray={p ? undefined : '4 4'}
             opacity={p ? 0.4 + p * 0.6 : 0.7}
@@ -84,20 +84,20 @@ function WeightFlow({ probabilities, query }: { probabilities: number[]; query: 
             y={14 + j * 55}
             width="60"
             height="32"
-            rx="6"
-            fill="#d4ccdd"
-            stroke="#b1a1c3"
+            rx="4"
+            fill="#ece4f1"
+            stroke="#b49dc5"
           />
-          <text x="320" y={35 + j * 55} textAnchor="middle" fill="#6e438e">
+          <text x="320" y={35 + j * 55} textAnchor="middle" fill="#6b4b82">
             V t{j}
           </text>
-          <text x="365" y={35 + j * 55} fill="#3f551d">
+          <text x="365" y={35 + j * 55} fill="#9e3c28">
             {(p * 100).toFixed(1)}%
           </text>
         </g>
       ))}
-      <rect x="25" y="64" width="85" height="42" rx="8" fill="#c5d0ec" stroke="#a8bce7" />
-      <text x="67" y="90" textAnchor="middle" fill="#3558a4">
+      <rect x="25" y="64" width="85" height="42" rx="4" fill="#e3ebf3" stroke="#9bb2cc" />
+      <text x="67" y="90" textAnchor="middle" fill="#2e5785">
         Q t{query}
       </text>
     </svg>

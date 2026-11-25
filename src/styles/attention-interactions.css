@@ -2,28 +2,28 @@
 :root {
   .figure-interaction-hint {
     margin: 11px 0 4px;
-    color: #38682a;
+    color: #9e3c28;
     font-size: 12px;
     line-height: 1.65;
   }
 
   .architecture-node rect,
   .architecture-node circle {
-    stroke: #869982;
+    stroke: #766d61;
     stroke-width: 1.6;
   }
 
   .architecture-node.selected rect,
   .architecture-node.selected circle {
-    stroke: #38751d;
+    stroke: #9e3c28;
     stroke-width: 3;
   }
 
   .architecture-node:hover rect,
   .architecture-node:hover circle {
-    stroke: #38751d;
+    stroke: #9e3c28;
     stroke-width: 2.3;
-    fill: #eef6e7;
+    fill: #f0e1da;
   }
 
   .architecture-node:focus-visible rect,
@@ -68,19 +68,19 @@
   .matrix-wrap .matrix-meta small {
     font-family: inherit;
     font-size: 10px;
-    color: #69736d;
+    color: #766d61;
     line-height: 1.8;
     white-space: nowrap;
   }
 
   .matrix-selectable .matrix-meta small {
-    color: #38682a;
+    color: #9e3c28;
     font-weight: 600;
   }
 
   .matrix-interaction-hint {
     margin: 0 0 8px;
-    color: #38682a;
+    color: #9e3c28;
     font-size: 11px;
     line-height: 1.6;
   }

@@ -72,8 +72,8 @@
 /* The token just merged: a heavier outline as well as a tint, not colour alone. */
 .bpe-new {
   border-width: 2px;
-  border-color: #426439;
-  background: #eef4e9;
+  border-color: #8c3422;
+  background: #f4efe5;
   font-weight: 600;
 }
 .bpe-best th {
@@ -82,7 +82,7 @@
 .bpe-mark {
   margin-left: 8px;
   font-size: 11px;
-  color: #426439;
+  color: #8c3422;
 }
 .bpe-vocab ol {
   display: flex;
@@ -99,6 +99,6 @@
   font-size: 12px;
 }
 .bpe-vocab li span {
-  color: #8a9389;
+  color: #766d61;
   margin-right: 2px;
 }

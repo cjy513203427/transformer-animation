@@ -234,7 +234,7 @@ export function TransformerOverview({
                 <path d="M0 0 L10 5 L0 10Z" fill="#6d6961" />
               </marker>
             </defs>
-            <rect x="61" y="263" width="318" height="305" rx="6" fill="#eaf2e6" stroke="#bdcfb9" />
+            <rect x="61" y="263" width="318" height="305" rx="4" fill="#f3e7e0" stroke="#d9bfb4" />
             <text x="75" y="284" className="architecture-block-caption">
               Block
             </text>

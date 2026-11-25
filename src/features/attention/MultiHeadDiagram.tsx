@@ -3,7 +3,7 @@ import { formatNumber as fmt, type Matrix } from '../../math/attention';
 import { MH_WEIGHTS, MH_X, type MultiHeadResult } from '../../math/multihead';
 import { T } from '../../i18n';
 
-export const HEAD_COLORS = ['#4d622f', '#c0507a', '#5262c4', '#a8741f'];
+export const HEAD_COLORS = ['#9e3c28', '#2e5785', '#6b4b82', '#a45619'];
 const CW = 34;
 const CH = 22;
 const WIDTH = 480;
@@ -12,22 +12,22 @@ const ROW_Y = [62, 200, 338];
 
 type Tone = 'neutral' | 'query' | 'key' | 'value' | 'probability' | 'output' | 'weight';
 const TINTS: Record<Tone, string> = {
-  neutral: '#d9d7d2',
-  query: '#dbd8d0',
-  key: '#e3d5c3',
-  value: '#d7cde1',
-  probability: '#d2dac6',
-  output: '#cadad5',
-  weight: '#dddbd7',
+  neutral: '#e8e0d3',
+  query: '#e3ebf3',
+  key: '#f3e5d5',
+  value: '#ece4f1',
+  probability: '#f0e1da',
+  output: '#dceae6',
+  weight: '#eae2d5',
 };
 const INKS: Record<Tone, string> = {
-  neutral: '#504d46',
-  query: '#3558a4',
-  key: '#8d4b13',
-  value: '#6f4a92',
-  probability: '#354818',
-  output: '#1f5d4c',
-  weight: '#55524c',
+  neutral: '#575047',
+  query: '#2e5785',
+  key: '#a45619',
+  value: '#6b4b82',
+  probability: '#7f2d1c',
+  output: '#24594e',
+  weight: '#575047',
 };
 
 interface Placement {
@@ -135,7 +135,7 @@ function Grid({
       )}
       {data.map((row, i) =>
         row.map((value, j) => {
-          const fill = heat ? `rgba(69, 94, 32, ${0.06 + Math.max(0, value) * 0.62})` : TINTS[tone];
+          const fill = heat ? `rgba(158, 60, 40, ${0.08 + Math.max(0, value) * 0.54})` : TINTS[tone];
           return (
             <g key={`${i}-${j}`}>
               <rect

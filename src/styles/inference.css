@@ -26,7 +26,7 @@
 }
 .inf-grid th {
   font-weight: 500;
-  color: #59665c;
+  color: #766d61;
   text-align: center;
   white-space: nowrap;
   padding: 2px 4px;
@@ -49,7 +49,7 @@
     600 13px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #252a27;
+  color: #1e1b18;
 }
 .inf-cell {
   min-width: 44px;
@@ -62,14 +62,14 @@
   transition: background-color 0.2s;
 }
 .inf-visible {
-  background: #edf5e5;
-  border-color: #9fb07f;
-  color: #2f4214;
+  background: #f0e1da;
+  border-color: #c77b68;
+  color: #7f2d1c;
 }
 .inf-masked,
 .inf-dropped {
-  background: repeating-linear-gradient(135deg, #edf0ed, #edf0ed 4px, #c9c6be 4px, #c9c6be 5px);
-  color: #59665c;
+  background: repeating-linear-gradient(135deg, #ece4d7, #ece4d7 4px, #c9c6be 4px, #c9c6be 5px);
+  color: #766d61;
 }
 .inf-repeat {
   background: #f0dccb;
@@ -77,26 +77,26 @@
   color: #7a3210;
 }
 .inf-fresh {
-  background: #38751d;
-  border-color: #344a15;
-  color: #ffffff;
+  background: #9e3c28;
+  border-color: #2b1814;
+  color: #fbf8f2;
   font-weight: 600;
 }
 .inf-write,
 .inf-keep {
-  background: #e2efcc;
-  border-color: #7d8c5a;
-  color: #1f2a14;
+  background: #ebd4c9;
+  border-color: #a84b36;
+  color: #2b1814;
 }
 .inf-read {
-  background: #dce3cf;
-  border-color: #9fb07f;
-  color: #2f4214;
+  background: #f0e1da;
+  border-color: #c77b68;
+  color: #7f2d1c;
 }
 .inf-new {
-  background: #4f7e2d;
-  border-color: #345b19;
-  color: #fff;
+  background: #9e3c28;
+  border-color: #8a3220;
+  color: #fbf8f2;
   font-weight: 600;
 }
 .inf-empty {
@@ -109,23 +109,23 @@
   font-weight: 600;
 }
 .inf-unknown {
-  background: #ffffff;
-  border: 1px dashed #bdc9c0;
-  color: #59665c;
+  background: #fbf8f2;
+  border: 1px dashed #c9beac;
+  color: #766d61;
 }
 .inf-count {
-  background: #ffffff;
+  background: #fbf8f2;
   border-color: #c4c0b5;
-  color: #252a27;
+  color: #1e1b18;
 }
 .inf-target {
-  background: #ffffff;
-  border: 2px solid #252a27;
-  color: #252a27;
+  background: #fbf8f2;
+  border: 2px solid #1e1b18;
+  color: #1e1b18;
   font-weight: 700;
 }
 .inf-row-changed th {
-  color: #345b19;
+  color: #8a3220;
 }
 .inf-legend {
   list-style: none;
@@ -134,7 +134,7 @@
   display: grid;
   gap: 5px;
   font-size: 11px;
-  color: #424d46;
+  color: #4a433b;
 }
 .inf-legend li {
   display: flex;

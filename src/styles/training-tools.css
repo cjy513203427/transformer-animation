@@ -1,19 +1,19 @@
 .note-tool {
   min-width: 0;
-  border: 1px solid #cedcc7;
+  border: 1px solid #e6ccc0;
   padding: 20px;
   margin: 24px 0;
-  background: #fcfdf9;
+  background: #fbf8f2;
 }
 .note-tool .note-tool-caption {
   font-size: 12px;
-  color: #5d6b58;
+  color: #4a433b;
 }
 .note-tool button,
 .note-reading-header button {
-  border: 1px solid #c5d1c0;
-  background: #fff;
-  color: #325729;
+  border: 1px solid #d4cab9;
+  background: #fbf8f2;
+  color: #8c3422;
   padding: 8px 12px;
   border-radius: 3px;
   line-height: 1.6;
@@ -25,8 +25,8 @@
   cursor: default;
 }
 .note-tool button[aria-pressed='true'] {
-  background: #e9f3df;
-  border-color: #6d9649;
+  background: #f0e1da;
+  border-color: #a84b36;
 }
 .note-tool .chapter-preset-buttons {
   align-items: center;
@@ -54,7 +54,7 @@
   overflow-wrap: anywhere;
   word-break: break-word;
   font: 12px/1.9 var(--font-mono, monospace);
-  background: #f1f4ee;
+  background: #f4efe5;
   padding: 14px;
   max-width: 100%;
 }
@@ -75,11 +75,11 @@
 }
 .note-slider input {
   width: 100%;
-  accent-color: #55852f;
+  accent-color: #8c3422;
 }
 .note-result {
-  border-left: 3px solid #6d9649;
-  background: #eff5e9;
+  border-left: 3px solid #a84b36;
+  background: #f4efe5;
   padding: 14px 18px;
   margin-top: 18px;
 }
@@ -95,7 +95,7 @@
 .note-table-scroll th,
 .note-table-scroll td {
   text-align: right;
-  border-bottom: 1px solid #d8e1d2;
+  border-bottom: 1px solid #f0e1da;
   padding: 6px 10px;
   white-space: nowrap;
 }
@@ -123,7 +123,7 @@
 }
 .note-pipeline button span {
   display: block;
-  color: #64715e;
+  color: #4a433b;
   margin-bottom: 4px;
 }
 .note-stage {

@@ -27,7 +27,7 @@
     'track track';
   gap: 4px 8px;
   font-size: 12px;
-  color: #424d46;
+  color: #4a433b;
 }
 .kv-bar-name {
   grid-area: name;
@@ -35,9 +35,9 @@
 .kv-bar-name small {
   margin-left: 6px;
   padding: 0 5px;
-  border: 1px solid #4f7e2d;
+  border: 1px solid #9e3c28;
   border-radius: 2px;
-  color: #345b19;
+  color: #8a3220;
   font-size: 10px;
 }
 .kv-bar-value {
@@ -52,8 +52,8 @@
   grid-area: track;
   display: flex;
   height: 14px;
-  background: #e7ece7;
-  border: 1px solid #d0dacf;
+  background: #e8dfd1;
+  border: 1px solid #d8cebe;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -62,17 +62,17 @@
   height: 100%;
 }
 .kv-bar-part-0 {
-  background: #6f7d4f;
+  background: #b86852;
 }
 .kv-bar-part-1 {
-  background: repeating-linear-gradient(45deg, #e2efcc, #e2efcc 3px, #9fac7a 3px, #9fac7a 5px);
+  background: repeating-linear-gradient(45deg, #ebd4c9, #ebd4c9 3px, #a84b36 3px, #a84b36 5px);
 }
 .kv-bar-current .kv-bar-part-0 {
-  background: #4f7e2d;
+  background: #9e3c28;
 }
 .kv-bar-current .kv-bar-name {
   font-weight: 700;
-  color: #252a27;
+  color: #1e1b18;
 }
 
 /* ---------- head map ---------- */
@@ -82,11 +82,11 @@
   max-width: 420px;
 }
 .kv-wire {
-  stroke: #d0dacf;
+  stroke: #d8cebe;
   stroke-width: 1.6;
 }
 .kv-wire-on {
-  stroke: #4f7e2d;
+  stroke: #9e3c28;
   stroke-width: 3;
 }
 .kv-node rect {
@@ -113,12 +113,12 @@
   fill: #6f3a0e;
 }
 .kv-node-on rect {
-  stroke: #4f7e2d;
+  stroke: #9e3c28;
   stroke-width: 3;
 }
 .kv-axis {
   font-size: 11px;
-  fill: #59665c;
+  fill: #766d61;
 }
 
 /* ---------- flows ---------- */
@@ -128,15 +128,15 @@
 }
 .kv-flow {
   padding: 12px 14px;
-  border: 1px solid #d0dacf;
+  border: 1px solid #d8cebe;
   border-radius: 4px;
-  background: #f6f8f5;
+  background: #f4efe5;
   opacity: 0.75;
 }
 .kv-flow-on {
   opacity: 1;
-  border: 2px solid #4f7e2d;
-  background: #ffffff;
+  border: 2px solid #9e3c28;
+  background: #fbf8f2;
 }
 .kv-flow > strong {
   display: block;
@@ -146,7 +146,7 @@
 .kv-flow > strong small {
   margin-left: 8px;
   font-size: 10px;
-  color: #345b19;
+  color: #8a3220;
 }
 .kv-flow ol {
   list-style: none;
@@ -161,17 +161,17 @@
   align-items: baseline;
   gap: 4px 10px;
   padding: 6px 8px;
-  border: 1px solid #dee5df;
+  border: 1px solid #e5ddd0;
   border-radius: 3px;
-  background: #ffffff;
+  background: #fbf8f2;
   font-size: 12px;
 }
 .kv-flow-step span {
-  color: #424d46;
+  color: #4a433b;
 }
 .kv-flow-cache {
-  border-color: #6f7d4f;
-  background: #e3e8d6;
+  border-color: #b86852;
+  background: #eee0d8;
 }
 .kv-flow-warn {
   border-color: #b5502a;
@@ -181,7 +181,7 @@
   margin: 8px 0 0;
   font-size: 12px;
   line-height: 1.8;
-  color: #424d46;
+  color: #4a433b;
 }
 
 /* ---------- widgets ---------- */
@@ -194,28 +194,28 @@
   display: grid;
   gap: 3px;
   font-size: 11px;
-  color: #59665c;
+  color: #766d61;
 }
 .kv-field input {
   width: 100%;
   padding: 5px 7px;
-  border: 1px solid #bdc9c0;
+  border: 1px solid #c9beac;
   border-radius: 3px;
-  background: #ffffff;
+  background: #fbf8f2;
   font:
     13px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #252a27;
+  color: #1e1b18;
 }
 .kv-result {
   display: grid;
   gap: 6px;
   padding: 12px 14px;
-  border: 3px solid #252a27;
+  border: 3px solid #1e1b18;
   border-radius: 4px;
-  background: #e2efcc;
-  color: #1f2a14;
+  background: #ebd4c9;
+  color: #2b1814;
   font-size: 12px;
   overflow-x: auto;
 }
@@ -273,18 +273,18 @@
   display: grid;
   gap: 1px;
   font-size: 12px;
-  color: #424d46;
+  color: #4a433b;
 }
 .kv-block figcaption strong {
   font-size: 13px;
-  color: #303638;
+  color: #38322c;
 }
 .kv-block figcaption span:last-child {
   font:
     11px 'IBM Plex Mono',
     Consolas,
     monospace;
-  color: #59665c;
+  color: #766d61;
 }
 .kv-blk {
   stroke-width: 0.8;
@@ -298,23 +298,23 @@
   stroke: #a48bbd;
 }
 .kv-blk-latent {
-  fill: #d5e6b9;
-  stroke: #6f7d4f;
+  fill: #e6ccc0;
+  stroke: #b86852;
 }
 .kv-blk-rope {
   fill: #f4f5e8;
-  stroke: #6f7d4f;
+  stroke: #b86852;
 }
 .kv-blk-axis {
   font:
     10px Consolas,
     'Microsoft YaHei',
     monospace;
-  fill: #59665c;
+  fill: #766d61;
 }
 .kv-blk-col {
   font:
     9px Consolas,
     monospace;
-  fill: #59665c;
+  fill: #766d61;
 }

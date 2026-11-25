@@ -8,8 +8,8 @@
   }
   .intro-chapter-entry {
     padding: 16px 20px;
-    border-left: 3px solid #6a9749;
-    background: #f5f9ef;
+    border-left: 2px solid var(--accent-mid, #c77b68);
+    background: var(--surface-soft, #f4efe5);
     margin: 12px 0 28px;
   }
   .intro-chapter-entry p,
@@ -27,10 +27,11 @@
     align-items: baseline;
     gap: 12px;
     margin: 0 0 10px;
+    font-family: var(--font-display, inherit);
     font-size: 23px;
-    font-weight: 650;
+    font-weight: 500;
     line-height: 1.45;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     color: var(--ink);
   }
   .intro-section > h2 > span {
@@ -42,7 +43,7 @@
   .intro-how li {
     font-size: 16px;
     line-height: 1.9;
-    color: #3b4245;
+    color: var(--body, #38322c);
   }
   .intro-section small[lang='en'] {
     font-size: 12px;
@@ -54,8 +55,8 @@
   .intro-demo {
     margin: 18px 0 20px;
     padding: 18px 20px 14px;
-    background: var(--surface, #f6f8f7);
-    border-left: 3px solid #69a82b;
+    background: var(--surface, #efe9dd);
+    border-left: 2px solid var(--accent, #9e3c28);
   }
   .intro-demo-head {
     display: flex;
@@ -67,7 +68,7 @@
   .intro-demo-head h3 {
     margin: 0;
     font-size: 16px;
-    font-weight: 650;
+    font-weight: 500;
   }
   .intro-demo-head span {
     font: 12px var(--mono);
@@ -80,7 +81,7 @@
     gap: 4px 14px;
     margin: 14px 0 6px;
     padding: 12px 14px;
-    background: #fff;
+    background: var(--paper-raised, #fbf8f2);
     border: 1px solid var(--line);
     font-size: 20px;
     line-height: 1.5;
@@ -91,7 +92,7 @@
     color: var(--muted);
   }
   .intro-blank {
-    color: #69a82b;
+    color: var(--accent, #9e3c28);
     font-weight: 600;
   }
   .intro-demo-question,
@@ -99,7 +100,7 @@
     margin: 12px 0 8px;
     font-size: 15px;
     line-height: 1.8;
-    color: #3b4245;
+    color: var(--body, #38322c);
   }
   .intro-candidates {
     list-style: none;
@@ -117,12 +118,12 @@
     width: 100%;
     padding: 9px 12px;
     text-align: left;
-    border: 1px solid #cbd2d0;
-    background: #fff;
+    border: 1px solid var(--line, #dfd6c8);
+    background: var(--paper-raised, #fbf8f2);
   }
   .intro-candidate-token {
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--ink);
   }
   .intro-candidate-score {
@@ -132,22 +133,22 @@
   }
   .intro-candidate-bar {
     height: 10px;
-    background: #e6ebe4;
+    background: #e5ddd0;
   }
   .intro-candidate-bar i {
     display: block;
     height: 100%;
-    background: #69a82b;
+    background: var(--accent, #9e3c28);
   }
   .intro-candidates strong {
     font: 600 13px var(--mono);
     text-align: right;
-    color: #315e18;
+    color: var(--accent-hover, #7f2d1c);
   }
   .intro-candidates em {
     font-style: normal;
     font-size: 11px;
-    color: #527c34;
+    color: var(--accent, #9e3c28);
     white-space: nowrap;
   }
   .intro-demo-actions {
@@ -188,8 +189,8 @@
     left: 16px;
     top: 34px;
     bottom: 0;
-    width: 2px;
-    background: #d5e2cb;
+    width: 1px;
+    background: var(--line-strong, #c9beac);
   }
   .intro-station-number {
     display: grid;
@@ -197,22 +198,22 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: #edf4e7;
-    border: 1px solid #b9d0a8;
+    background: var(--accent-soft, #f0e1da);
+    border: 1px solid var(--accent-mid, #c77b68);
     font: 600 14px var(--mono);
-    color: #315e18;
+    color: var(--accent-hover, #7f2d1c);
   }
   .intro-stations h3 {
     margin: 4px 0 2px;
     font-size: 16px;
-    font-weight: 650;
+    font-weight: 500;
     color: var(--ink);
   }
   .intro-stations p {
     margin: 0;
     font-size: 15px;
     line-height: 1.8;
-    color: #3b4245;
+    color: var(--body, #38322c);
   }
   .intro-station-links {
     display: flex;
@@ -283,7 +284,7 @@
     margin: 4px 0 8px;
     font-size: 14px;
     line-height: 1.75;
-    color: #535c60;
+    color: var(--muted);
   }
   .intro-path ul {
     list-style: none;
@@ -292,7 +293,7 @@
   }
   .intro-path li {
     padding: 6px 0;
-    border-top: 1px solid #edf0ee;
+    border-top: 1px solid var(--line-soft, #e8e0d3);
   }
   .intro-path li a {
     display: inline-flex;
@@ -302,7 +303,7 @@
   }
   .intro-path li a span {
     font: 12px var(--mono);
-    color: #73836a;
+    color: var(--muted);
   }
   .intro-path li a strong {
     font-size: 14px;

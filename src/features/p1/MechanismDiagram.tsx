@@ -330,7 +330,7 @@ export function MechanismDiagram({ frame: f, fallback }: { frame: Frame; fallbac
                   key={`${i}-${j}`}
                   d={`M102 ${75 + i * 70} C180 ${75 + i * 70} 250 ${75 + j * 70} 328 ${75 + j * 70}`}
                   fill="none"
-                  stroke="#6c8c46"
+                  stroke="#b3543e"
                   strokeWidth={1 + 5 * p}
                   opacity={0.25 + 0.7 * p}
                 />

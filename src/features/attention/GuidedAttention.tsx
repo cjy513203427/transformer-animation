@@ -339,7 +339,7 @@ export function GuidedAttention({ state, onState, onFinish, onExit }: Props) {
                 markerHeight="6"
                 orient="auto"
               >
-                <path d="M0 0 L10 5 L0 10Z" fill="#7c8a7b" />
+                <path d="M0 0 L10 5 L0 10Z" fill="#8b8174" />
               </marker>
             </defs>
             <path
