@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { Formula } from '../../components/Formula';
+import { LinkedCode } from '../../components/LinkedCode';
 import { Prediction, PredictionResult } from '../../components/Controls';
 import { Rich } from '../../components/Tex';
 import { StepSources, WhyIntro } from '../../components/WhyIntro';
+import { TRAIN_PY_CODE, TRAIN_PY_HIGHLIGHTS } from '../../content/codeViews';
 import { formatNumber as fmt } from '../../math/attention';
 import {
   error,
@@ -344,6 +346,9 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
               <summary>{T('公式与符号说明')}</summary>
               <Formula expression={step.formula} symbols={step.symbols} />
             </details>
+            {topic.id === 'training' && TRAIN_PY_HIGHLIGHTS[state.step] && (
+              <LinkedCode spec={TRAIN_PY_CODE} highlight={TRAIN_PY_HIGHLIGHTS[state.step]} />
+            )}
             <StepSources book={step.book} source={step.source} />
           </div>
         </div>

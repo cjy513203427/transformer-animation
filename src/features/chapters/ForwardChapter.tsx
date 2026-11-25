@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
+import { LinkedCode } from '../../components/LinkedCode';
 import { Matrix } from '../../components/Matrix';
 import { Prediction } from '../../components/Controls';
 import { ShareState } from '../../components/ShareState';
+import { MODEL_PY_CODE, MODEL_PY_HIGHLIGHTS } from '../../content/codeViews';
 import { FORWARD_CONTENT } from '../../content/forward';
 import { chapterUrl } from '../../content/book';
 import { TOPICS } from '../../content/topics';
@@ -435,6 +437,7 @@ export default function ForwardChapter() {
               symbols={content.symbols}
               showSymbols={state.view.explanations}
             />
+            <LinkedCode spec={MODEL_PY_CODE} highlight={MODEL_PY_HIGHLIGHTS[frame.kind]} />
             {frame.parameters && (
               <details className="chapter-parameters">
                 <summary>{T('查看本步固定参数')}</summary>

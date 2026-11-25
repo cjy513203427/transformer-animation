@@ -40,6 +40,8 @@ const P1 = [
 /** Imported fresh after each locale switch; explicit so the bundler can resolve them. */
 const P0_MODULES = {
   attention: () => import('./attention'),
+  linear: () => import('./linear'),
+  codeViews: () => import('./codeViews'),
   position: () => import('./position'),
   inference: () => import('./inference'),
   kv: () => import('./kv'),
@@ -88,7 +90,7 @@ for (const locale of ['en', 'de'] as const)
     it('P0 content and state labels contain no Chinese', async () => {
       for (const [name, load] of Object.entries(P0_MODULES))
         expect(chinese(strings(await load(), name))).toEqual([]);
-      for (const name of ['experiment', 'position', 'inference', 'kv', 'moe', 'flash']) {
+      for (const name of ['experiment', 'linear', 'position', 'inference', 'kv', 'moe', 'flash']) {
         const module = await import(`../state/${name}.ts`);
         expect(chinese(strings(module, `state/${name}`))).toEqual([]);
       }

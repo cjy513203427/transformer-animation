@@ -29,12 +29,12 @@ const terms = {
     T('yₜ 是 token t 的合并输出，所有行组成 Y；在选中集合 Aₜ 内，按门值 g 加权专家输出。'),
   ],
   counts: [
-    'D,E,F,K,T',
-    T('D 是输入/输出维数，E 是专家总数，F 是专家中间维数，K 是每 token 选中数，T 是 token 数。'),
+    'D,E,F,K,S',
+    T('D 是输入/输出维数，E 是路由专家总数，F 是专家中间维数，K 是每 token 选中数，S∈{0,1} 是共享专家数。'),
   ],
   parameters: [
-    'N_{\\mathrm{all}},N_{\\mathrm{active/token}},n_e',
-    T('依次是总参数量、每 token 激活参数量、专家 e 收到的任务数；DE 统计 Router 参数。'),
+    'L_{\\mathrm{aux}},\\alpha,f_e,P_e,N_{\\mathrm{active/token}}',
+    T('L_aux 是 Switch 式负载均衡辅助损失（本例 α=0.01）；fₑ 是分配给专家 e 的任务占比，Pₑ 是平均路由概率。'),
   ],
   communication: [
     'B_{\\mathrm{dispatch}},B_{\\mathrm{return}},B_{\\mathrm{total}}',

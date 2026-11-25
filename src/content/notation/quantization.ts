@@ -3,10 +3,13 @@ import { commonSymbols, createNotation, type FormulaSymbol } from './shared';
 
 const terms = {
   ...commonSymbols,
-  bits: ['b,q_{max}', T('b 是量化位数；q_max 是对称整数范围的正端点，本例使用 [−q_max, q_max]。')],
+  bits: [
+    'b,q_{\\min},q_{\\max}',
+    T('b 是量化位数；对称范围取 [−(2^(b−1)−1), 2^(b−1)−1]，非对称范围取 [0, 2^b−1]。'),
+  ],
   scale: [
-    'g,x_g,s_g,cap',
-    T('g 是分组编号，x_g 是该组原值，s_g 是该组量化步长；cap 限制用于计算步长的最大幅值。'),
+    'g,x_g,s_g,z_g,cap',
+    T('g 是分组编号，x_g 是该组原值，s_g 是步长，z_g 是整数零点（对称时为 0）；cap 限制校准幅值。'),
   ],
   values: [
     'x_i,q_i,\\hat x_i',
@@ -18,16 +21,22 @@ const terms = {
   ],
   size: ['N,G,\\lceil N/G\\rceil', T('N 是元素总数，G 是每组元素数；⌈N/G⌉ 向上取整得到分组数。')],
   metadata: ['B_{scale}', T('所有分组步长的存储字节数；本例每组保存一个 4 字节的步长。')],
-  error: ['MSE', T('均方误差（Mean Squared Error）：逐元素反量化误差的平方，再取平均。')],
-  total: ['B,b', T('B 是整数载荷与步长元数据的总字节数；b 是每个整数编码的位数。')],
+  awqGptq: [
+    's_i,H^{-1},\\hat w_j',
+    T('sᵢ 是 AWQ 按激活幅值计算的通道缩放；H⁻¹ 是 GPTQ 校准激活的二阶逆矩阵，用于把第 j 列误差补偿给后续列 k > j。'),
+  ],
+  total: [
+    'B,b,b_z',
+    T('B 是总字节数，b 是位数，b_z 是每组零点字节数（对称时为 0，非对称本例计 1 字节）。'),
+  ],
 } satisfies Record<string, FormulaSymbol>;
 
 /** One local glossary for each calculation step, in the same order as the lesson. */
 export const quantizationSymbols = createNotation(terms, [
-  ['bits', 'scale'],
+  ['bits', 'scale', 'round'],
   ['values', 'scale', 'bits', 'round'],
   ['clipping'],
   ['metadata', 'size'],
-  ['error', 'values', 'size', 'sum'],
+  ['awqGptq'],
   ['total', 'size'],
 ]);

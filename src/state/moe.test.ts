@@ -8,15 +8,20 @@ import {
 } from './moe';
 
 describe('MoE 可分享状态', () => {
-  it('完整参数、种子、步骤与展示选项往返恢复', () => {
+  it('完整参数、种子、步骤与展示选项往返恢复，且兼容不含新字段的旧 v1 链接', () => {
     const state = initialMoEState();
     state.step = 5;
     state.seed = 9999;
-    state.config = { topK: 1, topology: 'single' };
+    state.config = { topK: 1, topology: 'single', sharedExpert: true, capacity: 2 };
     state.input = { preset: 'concentrated', token: 3, delta: -1.75, expertScale: 0.25 };
     state.view = { explanations: false, speed: 2 };
     expect(restoreMoEState(serializeMoEState(state))).toEqual({ state, warning: null });
     expect(restoreMoEState('')).toEqual({ state: initialMoEState(), warning: null });
+    const legacy = {
+      ...initialMoEState(),
+      config: { topK: 2, topology: 'split' },
+    };
+    expect(validateMoEState(legacy)).toEqual(initialMoEState());
   });
 
   it.each(['#moe=%', '#moe=null', '#moe=[]', '#moe={}', '#moe=' + 'x'.repeat(2001), '#kv=1'])(

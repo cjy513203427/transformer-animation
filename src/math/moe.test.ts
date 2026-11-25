@@ -142,4 +142,42 @@ describe('参数、矩阵 MAC 与通信账本', () => {
       expect(p.remote).toBe(p.homeDevice !== p.expertDevice);
     });
   });
+
+  it('共享专家、容量上限丢弃与独立参考实现完全一致，并正确统计负载均衡辅助损失', () => {
+    for (const sharedExpert of [false, true]) {
+      for (const capacity of [0, 1, 2, 3] as const) {
+        for (const preset of ['balanced', 'concentrated'] as const) {
+          const options: MoEOptions = {
+            seed: 42,
+            config: { topK: 2, topology: 'split', sharedExpert, capacity },
+            input: { preset, token: 0, delta: 0, expertScale: 1.5 },
+          };
+          const result = computeMoE(options);
+          expect(maxDiff(result.output, directReference(options))).toBeLessThan(TOL);
+          expect(result.packets.length + result.droppedPackets.length).toBe(8);
+          if (capacity > 0) {
+            result.load.forEach((n) => expect(n).toBeLessThanOrEqual(capacity));
+          }
+          if (sharedExpert) {
+            expect(result.counts.sharedParams).toBe(12);
+            expect(result.counts.totalParams).toBe(8 + 5 * 12);
+          }
+        }
+      }
+    }
+    const balanced = computeMoE(base);
+    const concentrated = computeMoE({ ...base, input: { ...base.input, preset: 'concentrated' } });
+    expect(concentrated.balance.balanceFactor).toBeGreaterThan(balanced.balance.balanceFactor);
+    expect(concentrated.balance.auxLoss).toBeCloseTo(
+      concentrated.balance.auxAlpha * concentrated.balance.balanceFactor,
+      12,
+    );
+    const capped = computeMoE({
+      ...base,
+      config: { topK: 2, topology: 'split', sharedExpert: false, capacity: 2 },
+      input: { ...base.input, preset: 'concentrated' },
+    });
+    expect(capped.counts.droppedCount).toBe(4);
+    expect(capped.load).toEqual([2, 2, 0, 0]);
+  });
 });

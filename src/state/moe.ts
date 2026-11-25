@@ -1,4 +1,4 @@
-import { TOKENS, type MoEConfig, type MoEInput } from '../math/moe';
+import { TOKENS, type ExpertCapacity, type MoEConfig, type MoEInput } from '../math/moe';
 import { T } from '../i18n';
 
 /** Router → Top-K → FFN → combine → load → expert parallel ledger. */
@@ -7,7 +7,7 @@ export interface MoEState {
   version: 1;
   step: number;
   seed: number;
-  config: MoEConfig;
+  config: Required<MoEConfig>;
   input: MoEInput;
   view: { explanations: boolean; speed: number };
 }
@@ -17,7 +17,7 @@ export function initialMoEState(): MoEState {
     version: 1,
     step: 0,
     seed: 42,
-    config: { topK: 2, topology: 'split' },
+    config: { topK: 2, topology: 'split', sharedExpert: false, capacity: 0 },
     input: { preset: 'balanced', token: 0, delta: 0, expertScale: 1 },
     view: { explanations: true, speed: 1 },
   };
@@ -55,6 +55,10 @@ export function validateMoEState(value: unknown): MoEState | null {
     (config.topology !== 'single' && config.topology !== 'split')
   )
     return null;
+  const sharedExpert = config.sharedExpert === undefined ? false : config.sharedExpert;
+  const capacity = config.capacity === undefined ? 0 : config.capacity;
+  if (typeof sharedExpert !== 'boolean') return null;
+  if (capacity !== 0 && capacity !== 1 && capacity !== 2 && capacity !== 3) return null;
   if (
     (input.preset !== 'balanced' && input.preset !== 'concentrated') ||
     !int(input.token, 0, TOKENS - 1) ||
@@ -69,7 +73,12 @@ export function validateMoEState(value: unknown): MoEState | null {
     version: 1,
     step: value.step,
     seed: value.seed,
-    config: { topK: config.topK, topology: config.topology },
+    config: {
+      topK: config.topK,
+      topology: config.topology,
+      sharedExpert,
+      capacity: capacity as ExpertCapacity,
+    },
     input: {
       preset: input.preset,
       token: input.token,

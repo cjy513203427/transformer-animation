@@ -180,7 +180,7 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第08章-线性变换的几何意义-矩阵乘法的本质/'),
     units: [
       { name: T('投影与逐格点积核对'), status: 'interactive', topics: ['attention'] },
-      { name: T('二维线性变换的几何演示'), status: 'reference', topics: [] },
+      { name: T('二维线性变换的几何演示'), status: 'interactive', topics: ['linear'] },
     ],
   },
   {
@@ -344,8 +344,14 @@ export const CHAPTERS: Chapter[] = [
         topics: [],
         href: localePath('/chapters/15'),
       },
-      { name: T('PyTorch 实现与逐行代码联动'), status: 'reference', topics: [] },
+      {
+        name: T('model.py 步骤联动代码视图'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/chapters/15'),
+      },
       { name: T('权重绑定与不绑定的参数量'), status: 'interactive', topics: ['budget'] },
+      { name: T('完整 PyTorch 工程实现'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -360,6 +366,12 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第19章-手写Train.py-训练循环/'),
     units: [
       { name: T('右移标签与因果前向'), status: 'interactive', topics: ['inference'] },
+      {
+        name: T('train.py 步骤联动代码视图'),
+        status: 'interactive',
+        topics: [],
+        href: localePath('/training-step'),
+      },
       { name: T('反向、优化器与 checkpoint 代码'), status: 'reference', topics: [] },
     ],
   },
@@ -375,6 +387,11 @@ export const CHAPTERS: Chapter[] = [
     bookUrl: chapterUrl('第20章-手写Inference.py-推理逻辑/'),
     units: [
       { name: T('生成、采样与缓存机制'), status: 'interactive', topics: ['inference', 'decoding'] },
+      {
+        name: T('inference.py 缓存与重算代码联动'),
+        status: 'interactive',
+        topics: ['inference'],
+      },
       { name: T('完整 Python 推理代码'), status: 'reference', topics: [] },
     ],
   },
@@ -480,8 +497,12 @@ export const CHAPTERS: Chapter[] = [
     prerequisites: ['08'],
     bookUrl: chapterUrl('第27章-模型量化-GPTQ-AWQ-GGUF/'),
     units: [
-      { name: T('对称量化、裁剪、分组与误差'), status: 'interactive', topics: ['quantization'] },
-      { name: T('GPTQ、AWQ 算法与 GGUF 格式'), status: 'reference', topics: [] },
+      {
+        name: T('对称/非对称量化、裁剪、分组、AWQ 与 GPTQ 补偿'),
+        status: 'interactive',
+        topics: ['quantization'],
+      },
+      { name: T('大规模校准实现与 GGUF 文件格式'), status: 'reference', topics: [] },
     ],
   },
   {
@@ -567,7 +588,7 @@ export const CHAPTERS: Chapter[] = [
     units: [
       { name: T('Router、Top-K、合并与专家并行'), status: 'interactive', topics: ['moe'] },
       { name: T('MLA 压缩、解耦 RoPE 与矩阵吸收'), status: 'interactive', topics: ['kv'] },
-      { name: T('共享专家、容量限制与辅助损失'), status: 'reference', topics: [] },
+      { name: T('共享专家、容量限制与辅助损失'), status: 'interactive', topics: ['moe'] },
     ],
   },
   {

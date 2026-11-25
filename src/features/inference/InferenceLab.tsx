@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../../components/AppShell';
 import { RelatedNotes } from '../../components/RelatedNotes';
 import { Formula } from '../../components/Formula';
+import { LinkedCode } from '../../components/LinkedCode';
 import { Rich } from '../../components/Tex';
+import { INFERENCE_PY_CODE, INFERENCE_PY_HIGHLIGHTS } from '../../content/codeViews';
 import { inferenceMyths, inferenceSources, inferenceSteps } from '../../content/inference';
 import { chapterUrl } from '../../content/book';
 import {
@@ -329,6 +331,7 @@ export default function InferenceLab() {
               <summary>{T('公式与符号说明')}</summary>
               <Formula expression={step.formula} symbols={step.symbols} />
             </details>
+            <LinkedCode spec={INFERENCE_PY_CODE} highlight={INFERENCE_PY_HIGHLIGHTS[state.step]} />
             <a
               className="lesson-source"
               href={chapterUrl(step.chapter[1])}

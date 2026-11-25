@@ -20,7 +20,7 @@ for(const lab of labs) test(`${lab.id} 同一例子逐步核对、预测、回�
   await expect(page.locator('.lesson-progress')).toHaveText(`1 / ${lab.steps}`);
   await expect(page.locator('.diagram-panel figure')).toBeVisible();
   const directory=await openDirectory(page);
-  await expect(directory.locator('ol a')).toHaveCount(23);
+  await expect(directory.locator('ol a')).toHaveCount(24);
   await page.keyboard.press('Escape');
   for(let i=0;i<lab.steps;i++){
     await page.locator('.p1-steps button').nth(i).click();

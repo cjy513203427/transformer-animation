@@ -10,6 +10,7 @@ const SWITCH = 'https://arxiv.org/html/2101.03961v3';
 const GSHARD = 'https://arxiv.org/html/2006.16668v1';
 const MIXTRAL_CODE =
   'https://github.com/huggingface/transformers/blob/main/src/transformers/models/mixtral/modeling_mixtral.py';
+const DEEPSEEK_MOE = 'https://arxiv.org/abs/2401.06066';
 
 /** Sources were read online on this date; the toy example is our own, untrained model. */
 export const moeVerifiedDate = '2026-11-07';
@@ -81,14 +82,14 @@ export const moeSteps: {
   },
   {
     name: T('负载与参数'),
-    title: T('只激活 K 个专家，为什么还要存全部参数？'),
+    title: T('负载不均、共享专家、容量丢弃与辅助损失'),
     explanation: T(
-      '切换分散与集中输入，观察每个专家实际接到多少条任务。每个 token 都选 K 个专家，任务总数仍为 T × K，分配却可能很不均匀。本例每个专家有 12 个参数，路由器有 8 个，总计 56 个；每 token 使用 8 + 12K 个。未选中的专家仍需保留权重，供后续输入使用。',
+      '切换分散与集中输入，观察每个专家实际接到多少任务、Switch 式负载均衡辅助损失 $L_{\\mathrm{aux}} = \\alpha E \\sum_e f_e P_e$ 如何升高。还可以开启 1 个始终激活的共享专家（DeepSeekMoE 思路），或设置单专家容量上限观察溢出 token 被丢弃的效果。',
     ),
-    takeaway: T('总参数决定要保存多少权重；激活参数和任务数描述本次计算，负载描述任务分布。'),
-    prompt: T('K 从 1 变成 2，哪些参数账单不变？任务集中在一个专家，会自动变得更快吗？'),
+    takeaway: T('总参数决定存储，激活参数决定单 token 计算，辅助损失与容量限制用于应对负载不均。'),
+    prompt: T('为什么路由坍缩时 $E\\sum f_e P_e$ 会大于 1？开启共享专家和设置容量上限各自改变了什么？'),
     symbols: moeSymbols[4],
-    formula: String.raw`N_{\mathrm{all}}=DE+E(2DF),\quad N_{\mathrm{active/token}}=DE+K(2DF),\quad \sum_e n_e=TK`,
+    formula: String.raw`L_{\mathrm{aux}}=\alpha E\sum_{e=0}^{E-1} f_e P_e,\qquad N_{\mathrm{active/token}}=DE+(K+S)(2DF)`,
     book: [T('第 30.2.6 节 · 负载均衡问题'), CH30],
   },
   {
@@ -142,12 +143,13 @@ export const moeSources = [
   { title: T('Shazeer et al., 2017 · 稀疏门控 MoE，§2–4'), url: SPARSE_MOE },
   { title: T('Switch Transformers · §2.1 路由、§5.4 专家并行'), url: SWITCH },
   { title: T('GShard · §3.1 Dispatch / Combine、§3.3.2 AllToAll'), url: GSHARD },
+  { title: T('DeepSeekMoE · 共享专家与细粒度专家'), url: DEEPSEEK_MOE },
   { title: T('Hugging Face Transformers · Mixtral 路由实现'), url: MIXTRAL_CODE },
 ];
 
 export const moeMyths = [
   T('E0–E3 没有手工指定的“数学”“代码”等职责；本例权重是可复现的教学数字，不是真实模型数据。'),
-  T('本例只演示一个 MoE 层：没有共享专家、容量上限、丢弃、重路由或辅助损失，也没有训练过程。'),
+  T('本例只演示一个 MoE 层：含路由、可选共享专家、容量上限丢弃与辅助损失，不执行反向梯度训练或随机重路由。'),
   T('本例 Top-1 重新归一化后门值为 1；其他架构可能保留原概率，门控规则必须随模型说明。'),
   T('稀疏激活不意味着只需存储本次选中的参数；权重卸载是另一种实现选择，本例未实现。'),
   T(

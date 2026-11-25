@@ -171,37 +171,53 @@ function RoutingDiagram({ state, result }: { state: MoEState; result: Result }) 
 
 function LoadDiagram({ state, result }: { state: MoEState; result: Result }) {
   const assignments = TOKENS * state.config.topK;
+  const cap = state.config.capacity;
   return (
     <div className="moe-load-diagram">
       <ul className="moe-load-bars" aria-label={T('四个专家的 token 分配负载')}>
-        {experts.map((expert) => (
-          <li key={expert}>
-            <span>E{expert}</span>
-            <span className="moe-load-track">
-              <i style={{ width: `${(result.load[expert] / TOKENS) * 100}%` }} />
-            </span>
-            <strong>{Tx('{#0} 次', result.load[expert])}</strong>
-            <small>
-              {result.packets
-                .filter((packet) => packet.expert === expert)
-                .map((packet) => `t${packet.token}`)
-                .join(' · ') || T('空闲')}
-            </small>
-          </li>
-        ))}
+        {experts.map((expert) => {
+          const dropped = result.requestedLoad[expert] - result.load[expert];
+          return (
+            <li key={expert}>
+              <span>E{expert}</span>
+              <span className="moe-load-track">
+                <i style={{ width: `${(result.load[expert] / TOKENS) * 100}%` }} />
+              </span>
+              <strong>{Tx('{#0} 次', result.load[expert])}</strong>
+              <small>
+                {result.packets
+                  .filter((packet) => packet.expert === expert)
+                  .map((packet) => `t${packet.token}`)
+                  .join(' · ') || T('空闲')}
+                {dropped > 0 ? Tx(' · 溢出丢弃 {#0} 份', dropped) : ''}
+              </small>
+            </li>
+          );
+        })}
       </ul>
       <div className="moe-readout">
         <strong>
-          {Tx('{#0} token × Top-{#1} = {#2} 次专家调用', TOKENS, state.config.topK, assignments)}
+          {Tx(
+            '{#0} token × Top-{#1} = {#2} 次请求（实际执行 {#3} 次）',
+            TOKENS,
+            state.config.topK,
+            assignments,
+            result.packets.length,
+          )}
         </strong>
         <span>
           {Tx(
-            '总参数 {#0}；每 token 激活参数 {#1}。',
+            '总参数 {#0}；每 token 激活参数 {#1}；均衡因子 E·Σf·P = {#2}。',
             result.counts.totalParams,
             result.counts.activeParamsPerToken,
+            fmt(result.balance.balanceFactor, 3),
           )}
         </span>
-        <span>{Tx('负载统计调用次数，每次输入仍是同一个 D = {#0} 维向量。', D_MODEL)}</span>
+        <span>
+          {cap > 0
+            ? Tx('当前每专家容量上限 {#0}，已丢弃 {#1} 份溢出分支。', cap, result.counts.droppedCount)
+            : Tx('负载统计调用次数，每次输入仍是同一个 D = {#0} 维向量。', D_MODEL)}
+        </span>
       </div>
     </div>
   );

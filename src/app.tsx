@@ -13,6 +13,7 @@ const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
   '/notes': lazy(() => import('./features/chapters/KnowledgeNotebook')),
   '/chapters/15': lazy(() => import('./features/chapters/ForwardChapter')),
   '/chapters/32': lazy(() => import('./features/chapters/PostTransformerChapter')),
+  '/linear-transform': lazy(() => import('./features/linear/LinearLab')),
   '/attention': AttentionLab,
   '/position': lazy(() => import('./features/position/PositionLab')),
   '/inference-cache': lazy(() => import('./features/inference/InferenceLab')),

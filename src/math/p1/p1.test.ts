@@ -3,7 +3,7 @@ import { matmul, softmax } from '../attention';
 import { normalize, normalization } from './normalization';
 import { ffn, FFN_W1, FFN_W2 } from './ffn';
 import { lora, BASE_WEIGHT } from './lora';
-import { quantize } from './quantization';
+import { quantize, quantizeAWQ, quantizeGPTQ, QUANT_ACTIVATION } from './quantization';
 import { filterTokens, sampleToken, searchTree } from './sampling';
 import { groupAdvantages, ppoTerm, preference } from './preference';
 import { memory, linearScan, linearReference, infiniSegments, phi } from './memory';
@@ -144,6 +144,33 @@ describe('LoRA 与分组量化', () => {
     expect(Math.abs(grouped.difference[0])).toBeLessThan(
       Math.abs(quantize([0.2, 0.4, 0.6, 8], 4, 4, 8).difference[0]),
     );
+  });
+  it('非对称量化精确保留 0，偏态正值格点比对称更密且计入零点字节', () => {
+    const pos = [0.2, 0.5, 0.8, 1.2, 1.8, 2.5, 3.2, 4.0];
+    const sym = quantize(pos, 4, 8, 8, false);
+    const asym = quantize(pos, 4, 8, 8, true);
+    expect(asym.scales[0]).toBeLessThan(sym.scales[0] * 0.55);
+    expect(asym.mse).toBeLessThan(sym.mse);
+    expect(asym.zeroPointBytes).toBe(1);
+    expect(asym.bytes).toBe(sym.bytes + 1);
+    const withZero = quantize([-1, 0, 1.5, 3], 4, 4, 8, true);
+    expect(withZero.restored[1]).toBe(0);
+  });
+  it('AWQ 等价缩放保持点积恒等并降低高激活输出误差；GPTQ 逆 Hessian 精确且降低二次损失', () => {
+    const w = [-0.9, -0.4, 0.2, 0.8, -1, 0.1, 0.5, 6];
+    const rtn = quantize(w, 4, 8, 8, false);
+    const awq = quantizeAWQ(w, QUANT_ACTIVATION, 4, 8, 8, false);
+    expect(awq.scaledOutput).toBeCloseTo(awq.directOutput, 12);
+    const full = w.reduce((s, v, i) => s + v * QUANT_ACTIVATION[i], 0);
+    const rtnOutErr = Math.abs(rtn.restored.reduce((s, v, i) => s + v * QUANT_ACTIVATION[i], 0) - full);
+    const awqOutErr = Math.abs(awq.directOutput - full);
+    expect(awqOutErr).toBeLessThan(rtnOutErr);
+
+    const gptqGrouped = quantizeGPTQ(w, 4, 4, 8, false);
+    expect(gptqGrouped.identityError).toBeLessThan(1e-10);
+    expect(gptqGrouped.hessianLoss).toBeLessThan(gptqGrouped.rtnHessianLoss);
+    const gptqBalanced = quantizeGPTQ([-0.9, -0.4, 0.2, 0.8, -1, 0.1, 0.5, 1.2], 4, 8, 8, false);
+    expect(gptqBalanced.hessianLoss).toBeLessThan(gptqBalanced.rtnHessianLoss);
   });
 });
 describe('解码集合与短序列搜索', () => {

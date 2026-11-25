@@ -2,6 +2,7 @@ import { localePath, T } from '../i18n';
 
 export type TopicId =
   | 'attention'
+  | 'linear'
   | 'position'
   | 'inference'
   | 'kv'
@@ -50,6 +51,13 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     href: '/attention',
     title: T('跟图理解 Attention'),
     subtitle: T('单头、多头，逐步核对'),
+  },
+  {
+    id: 'linear',
+    group: 'foundation',
+    href: '/linear-transform',
+    title: T('线性变换与几何'),
+    subtitle: T('网格变形、行列式、点积与复合'),
   },
   { id:'bpe', group:'foundation', href:'/tokenization', title:T('分词与 BPE'), subtitle:T('合并相邻对、切分新词与查表') },
   {

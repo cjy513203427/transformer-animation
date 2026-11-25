@@ -68,15 +68,33 @@ function Tensor({
 export function MoEInputs({ state, result, onChange }: Props) {
   const setInput = (patch: Partial<MoEState['input']>) =>
     onChange({ ...state, input: { ...state.input, ...patch } });
+  const setConfig = (patch: Partial<MoEState['config']>) =>
+    onChange({ ...state, config: { ...state.config, ...patch } });
   return (
     <div className="moe-inputs">
-      <Segment
-        label={T('输入预设')}
-        options={['balanced', 'concentrated'] as const}
-        value={state.input.preset}
-        onSelect={(preset) => setInput({ preset, delta: 0, expertScale: 1 })}
-        render={(value) => (value === 'balanced' ? T('分散输入') : T('集中输入'))}
-      />
+      <div className="moe-input-row">
+        <Segment
+          label={T('输入预设')}
+          options={['balanced', 'concentrated'] as const}
+          value={state.input.preset}
+          onSelect={(preset) => setInput({ preset, delta: 0, expertScale: 1 })}
+          render={(value) => (value === 'balanced' ? T('分散输入') : T('集中输入'))}
+        />
+        <Segment
+          label={T('共享专家')}
+          options={[0, 1] as const}
+          value={state.config.sharedExpert ? 1 : 0}
+          onSelect={(on) => setConfig({ sharedExpert: on === 1 })}
+          render={(on) => (on === 1 ? T('开启（+1 共享）') : T('关闭'))}
+        />
+        <Segment
+          label={T('单专家容量上限')}
+          options={[0, 1, 2, 3] as const}
+          value={state.config.capacity}
+          onSelect={(capacity) => setConfig({ capacity })}
+          render={(cap) => (cap === 0 ? T('无限制') : String(cap))}
+        />
+      </div>
       <div className="moe-input-row">
         <Segment
           label={T('观察 token')}
@@ -239,7 +257,9 @@ const options: { value: Guess; label: string }[] = [
 function ExpertWidget({ state, result, onChange }: Props) {
   const t = state.input.token;
   const [expert, setExpert] = useState(result.selected[t][0]);
-  const packet = result.packets.find((p) => p.token === t && p.expert === expert)!;
+  const activeExpert = result.selected[t].includes(expert) ? expert : result.selected[t][0];
+  const packet = result.packets.find((p) => p.token === t && p.expert === activeExpert);
+  const dropped = result.droppedMatrix[t][activeExpert];
   const [pending, setPending] = useState(state.input.expertScale === 1 ? 2 : 1);
   const [choice, setChoice] = useState<Guess | null>(null);
   const [verdict, setVerdict] = useState<{
@@ -252,24 +272,40 @@ function ExpertWidget({ state, result, onChange }: Props) {
       <Segment
         label={T('查看选中专家')}
         options={result.selected[t]}
-        value={expert}
+        value={activeExpert}
         onSelect={(next) => {
           onChange(state, true);
           setExpert(next);
         }}
         render={(e) => 'E' + e}
       />
-      <p className="moe-equation">
-        {Tx(
-          't{#0} → E{#1}：{#2} → {#3} → ReLU → {#4} → {#5}',
-          t,
-          expert,
-          vec(packet.input),
-          vec(packet.preactivation),
-          vec(packet.hidden),
-          vec(packet.output),
-        )}
-      </p>
+      {packet ? (
+        <p className="moe-equation">
+          {Tx(
+            't{#0} → E{#1}：{#2} → {#3} → ReLU → {#4} → {#5}',
+            t,
+            activeExpert,
+            vec(packet.input),
+            vec(packet.preactivation),
+            vec(packet.hidden),
+            vec(packet.output),
+          )}
+        </p>
+      ) : (
+        <p className="exp-verdict">
+          {Tx(
+            't{#0} → E{#1} 因超过单专家容量上限 {#2} 被丢弃（未执行 FFN，该分支输出为 [0, 0]）。',
+            t,
+            activeExpert,
+            state.config.capacity,
+          )}
+        </p>
+      )}
+      {dropped && state.config.sharedExpert && result.sharedOutputs && (
+        <p className="exp-caption">
+          {Tx('共享专家不受容量上限影响：S(x_{#0}) = {#1}。', t, vec(result.sharedOutputs[t]))}
+        </p>
+      )}
       <p className="exp-caption">
         {Tx(
           '形状 [1, 2] × [2, 3] → [1, 3]，ReLU 把负数截为 0；再乘 [3, 2] 得到 [1, 2]。 当前 E0 输出倍率为 {#0}，作用在第二层 FFN 之后。',
@@ -277,16 +313,16 @@ function ExpertWidget({ state, result, onChange }: Props) {
         )}
       </p>
       <details className="lesson-formula">
-        <summary>{Tx('展开专家 E{#0} 的两份权重', expert)}</summary>
+        <summary>{Tx('展开专家 E{#0} 的两份权重', activeExpert)}</summary>
         <Tensor
-          name={'E' + expert + ' W1'}
-          data={result.weights.w1[expert]}
+          name={'E' + activeExpert + ' W1'}
+          data={result.weights.w1[activeExpert]}
           rowPrefix="d"
           colPrefix="f"
         />
         <Tensor
-          name={'E' + expert + ' W2'}
-          data={result.weights.w2[expert]}
+          name={'E' + activeExpert + ' W2'}
+          data={result.weights.w2[activeExpert]}
           rowPrefix="f"
           colPrefix="d"
         />
@@ -375,14 +411,25 @@ function CombineWidget({ state, result }: Props) {
             </tr>
           </thead>
           <tbody>
-            {result.selected[t].map((e) => (
-              <tr key={e}>
-                <th scope="row">E{e}</th>
-                <td>{vec(result.expertOutputs[t][e]!)}</td>
-                <td>{fmt(result.gates[t][e])}</td>
-                <td>{vec(result.contributions[t][e]!)}</td>
+            {result.selected[t].map((e) => {
+              const dropped = result.droppedMatrix[t][e];
+              return (
+                <tr key={e}>
+                  <th scope="row">E{e}</th>
+                  <td>{dropped ? T('容量溢出（已丢弃）') : vec(result.expertOutputs[t][e]!)}</td>
+                  <td>{fmt(result.gates[t][e])}</td>
+                  <td>{dropped ? '[0, 0]' : vec(result.contributions[t][e]!)}</td>
+                </tr>
+              );
+            })}
+            {state.config.sharedExpert && result.sharedOutputs && (
+              <tr className="exp-changed">
+                <th scope="row">{T('共享专家 S')}</th>
+                <td>{vec(result.sharedOutputs[t])}</td>
+                <td>1</td>
+                <td>{vec(result.sharedOutputs[t])}</td>
               </tr>
-            ))}
+            )}
             <tr className="exp-total">
               <th scope="row">{Tx('合并 y_{#0}', t)}</th>
               <td colSpan={3}>{vec(result.output[t])}</td>
@@ -461,13 +508,50 @@ function LoadWidget({ state, result, onChange }: Props) {
           <strong>{c.totalExpertMACs} MAC</strong>
         </div>
         <div>
-          <span>{T('本批 Router 计算')}</span>
-          <strong>{c.totalRouterMACs} MAC</strong>
+          <span>{T('负载均衡因子 E·Σf·P（均匀=1）')}</span>
+          <strong>{fmt(result.balance.balanceFactor, 4)}</strong>
         </div>
+        <div>
+          <span>{T('辅助损失 L_aux（α=0.01）')}</span>
+          <strong>{fmt(result.balance.auxLoss, 5)}</strong>
+        </div>
+        <div>
+          <span>{T('容量溢出丢弃数')}</span>
+          <strong>{Tx('{#0} 份', c.droppedCount)}</strong>
+        </div>
+        <div>
+          <span>{T('共享专家参数')}</span>
+          <strong>{c.sharedParams}</strong>
+        </div>
+      </div>
+      <div className="exp-table-wrap">
+        <table className="exp-table" aria-label={T('各专家负载与辅助损失拆解')}>
+          <caption>{T('Switch 式负载均衡损失：f_e 为路由占比，P_e 为平均路由概率')}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{T('专家')}</th>
+              <th scope="col">{T('请求 / 接纳')}</th>
+              <th scope="col">f_e</th>
+              <th scope="col">P_e</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tokens.map((e) => (
+              <tr key={e}>
+                <th scope="row">E{e}</th>
+                <td>
+                  {result.requestedLoad[e]} / {result.load[e]}
+                </td>
+                <td>{fmt(result.balance.fFraction[e], 3)}</td>
+                <td>{fmt(result.balance.pMean[e], 3)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       <p className="exp-caption">
         {Tx(
-          '每专家 {#0}×{#1} + {#2}×{#3} = {#4} 个参数； Router {#5}×{#6} = {#7} 个参数。激活参数统计每个 token 使用的权重个数，不是激活张量的大小。 MAC 为所选路径的理论矩阵乘加，忽略 ReLU、Softmax、Top-K 和门控合并。',
+          '每专家 {#0}×{#1} + {#2}×{#3} = {#4} 个参数； Router {#5}×{#6} = {#7} 个参数。开启共享专家会为总参数与每 token 激活参数各加 {#4}。设置容量上限后，超出容量的分支被丢弃而不执行 FFN。',
           D_MODEL,
           D_FF,
           D_FF,
@@ -480,7 +564,7 @@ function LoadWidget({ state, result, onChange }: Props) {
       </p>
       <p className="exp-verdict">
         {T(
-          '切换上方「集中输入」：总分配数仍为 4×K，但可能集中到少数专家。 未激活的专家权重仍需存储；这张账本没有卸载机制，也没有用负载均衡损失调整路由。',
+          '切换「集中输入」观察：均衡因子 E·Σf·P 从约 1 明显升高，代表路由坍缩惩罚变大；再把单专家容量设为 2，即可看到热门专家溢出并丢弃靠后的 token 分支。',
         )}
       </p>
     </div>
