@@ -57,15 +57,13 @@ export function AppShell({
   crumb,
   indicator,
   title,
-  chapter,
   children,
 }: {
   /** The current experiment, or the introduction that precedes them. */
-  active: TopicId | 'intro' | 'chapters';
+  active: TopicId | 'intro';
   crumb: string;
   indicator: string;
   title: string;
-  chapter?: { id: string; title: string };
   children: ReactNode;
 }) {
   const { width, zoom, desktop, directoryOpen, setDirectoryOpen, setWidth, setZoom } =
@@ -76,19 +74,13 @@ export function AppShell({
   const mainShell = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pointerId: number; startX: number; width: number } | null>(null);
   const intro = active === 'intro';
-  const bookMode = active === 'chapters';
   const activeIndex = TOPICS.findIndex((topic) => topic.id === active);
-  const current = bookMode
-      ? { number: chapter?.id ?? '32 + 3', title: chapter?.title ?? T('原书章节与覆盖情况') }
-      : intro
-        ? INTRO
-        : TOPICS[activeIndex];
+  const current = intro ? INTRO : TOPICS[activeIndex];
   // The first experiment leads back to the introduction; the introduction leads into it.
-  const previous =
-      intro || bookMode ? undefined : activeIndex === 0 ? INTRO : TOPICS[activeIndex - 1],
-    next = bookMode ? undefined : TOPICS[activeIndex + 1];
+  const previous = intro ? undefined : activeIndex === 0 ? INTRO : TOPICS[activeIndex - 1],
+    next = TOPICS[activeIndex + 1];
   const previousIsIntro = previous === INTRO;
-  const group = intro || bookMode ? undefined : TOPICS[activeIndex].group;
+  const group = intro ? undefined : TOPICS[activeIndex].group;
   const groupIndex = TOPIC_GROUPS.findIndex((g) => g.id === group);
   const closeDirectory = () => {
     setDirectoryOpen(false);
@@ -333,13 +325,7 @@ export function AppShell({
               <span>{T('学习目录')}</span>
             </button>
             <div className="course-location">
-              <span>
-                {bookMode
-                  ? T('学习目录')
-                  : intro
-                    ? T('学习顺序 · 开始之前')
-                    : TOPIC_GROUPS[groupIndex].title}
-              </span>
+              <span>{intro ? T('学习顺序 · 开始之前') : TOPIC_GROUPS[groupIndex].title}</span>
               <span className="course-location-divider" aria-hidden="true">
                 /
               </span>
@@ -376,49 +362,45 @@ export function AppShell({
               </button>
             </div>
             <nav className="course-arrows" aria-label={T('相邻实验')}>
-              {!bookMode && (
-                <>
-                  {previous ? (
-                    <a
-                      href={previous.href}
-                      aria-label={
-                        previousIsIntro
-                          ? T('回到导读：{#0}', previous.subtitle)
-                          : T('上一实验：{#0}', previous.title)
-                      }
-                      title={previous.title}
-                    >
-                      ←
-                    </a>
-                  ) : (
-                    <span
-                      className="course-arrow-disabled"
-                      role="link"
-                      aria-disabled="true"
-                      aria-label={T('上一实验')}
-                    >
-                      <span aria-hidden="true">←</span>
-                    </span>
-                  )}
-                  {next ? (
-                    <a
-                      href={next.href}
-                      aria-label={T('下一实验：{#0}', next.title)}
-                      title={next.title}
-                    >
-                      →
-                    </a>
-                  ) : (
-                    <span
-                      className="course-arrow-disabled"
-                      role="link"
-                      aria-disabled="true"
-                      aria-label={T('下一实验')}
-                    >
-                      <span aria-hidden="true">→</span>
-                    </span>
-                  )}
-                </>
+              {previous ? (
+                <a
+                  href={previous.href}
+                  aria-label={
+                    previousIsIntro
+                      ? T('回到导读：{#0}', previous.subtitle)
+                      : T('上一实验：{#0}', previous.title)
+                  }
+                  title={previous.title}
+                >
+                  ←
+                </a>
+              ) : (
+                <span
+                  className="course-arrow-disabled"
+                  role="link"
+                  aria-disabled="true"
+                  aria-label={T('上一实验')}
+                >
+                  <span aria-hidden="true">←</span>
+                </span>
+              )}
+              {next ? (
+                <a
+                  href={next.href}
+                  aria-label={T('下一实验：{#0}', next.title)}
+                  title={next.title}
+                >
+                  →
+                </a>
+              ) : (
+                <span
+                  className="course-arrow-disabled"
+                  role="link"
+                  aria-disabled="true"
+                  aria-label={T('下一实验')}
+                >
+                  <span aria-hidden="true">→</span>
+                </span>
               )}
             </nav>
           </div>
@@ -431,58 +413,49 @@ export function AppShell({
           style={{ zoom: zoom / 100 }}
         >
           {children}
-          {bookMode ? (
-            <nav className="course-pagination" aria-label={T('章节学习导航')}>
-              <a href={localePath('/attention')}>
-                <span>{T('按机制实验')}</span>
-                <strong>{T('进入可计算的机制实验')}</strong>
+          <nav className="course-pagination" aria-label={T('按顺序继续学习')}>
+            {previous ? (
+              <a
+                href={previous.href}
+                aria-label={
+                  previousIsIntro
+                    ? T('回到导读：{#0}', previous.subtitle)
+                    : T('上一实验：{#0}', previous.title)
+                }
+              >
+                <span>{previousIsIntro ? T('← 开始之前') : T('← 上一实验')}</span>
+                <strong>
+                  {previous.number} · {previous.title}
+                </strong>
+                <small>{previous.subtitle}</small>
               </a>
-            </nav>
-          ) : (
-            <nav className="course-pagination" aria-label={T('按顺序继续学习')}>
-              {previous ? (
-                <a
-                  href={previous.href}
-                  aria-label={
-                    previousIsIntro
-                      ? T('回到导读：{#0}', previous.subtitle)
-                      : T('上一实验：{#0}', previous.title)
-                  }
-                >
-                  <span>{previousIsIntro ? T('← 开始之前') : T('← 上一实验')}</span>
-                  <strong>
-                    {previous.number} · {previous.title}
-                  </strong>
-                  <small>{previous.subtitle}</small>
-                </a>
-              ) : (
-                <div className="course-boundary">
-                  <span>{T('学习起点')}</span>
-                  <strong>{T('从这里拆开计算过程')}</strong>
-                  <small>{T('可用左侧学习目录跳到其他实验')}</small>
-                </div>
-              )}
-              {next ? (
-                <a
-                  href={next.href}
-                  className="course-next"
-                  aria-label={T('下一实验：{#0}', next.title)}
-                >
-                  <span>{T('下一实验 →')}</span>
-                  <strong>
-                    {next.number} · {next.title}
-                  </strong>
-                  <small>{next.subtitle}</small>
-                </a>
-              ) : (
-                <div className="course-boundary">
-                  <span>{T('学习路径末尾')}</span>
-                  <strong>{T('回到目录选择需要复习的机制')}</strong>
-                  <small>{T('编号表示位置，不记录完成状态')}</small>
-                </div>
-              )}
-            </nav>
-          )}
+            ) : (
+              <div className="course-boundary">
+                <span>{T('学习起点')}</span>
+                <strong>{T('从这里拆开计算过程')}</strong>
+                <small>{T('可用左侧学习目录跳到其他实验')}</small>
+              </div>
+            )}
+            {next ? (
+              <a
+                href={next.href}
+                className="course-next"
+                aria-label={T('下一实验：{#0}', next.title)}
+              >
+                <span>{T('下一实验 →')}</span>
+                <strong>
+                  {next.number} · {next.title}
+                </strong>
+                <small>{next.subtitle}</small>
+              </a>
+            ) : (
+              <div className="course-boundary">
+                <span>{T('学习路径末尾')}</span>
+                <strong>{T('回到目录选择需要复习的机制')}</strong>
+                <small>{T('编号表示位置，不记录完成状态')}</small>
+              </div>
+            )}
+          </nav>
           <footer className="site-footer">
             <div className="site-footer-primary">
               <span>{T('LLM 原理实验室')}</span>

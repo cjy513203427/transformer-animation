@@ -10,12 +10,14 @@ export type TopicId =
   | 'flash'
   | 'normalization'
   | 'ffn'
+  | 'forward'
   | 'lora'
   | 'quantization'
   | 'decoding'
   | 'preference'
   | 'memory'
   | 'ssm'
+  | 'hybrid'
   | 'training'
   | 'policy'
   | 'prompt-chain'
@@ -82,6 +84,13 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     subtitle: T('非线性、梯度路径与 Dropout'),
   },
   {
+    id: 'forward',
+    group: 'foundation',
+    href: '/forward-pass',
+    title: T('完整前向传播'),
+    subtitle: T('查表、Block、词表映射与 model.py'),
+  },
+  {
     id: 'inference',
     group: 'generation',
     href: '/inference-cache',
@@ -127,6 +136,13 @@ const TOPIC_DEFINITIONS: Omit<Topic, 'number'>[] = [
     href: '/ssm-mamba',
     title: 'SSM / Mamba',
     subtitle: T('状态递推与选择性参数'),
+  },
+  {
+    id: 'hybrid',
+    group: 'architecture',
+    href: '/post-transformer',
+    title: T('后 Transformer 架构'),
+    subtitle: T('Mamba Block、SSD 递推与混合层账本'),
   },
   { id:'training', group:'adaptation', href:'/training-step', title:T('前向、损失与参数更新'), subtitle:T('用同一例子算完一次训练') },
   { id:'optimizer', group:'adaptation', href:'/optimizer', title:T('优化器：SGD、Adam 与 AdamW'), subtitle:T('动量、按坐标归一化与权重衰减') },

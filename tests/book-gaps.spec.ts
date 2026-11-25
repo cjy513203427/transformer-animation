@@ -40,7 +40,7 @@ test('第 18–20 章联动 PyTorch 代码随步骤高亮更新', async ({ page 
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
 
-  await page.goto('/chapters/15');
+  await page.goto('/forward-pass');
   const modelCode = page.getByTestId('linked-code-model.py');
   await modelCode.locator('summary').click();
   await expect(modelCode.locator('.code-line-active')).toHaveCount(1);

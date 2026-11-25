@@ -9,6 +9,7 @@ const orderedTitles = [
   '位置编码',
   '归一化',
   'FFN 与残差',
+  '完整前向传播',
   '训练、生成与缓存',
   '解码策略',
   'KV 架构对照',
@@ -20,6 +21,7 @@ const orderedTitles = [
   '稀疏与压缩记忆',
   'MoE 与专家并行',
   'SSM / Mamba',
+  '后 Transformer 架构',
   '前向、损失与参数更新',
   '优化器：SGD、Adam 与 AdamW',
   '参数量与计算量',
@@ -29,7 +31,7 @@ const orderedTitles = [
   'RLHF / 偏好学习 / GRPO',
 ];
 
-test('学习目录分四阶段，24个实验顺序明确，当前项与键盘关闭可用', async ({ page }, info) => {
+test('学习目录分四阶段，26个实验顺序明确，当前项与键盘关闭可用', async ({ page }, info) => {
   await page.goto('/moe');
   const toggle = page.getByRole('button', { name: '学习目录', exact: true });
   await expect(toggle).toHaveAttribute(
@@ -48,8 +50,8 @@ test('学习目录分四阶段，24个实验顺序明确，当前项与键盘关
     await expect(directory.getByRole('heading', { name: new RegExp(group) })).toBeVisible();
   }
   const links = directory.locator('ol a');
-  await expect(links).toHaveCount(24);
-  await expect(directory.getByRole('link')).toHaveCount(25);
+  await expect(links).toHaveCount(26);
+  await expect(directory.getByRole('link')).toHaveCount(27);
   await expect(directory.locator('.course-note-guide,.course-architecture-guide')).toHaveCount(0);
   await expect(directory.getByRole('link', { name: '00 导读', exact: true })).toHaveAttribute(
     'href',
@@ -75,18 +77,18 @@ test('学习目录分四阶段，24个实验顺序明确，当前项与键盘关
 test('上一与下一实验跨阶段衔接，首尾边界明确，目录可直接跳转', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/ffn-residual');
+  await page.goto('/forward-pass');
   const header = page.locator('.site-header');
   const continued = page.getByRole('navigation', { name: '按顺序继续学习', exact: true });
-  await expect(header.getByRole('link', { name: '上一实验：归一化', exact: true })).toBeVisible();
+  await expect(header.getByRole('link', { name: '上一实验：FFN 与残差', exact: true })).toBeVisible();
   await expect(
     continued.getByRole('link', { name: '下一实验：训练、生成与缓存', exact: true }),
   ).toBeVisible();
   await header.getByRole('link', { name: '下一实验：训练、生成与缓存', exact: true }).click();
   await expect(page).toHaveURL(/\/inference-cache$/);
   await expect(page.locator('.course-location')).toContainText('生成与效率');
-  await header.getByRole('link', { name: '上一实验：FFN 与残差', exact: true }).click();
-  await expect(page).toHaveURL(/\/ffn-residual$/);
+  await header.getByRole('link', { name: '上一实验：完整前向传播', exact: true }).click();
+  await expect(page).toHaveURL(/\/forward-pass$/);
 
   const directory = await openDirectory(page);
   await directory.getByRole('link', { name: '跟图理解 Attention', exact: true }).click();
@@ -216,12 +218,12 @@ test('失效的阅读偏好回退到安全范围，各页面共用机制实验�
   await page.addInitScript(() => {
     localStorage.setItem('llm-reading-layout-v1', JSON.stringify({ width: -500, zoom: 'broken' }));
   });
-  await page.goto('/chapters');
+  await page.goto('/forward-pass');
   await expect(page.locator('.reading-zoom-reset')).toHaveText('100%');
   const toggle = page.getByRole('button', { name: '学习目录', exact: true });
   if (info.project.name === 'mobile') await toggle.tap();
   const directory = page.getByRole('navigation', { name: '实验目录', exact: true });
-  await expect(directory.locator('ol a')).toHaveCount(24);
+  await expect(directory.locator('ol a')).toHaveCount(26);
   if (info.project.name === 'desktop')
     await expect(page.getByRole('separator', { name: '调整目录宽度' })).toHaveAttribute(
       'aria-valuenow',
@@ -261,7 +263,7 @@ test('根路径是导读：接词演示用 Softmax 实际计算，学习路径�
   await demo.getByRole('button', { name: '重新开始', exact: true }).click();
   await expect(demo.locator('.intro-candidates button')).toHaveCount(4);
 
-  await expect(page.locator('.intro-path a')).toHaveCount(24);
+  await expect(page.locator('.intro-path a')).toHaveCount(26);
   await expect(page.getByRole('link', { name: /^从 跟图理解 Attention 开始/ })).toHaveAttribute(
     'href',
     '/attention',

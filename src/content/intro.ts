@@ -82,7 +82,7 @@ export const STATIONS: Station[] = [
     text: T(
       '上面两站合起来叫一个 Block。大模型会把几十个 Block 叠起来，每一层都在上一层的结果上继续加工。',
     ),
-    topics: [],
+    topics: ['forward'],
   },
   {
     title: T('打分、挑一个词'),

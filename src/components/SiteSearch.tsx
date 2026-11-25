@@ -12,7 +12,6 @@ type FilterKind = SearchKind | 'all';
 
 const KIND_LABELS: Record<SearchKind, string> = {
   experiment: T('实验'),
-  chapter: T('章节'),
   note: T('笔记'),
 };
 
@@ -145,8 +144,8 @@ export function SiteSearch() {
                 ref={inputRef}
                 type="search"
                 value={query}
-                aria-label={T('搜索实验、章节或概念')}
-                placeholder={T('支持模糊搜索：实验、章节、缩写（如 RoPE、GQA、AWQ）…')}
+                aria-label={T('搜索实验或概念')}
+                placeholder={T('支持模糊搜索：实验、笔记、缩写（如 RoPE、GQA、AWQ）…')}
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setActiveIndex(0);
@@ -182,7 +181,6 @@ export function SiteSearch() {
                 [
                   ['all', T('全部')],
                   ['experiment', T('实验')],
-                  ['chapter', T('原书章节')],
                   ['note', T('知识笔记')],
                 ] as const
               ).map(([value, label]) => (
@@ -262,7 +260,7 @@ export function SiteSearch() {
               })}
               {hits.length === 0 && (
                 <li className="site-search-empty">
-                  {T('没有找到匹配项，试试更短的关键词、英文缩写（如 RoPE、GQA、AWQ）或章节号。')}
+                  {T('没有找到匹配项，试试更短的关键词或英文缩写（如 RoPE、GQA、AWQ）。')}
                 </li>
               )}
             </ul>

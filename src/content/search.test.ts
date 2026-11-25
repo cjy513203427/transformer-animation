@@ -35,9 +35,9 @@ describe('全站模糊搜索引擎', () => {
     expect(multi.length).toBeGreaterThan(0);
     expect(multi[0].item.href).toContain('/quantization');
 
-    // Chapter lookup by number / file name: "model.py" -> Ch 18
-    const ch18 = searchSite('model.py', 'chapter');
-    expect(ch18.some((h) => h.item.id === 'chapter-18')).toBe(true);
+    // File name / alias lookup: "model.py" -> forward-pass lab
+    const modelPy = searchSite('model.py', 'experiment');
+    expect(modelPy.some((h) => h.item.href.includes('/forward-pass'))).toBe(true);
 
     // Typo in English acronym/word: "quantizatoin" -> quantization
     const typoQuant = searchSite('quantizatoin', 'experiment');
@@ -48,9 +48,10 @@ describe('全站模糊搜索引擎', () => {
     const notesOnly = searchSite('dpo', 'note');
     expect(notesOnly.length).toBeGreaterThan(0);
     expect(notesOnly.every((h) => h.item.kind === 'note')).toBe(true);
+    expect(notesOnly[0].item.href).toContain('?note=');
 
-    const chaptersOnly = searchSite('15', 'chapter');
-    expect(chaptersOnly.some((h) => h.item.id === 'chapter-15')).toBe(true);
+    const hybrid = searchSite('jamba', 'experiment');
+    expect(hybrid.some((h) => h.item.href.includes('/post-transformer'))).toBe(true);
 
     expect(fuzzyMatchesText('flsh', 'FlashAttention')).toBe(true);
     expect(fuzzyMatchesText('attnetion', 'Multi-Head Attention')).toBe(true);

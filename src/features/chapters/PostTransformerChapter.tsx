@@ -28,7 +28,6 @@ import {
 } from '../../state/architecture';
 import { localePath, T } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
-import { ChapterTrail } from './ChapterIndex';
 import '../../styles/editorial.css';
 import '../../styles/chapters.css';
 import '../../styles/experiment.css';
@@ -97,16 +96,15 @@ export default function PostTransformerChapter() {
   ];
   return (
     <AppShell
-      active="chapters"
-      chapter={{ id: '32', title: T('后 Transformer 架构') }}
+      active="hybrid"
       title={T('后 Transformer 架构')}
-      crumb={T('第 32 章导读与实验')}
+      crumb={T('后 Transformer 架构')}
       indicator={T('浏览器内计算')}
     >
       <article className={`chapter-page ${state.view.explanations ? '' : 'chapter-recall-mode'}`}>
         <header className="page-heading">
           <div>
-            <div className="eyebrow">{T('第 32 章 · 从单一机制走向架构全貌')}</div>
+            <div className="eyebrow">{T('架构全景 · 从单一机制走向混合模型')}</div>
             <h1>{T('历史怎样被读取、压缩和组合？')}</h1>
             <p>
               {T(
@@ -121,7 +119,7 @@ export default function PostTransformerChapter() {
             {notice}
           </p>
         )}
-        <nav className="chapter-section-nav" aria-label={T('本章小节')}>
+        <nav className="chapter-section-nav" aria-label={T('本页小节')}>
           {anchors.map((id, i) => (
             <a key={id} href={`#${id}`}>
               {sectionLabels[i]}
@@ -129,7 +127,7 @@ export default function PostTransformerChapter() {
           ))}
         </nav>
         <section id="overview" className="chapter-section">
-          <div className="eyebrow">32.1</div>
+          <div className="eyebrow">01</div>
           <h2>{T('先区分两个设计问题')}</h2>
           <p>
             {T(
@@ -172,7 +170,7 @@ export default function PostTransformerChapter() {
           </p>
         </section>
         <section id="mamba" className="chapter-section">
-          <div className="eyebrow">32.2–32.3</div>
+          <div className="eyebrow">02</div>
           <h2>{T('SSM 只是 Mamba Block 中的一段')}</h2>
           <p>
             {T(
@@ -242,7 +240,7 @@ export default function PostTransformerChapter() {
           </a>
         </section>
         <section id="ssd" className="chapter-section">
-          <div className="eyebrow">32.4</div>
+          <div className="eyebrow">03</div>
           <h2>{T('同一段历史，可以递推，也可以写成结构化矩阵')}</h2>
           <p>
             {T(
@@ -346,7 +344,7 @@ export default function PostTransformerChapter() {
           </a>
         </section>
         <section id="hybrid" className="chapter-section">
-          <div className="eyebrow">32.5</div>
+          <div className="eyebrow">04</div>
           <h2>{T('混合架构：每层留什么，实际算一遍')}</h2>
           <p>
             {T(
@@ -578,7 +576,7 @@ export default function PostTransformerChapter() {
           </a>
         </section>
         <section id="alternatives" className="chapter-section">
-          <div className="eyebrow">32.6</div>
+          <div className="eyebrow">05</div>
           <h2>{T('其他路线：保留机制定位，也保留差异')}</h2>
           <p>
             {T(
@@ -635,7 +633,7 @@ export default function PostTransformerChapter() {
           <summary>{T('采用的设定、尚未实现的部分与来源')}</summary>
           <p>
             {T(
-              '本章新增的是架构导读、标量 SSD 等价核对和混合架构账本；完整 Mamba-1、Mamba-2、RWKV、RetNet、Hyena 的训练与模型级数值复现仍需到原论文和作者实现。本例不输出未经训练的模型成绩或 GPU 加速倍数。',
+              '本页包含架构导读、标量 SSD 等价核对和混合架构账本；完整 Mamba-1、Mamba-2、RWKV、RetNet、Hyena 的训练与模型级数值复现仍需到原论文和作者实现。本例不输出未经训练的模型成绩或 GPU 加速倍数。',
             )}
           </p>
           <p>
@@ -652,7 +650,6 @@ export default function PostTransformerChapter() {
             {T('阅读原书第 32 章 ↗')}
           </a>
         </details>
-        <ChapterTrail id="32" />
       </article>
     </AppShell>
   );

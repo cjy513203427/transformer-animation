@@ -473,7 +473,7 @@ export default function P1Lab({ topic }: { topic: TopicDefinition }) {
         )}
         {topic.id === 'ssm' && (
           <p>
-            <a href={localePath('/chapters/32#family-rwkv')}>{T('查看架构关系与混合层账本 →')}</a>
+            <a href={localePath('/post-transformer#family-rwkv')}>{T('查看架构关系与混合层账本 →')}</a>
           </p>
         )}
       </RelatedNotes>

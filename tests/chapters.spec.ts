@@ -35,37 +35,20 @@ async function layoutAndLanguage(page: Page, locale: 'en' | 'de') {
   expect(problems).toEqual([]);
 }
 
-test('旧章节索引链接仍可使用搜索、缺口筛选和锚点', async ({ page }) => {
+test('旧章节地址自动跳转到对应实验页，不留死链', async ({ page }) => {
   await page.goto('/chapters');
-  await expect(page).toHaveURL(/\/chapters$/);
-  await expect(page.locator('.chapter-entry')).toHaveCount(35);
-  const search = page.getByRole('searchbox', { name: '查找章节或概念' });
-  await search.fill('Mamba');
-  await expect(page.locator('.chapter-entry')).toHaveCount(1);
-  await expect(page.locator('#chapter-32')).toBeVisible();
-  await search.fill('');
-  await page.getByRole('button', { name: '仍有覆盖缺口', exact: true }).click();
-  await expect(page.locator('#chapter-17')).toBeVisible();
-  await expect(page.locator('#chapter-06')).toHaveCount(0);
-  await page.goto('/chapters#chapter-17');
-  const learningRate = page.locator('#chapter-17');
-  await expect(learningRate).toHaveAttribute('open', '');
-  await expect(learningRate.locator('.coverage-status')).toHaveText(['可操作实验', '可操作实验', '原书阅读']);
-  await expect(learningRate.getByRole('link', { name: '打开计算 →' })).toHaveAttribute(
-    'href',
-    '/training-step',
-  );
-  await page.goto('/chapters');
-  await page.locator('#chapter-32 > summary').focus();
-  await page.keyboard.press('Enter');
-  await page.locator('#chapter-32').getByRole('link', { name: '打开讲解 →' }).click();
-  await expect(page).toHaveURL(/\/chapters\/32$/);
-  await expect(page.locator('h1')).toContainText('历史怎样被读取');
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/chapters/04');
+  await expect(page).toHaveURL(/\/tokenization$/);
+  await page.goto('/chapters/15#scope');
+  await expect(page).toHaveURL(/\/forward-pass#scope$/);
+  await page.goto('/chapters/32#hybrid');
+  await expect(page).toHaveURL(/\/post-transformer#hybrid$/);
 });
 
 test('完整前向可跳步、播放暂停、回退、改参重建并分享恢复', async ({ page, context }, info) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await page.goto('/chapters/15');
+  await page.goto('/forward-pass');
   const progress = page.getByTestId('forward-progress');
   const step = page.getByRole('combobox', { name: '前向计算步骤', exact: true });
   await expect(progress).toHaveText('1 / 23');
@@ -105,13 +88,13 @@ test('完整前向可跳步、播放暂停、回退、改参重建并分享恢�
   await page
     .locator('.forward-current')
     .screenshot({ path: `test-results/${info.project.name}-chapter15.png`, scale: 'css' });
-  await page.goto('/chapters/15#forward=bad');
+  await page.goto('/forward-pass#forward=bad');
   await expect(page.getByText('分享状态无效，已恢复默认示例。', { exact: true })).toBeVisible();
   await expect(progress).toHaveText('1 / 23');
 });
 
 test('完整前向的因果对照通过所有Block，双向对照确实改变早期输出', async ({ page }) => {
-  await page.goto('/chapters/15');
+  await page.goto('/forward-pass');
   await page.getByRole('button', { name: '不变', exact: true }).click();
   await page.getByRole('button', { name: '替换 t2 并核对整条前向', exact: true }).click();
   expect(await page.getByTestId('forward-before').textContent()).toBe(
@@ -129,7 +112,7 @@ test('完整前向的因果对照通过所有Block，双向对照确实改变早
 
 test('Mamba模块、SSD输入、锚点和分享状态联动，复述模式可恢复', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await page.goto('/chapters/32');
+  await page.goto('/post-transformer');
   await expect(page.locator('.mamba-flow button')).toHaveCount(7);
   for (const button of await page.locator('.mamba-flow button').all()) {
     await button.click();
@@ -144,7 +127,7 @@ test('Mamba模块、SSD输入、锚点和分享状态联动，复述模式可恢
   expect((await table.locator('tbody tr').allTextContents()).slice(0, 3)).toEqual(before);
   await expect(page.getByTestId('ssd-error')).toContainText('0.0e+0');
   await page
-    .getByRole('navigation', { name: '本章小节' })
+    .getByRole('navigation', { name: '本页小节' })
     .getByRole('link', { name: '混合架构账本', exact: true })
     .click();
   await expect(slider).toHaveValue('1');
@@ -167,11 +150,11 @@ for (const locale of ['', 'en', 'de'] as const)
   test(`${locale || 'zh'} SSM进阶阅读可展开RWKV，章节锚点保留已编辑输入`, async ({ page }) => {
     const prefix = locale ? `/${locale}` : '';
     await page.goto(prefix + '/ssm-mamba');
-    const link = page.locator('a[href$="/chapters/32#family-rwkv"]');
+    const link = page.locator('a[href$="/post-transformer#family-rwkv"]');
     await page.locator('.details-panel').filter({has:link}).locator('summary').first().click();
-    await expect(link).toHaveAttribute('href', prefix + '/chapters/32#family-rwkv');
+    await expect(link).toHaveAttribute('href', prefix + '/post-transformer#family-rwkv');
     await link.click();
-    await expect(page).toHaveURL(/\/chapters\/32#family-rwkv$/);
+    await expect(page).toHaveURL(/\/post-transformer#family-rwkv$/);
     const rwkv = page.locator('#family-rwkv');
     await expect(rwkv).toHaveAttribute('open', '');
     await expect(rwkv.locator('summary')).toBeInViewport();
@@ -188,7 +171,7 @@ for (const locale of ['', 'en', 'de'] as const)
   });
 
 test('混合账本区分KV、状态与MoE，短序列可暴露总量反例', async ({ page }, info) => {
-  await page.goto('/chapters/32#hybrid');
+  await page.goto('/post-transformer#hybrid');
   const kv = page.getByTestId('hybrid-kv'),
     history = page.getByTestId('hybrid-history');
   await expect(kv).toHaveText('16,384 B');
@@ -216,7 +199,7 @@ test('混合账本区分KV、状态与MoE，短序列可暴露总量反例', asy
 });
 
 for (const locale of ['en', 'de'] as const)
-  for (const route of ['/chapters', '/chapters/15', '/chapters/32'])
+  for (const route of ['/forward-pass', '/post-transformer'])
     test(`${locale}${route}: 全部讲解与数值步骤翻译完整且无横向溢出`, async ({ page }, info) => {
       test.setTimeout(90000);
       const problems: string[] = [];
@@ -226,19 +209,7 @@ for (const locale of ['en', 'de'] as const)
       });
       await page.goto(`/${locale}${route}`);
       await expect(page.locator('h1')).toBeVisible();
-      if (route === '/chapters') {
-        await page
-          .locator('.chapter-entry')
-          .evaluateAll((elements) =>
-            elements.forEach((el) => ((el as HTMLDetailsElement).open = true)),
-          );
-        await expect(page.locator('.chapter-entry[open]')).toHaveCount(35);
-        await layoutAndLanguage(page, locale);
-        await page.screenshot({
-          path: `test-results/${info.project.name}-chapters-${locale}.png`,
-          scale: 'css',
-        });
-      } else if (route === '/chapters/15') {
+      if (route === '/forward-pass') {
         const step = page.locator('.forward-jump select');
         for (let i = 0; i < 23; i++) {
           await step.selectOption(String(i));
@@ -247,7 +218,7 @@ for (const locale of ['en', 'de'] as const)
         await page.locator('#scope').evaluate((el) => ((el as HTMLDetailsElement).open = true));
         await layoutAndLanguage(page, locale);
         await page.locator('.forward-current').screenshot({
-          path: `test-results/${info.project.name}-chapter15-${locale}.png`,
+          path: `test-results/${info.project.name}-forward-${locale}.png`,
           scale: 'css',
         });
       } else {

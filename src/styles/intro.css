@@ -6,18 +6,6 @@
   .intro-heading {
     margin-bottom: 18px;
   }
-  .intro-chapter-entry {
-    padding: 16px 20px;
-    border-left: 2px solid var(--accent-mid, #c77b68);
-    background: var(--surface-soft, #f4efe5);
-    margin: 12px 0 28px;
-  }
-  .intro-chapter-entry p,
-  .intro-chapter-entry a {
-    font-size: 13px;
-    line-height: 1.9;
-    margin: 6px 0;
-  }
   .intro-section {
     padding: 26px 0 8px;
     border-top: 1px solid var(--line);

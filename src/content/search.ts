@@ -1,10 +1,9 @@
-import { CHAPTERS, chapterHref, chapterLabel } from './chapters';
 import { NOTE_DESTINATIONS } from './experimentLinks';
 import { KNOWLEDGE_NOTES } from './notebook';
 import { INTRO, TOPICS, type TopicId } from './topics';
 import { localePath, T } from '../i18n';
 
-export type SearchKind = 'experiment' | 'chapter' | 'note';
+export type SearchKind = 'experiment' | 'note';
 
 export interface SearchItem {
   id: string;
@@ -215,6 +214,8 @@ const TOPIC_ALIASES: Record<TopicId, string> = {
   position: 'positional encoding sinusoidal rope alibi rotary relative 位置编码 正弦 旋转位置编码 相对位置',
   normalization: 'layernorm rmsnorm softmax variance affine temperature 归一化 均方根 概率',
   ffn: 'ffn feed forward mlp relu gelu swiglu residual dropout jacobian 前馈 非线性 残差 梯度',
+  forward:
+    'forward pass decoder block model.py pytorch embedding lm head logits pre-norm 完整前向 前向传播 架构地图 模型定义',
   inference: 'training inference prefill decode kv cache teacher forcing causal mask inference.py 训练 推理 缓存 生成',
   decoding: 'decoding sampling temperature top-k top-p nucleus greedy beam search 解码 采样 温度 束搜索 贪心',
   kv: 'kv cache mha mqa gqa mla deepseek-v2 latent absorb rope 缓存 共享头 压缩 矩阵吸收',
@@ -226,6 +227,8 @@ const TOPIC_ALIASES: Record<TopicId, string> = {
   memory: 'sparse attention linear attention infini-attention sliding window longformer 稀疏 滑动窗口 线性 压缩记忆',
   moe: 'moe mixture of experts router top-k shared expert capacity drop aux loss deepseek mixtral switch 混合专家 路由 共享专家 容量 丢弃 辅助损失 专家并行',
   ssm: 'ssm mamba s4 state space zoh selective scan rwkv retnet hyena 状态空间 选择性 递推 混合架构',
+  hybrid:
+    'post-transformer mamba block ssd hybrid jamba rwkv retnet hyena s4 后transformer 混合架构 状态空间 账本',
   training: 'training cross entropy loss backward sgd warmup train.py 交叉熵 反向传播 梯度 参数更新',
   optimizer: 'optimizer sgd adam adamw momentum weight decay l2 优化器 动量 权重衰减 学习率',
   budget: 'parameters flops 12ld2 6nd scaling law chinchilla gpt-2 llama 参数量 计算量 缩放定律',
@@ -238,13 +241,12 @@ const TOPIC_ALIASES: Record<TopicId, string> = {
 
 const KIND_BONUS: Record<SearchKind, number> = {
   experiment: 12,
-  chapter: 6,
   note: 0,
 };
 
 let cachedItems: SearchItem[] | null = null;
 
-/** Builds the complete localized index of experiments, chapters, and notes. */
+/** Builds the complete localized index of experiments and notes. */
 export function getSearchItems(): SearchItem[] {
   if (cachedItems) return cachedItems;
   const items: SearchItem[] = [
@@ -266,36 +268,14 @@ export function getSearchItems(): SearchItem[] {
       href: topic.href,
       keywords: `${topic.id} ${TOPIC_ALIASES[topic.id] ?? ''}`,
     })),
-    {
-      id: 'chapters-index',
-      kind: 'chapter',
-      title: T('原书章节与覆盖情况'),
-      subtitle: T('32 章 + 3 个附录的知识主线与检索'),
-      badge: '32+3',
-      href: localePath('/chapters'),
-      keywords: 'chapters toc book index outline 章节 目录 全书 附录',
-    },
-    ...CHAPTERS.map((chapter): SearchItem => {
-      const num = /^\d+$/.test(chapter.id) ? String(Number(chapter.id)) : chapter.id;
-      const unitNames = chapter.units.map((u) => u.name).join(' ');
-      return {
-        id: `chapter-${chapter.id}`,
-        kind: 'chapter',
-        title: `${chapterLabel(chapter.id)} · ${chapter.title}`,
-        subtitle: chapter.question,
-        badge: /^\d+$/.test(chapter.id) ? `Ch ${chapter.id}` : `App ${chapter.id}`,
-        href: chapterHref(chapter.id),
-        keywords: `${chapter.summary} ${unitNames} ch${chapter.id} ch${num} chapter ${num} 第${num}章 附录${chapter.id} ${chapter.id === '18' ? 'model.py pytorch' : chapter.id === '19' ? 'train.py pytorch' : chapter.id === '20' ? 'inference.py pytorch' : ''}`,
-      };
-    }),
     ...KNOWLEDGE_NOTES.map((note): SearchItem => ({
       id: `note-${note.id}`,
       kind: 'note',
       title: note.title,
       subtitle: note.question,
       badge: T('笔记'),
-      href: localePath(NOTE_DESTINATIONS[note.id]),
-      keywords: `${note.id} ${note.body.join(' ')} ${note.example} ${note.chapters.map((c) => `ch${c}`).join(' ')}`,
+      href: `${localePath(NOTE_DESTINATIONS[note.id])}?note=${note.id}`,
+      keywords: `${note.id} ${note.body.join(' ')} ${note.example}`,
     })),
   ];
   cachedItems = items;

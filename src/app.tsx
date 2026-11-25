@@ -1,18 +1,30 @@
-import React, { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
+import React, { lazy, Suspense, useEffect, type ComponentType, type LazyExoticComponent } from 'react';
 import ReactDOM from 'react-dom/client';
 import { TOPICS } from './content/topics';
-import { splitLocale, T } from './i18n';
+import { localePath, splitLocale, T } from './i18n';
 
 const AttentionLab = lazy(() => import('./features/attention/AttentionLab'));
 
+/** Redirects legacy /chapters/* bookmarks to the corresponding experiment page. */
+function redirectTo(path: string, keepHash = false): ComponentType {
+  return function LegacyRedirect() {
+    useEffect(() => {
+      window.location.replace(localePath(path) + (keepHash ? window.location.hash : ''));
+    }, []);
+    return <div className="loading">{T('正在准备实验…')}</div>;
+  };
+}
+
 /** Each experiment loads only when its path is opened. Paths exclude the /en or /de prefix. */
-const ROUTES: Record<string, LazyExoticComponent<ComponentType>> = {
+const ROUTES: Record<string, ComponentType | LazyExoticComponent<ComponentType>> = {
   '/': lazy(() => import('./features/intro/IntroPage')),
-  '/chapters': lazy(() => import('./features/chapters/ChapterIndex')),
-  '/chapters/04': lazy(() => import('./features/chapters/TokenizationChapter')),
+  '/chapters': redirectTo('/'),
+  '/chapters/04': redirectTo('/tokenization'),
+  '/chapters/15': redirectTo('/forward-pass', true),
+  '/chapters/32': redirectTo('/post-transformer', true),
   '/notes': lazy(() => import('./features/chapters/KnowledgeNotebook')),
-  '/chapters/15': lazy(() => import('./features/chapters/ForwardChapter')),
-  '/chapters/32': lazy(() => import('./features/chapters/PostTransformerChapter')),
+  '/forward-pass': lazy(() => import('./features/chapters/ForwardChapter')),
+  '/post-transformer': lazy(() => import('./features/chapters/PostTransformerChapter')),
   '/linear-transform': lazy(() => import('./features/linear/LinearLab')),
   '/attention': AttentionLab,
   '/position': lazy(() => import('./features/position/PositionLab')),

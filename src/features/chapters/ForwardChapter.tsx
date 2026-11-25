@@ -25,7 +25,6 @@ import {
 } from '../../state/forward';
 import { T } from '../../i18n';
 import { Tx } from '../../i18n/jsx';
-import { ChapterTrail } from './ChapterIndex';
 import '../../styles/editorial.css';
 import '../../styles/chapters.css';
 import '../../styles/lesson.css';
@@ -189,16 +188,15 @@ export default function ForwardChapter() {
   ];
   return (
     <AppShell
-      active="chapters"
-      chapter={{ id: '15', title: T('完整前向传播') }}
+      active="forward"
       title={T('完整前向传播')}
-      crumb={T('第 15 章计算台')}
+      crumb={T('完整前向传播')}
       indicator={T('浏览器内计算')}
     >
       <article className="chapter-page">
         <header className="page-heading">
           <div>
-            <div className="eyebrow">{T('第 15 章 · 把零件连接成一次计算')}</div>
+            <div className="eyebrow">{T('完整前向 · 把零件连接成一次计算')}</div>
             <h1>{T('从三个 token，走到下一个 token')}</h1>
             <p>
               {T(
@@ -490,7 +488,7 @@ export default function ForwardChapter() {
             </div>
           )}
         </section>
-        <RelatedNotes path="/chapters/15" />
+        <RelatedNotes path="/forward-pass" />
         <details id="scope" className="chapter-section">
           <summary>{T('设定、简化与来源')}</summary>
           <p>
@@ -539,7 +537,6 @@ export default function ForwardChapter() {
           </ul>
           <p>{T('来源核对：2026-11-12。计算与图形为本站教学实现。')}</p>
         </details>
-        <ChapterTrail id="15" />
       </article>
     </AppShell>
   );
